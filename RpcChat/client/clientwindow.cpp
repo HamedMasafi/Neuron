@@ -136,7 +136,6 @@ void ClientWindow::on_pushButtonSendImage_clicked()
     if(!fileName.isNull()){
         QPixmap pixmap(fileName);
         if(!pixmap.isNull())
-            //user->sendImage(pixmap, this, &ClientWindow::imageSent);
             user->sendImage(pixmap, this, "imageSent");
 
             /*

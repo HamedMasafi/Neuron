@@ -1,0 +1,6 @@
+int findOpponent();
+bool moveResourceToStorage(int n);
+
+Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
+Q_PROPERTY(QString email READ username WRITE setUsername NOTIFY usernameChanged)
+

@@ -1,0 +1,11 @@
+#ifndef %2_H
+#define %2_H
+
+#if __cplusplus < 201103L
+#   include <functional>
+#endif
+#include "rpcpeer.h"
+
+
+class %1 : public RpcPeer{
+   Q_OBJECT

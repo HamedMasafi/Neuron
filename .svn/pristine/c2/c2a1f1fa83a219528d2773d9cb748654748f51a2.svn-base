@@ -1,0 +1,20 @@
+
+//-----------------------------------------
+// Methods for property %NAME%
+//-----------------------------------------
+
+%TYPE% %CLASS_NAME%::%READ_NAME%() const
+{
+    return m_%NAME%;
+}
+
+void %CLASS_NAME%::%WRITE_NAME%(%TYPE% %NAME%)
+{
+    if (m_%NAME% == %NAME%)
+        return;
+
+    m_%NAME% = %NAME%;
+    invokeOnPeer("%WRITE_NAME%", %NAME%);
+    emit %NOTIFY_NAME%();
+}
+

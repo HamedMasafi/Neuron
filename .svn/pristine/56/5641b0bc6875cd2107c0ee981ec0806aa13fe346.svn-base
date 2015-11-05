@@ -1,0 +1,3 @@
+#!/bin/bash
+/doc/dev/Qt/ToojRPCFramework/build-RpcPeerGenerator-Qt_5_2_0_gcc_64-Debug/RpcPeerGenerator playerbase
+

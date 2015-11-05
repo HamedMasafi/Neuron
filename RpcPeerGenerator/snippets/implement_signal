@@ -1,0 +1,5 @@
+%2 PlayerBase::%1(QObject *obj, char *slotName)
+{
+    %2 buffer = Task::await<%2>([&]() {return %1();} ) ;
+    obj->metaObject()->invokeMethod(obj, slotName, Q_ARG(%2, buffer));
+}

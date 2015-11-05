@@ -1,0 +1,5 @@
+
+_type_ _class-name_::_name_()
+{
+    return invokeOnPeer("_name_Slot", false).value<_type_>();
+}

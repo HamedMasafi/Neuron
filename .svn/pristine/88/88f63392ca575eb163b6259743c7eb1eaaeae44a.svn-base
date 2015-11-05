@@ -1,0 +1,25 @@
+#ifndef CLIENTWINDOW_H
+#define CLIENTWINDOW_H
+
+#include "ui_clientwindow.h"
+
+class User;
+class ClientWindow : public QMainWindow, private Ui::ClientWindow
+{
+    Q_OBJECT
+
+    User *me;
+public:
+    explicit ClientWindow(QWidget *parent = 0);
+
+protected:
+    void changeEvent(QEvent *e);
+    void keyPressEvent(QKeyEvent *);
+
+private slots:
+    void on_pushButtonLogin_clicked();
+    void on_pushButtonSend_clicked();
+    void on_pushButtonChangeAvator_clicked();
+};
+
+#endif // CLIENTWINDOW_H

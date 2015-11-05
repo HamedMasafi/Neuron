@@ -1,0 +1,170 @@
+#include "player.h"
+#include <QMetaObject>
+
+Player::Player(QObject *parent) : RpcPeer(parent)
+{
+
+}
+
+
+//-----------------------------------------
+// Methods for login
+//-----------------------------------------
+
+bool Player::loginSlot()
+{
+	bool ret;
+    emit loginSignal(&ret);
+    return ret;
+    //throw std::runtime_error("TODO: fill block 'Player::login' in subclass");
+}
+
+void Player::loginAsync()
+{
+	qlonglong id = invokeOnPeer("loginSlot", false);
+    RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+    _calls[id] = call;
+}
+
+bool Player::login()
+{
+	if(_isTransaction){
+        return loginAsync();
+    }else{
+		qlonglong id = invokeOnPeer("loginSlot", false);
+		RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+		_calls[id] = call;
+		call->eventLoop->exec();
+		bool ret = call->returnData.value<bool>();
+		_calls.remove(id);
+		delete call;
+		return ret;
+	}
+}
+
+#if __cplusplus < 201103L
+void Player::login(std::function<void(bool)> func)
+{
+    RemoteCall<bool> *call = new RemoteCall<bool>(func);
+    qlonglong id = invokeOnPeer("loginSlot", false);
+    _calls[id] = call;
+}
+#endif
+
+void Player::login(QObject *obj, char *slotName)
+{
+    RemoteCall<bool> *call = new RemoteCall<bool>(obj, slotName);
+    qlonglong id = invokeOnPeer("loginSlot", false);
+    _calls[id] = call;
+}
+
+//-----------------------------------------
+// Methods for getRandom
+//-----------------------------------------
+
+qlonglong Player::getRandomSlot()
+{
+	qlonglong ret;
+    emit loginSignal(&ret);
+    return ret;
+    //throw std::runtime_error("TODO: fill block 'Player::getRandom' in subclass");
+}
+
+void Player::getRandomAsync()
+{
+	qlonglong id = invokeOnPeer("getRandomSlot", false);
+    RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+    _calls[id] = call;
+}
+
+qlonglong Player::getRandom()
+{
+	if(_isTransaction){
+        return getRandomAsync();
+    }else{
+		qlonglong id = invokeOnPeer("getRandomSlot", false);
+		RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+		_calls[id] = call;
+		call->eventLoop->exec();
+		qlonglong ret = call->returnData.value<qlonglong>();
+		_calls.remove(id);
+		delete call;
+		return ret;
+	}
+}
+
+#if __cplusplus < 201103L
+void Player::getRandom(std::function<void(qlonglong)> func)
+{
+    RemoteCall<qlonglong> *call = new RemoteCall<qlonglong>(func);
+    qlonglong id = invokeOnPeer("getRandomSlot", false);
+    _calls[id] = call;
+}
+#endif
+
+void Player::getRandom(QObject *obj, char *slotName)
+{
+    RemoteCall<qlonglong> *call = new RemoteCall<qlonglong>(obj, slotName);
+    qlonglong id = invokeOnPeer("getRandomSlot", false);
+    _calls[id] = call;
+}
+
+//-----------------------------------------
+// Methods for property username
+//-----------------------------------------
+
+QString Player::username() const
+{
+    return m_username;
+}
+
+void Player::setUsername(QString username)
+{
+    if (m_username == username)
+        return;
+
+    m_username = username;
+    invokeOnPeer("setUsername", false, username);
+    emit usernameChanged();
+}
+
+
+//-----------------------------------------
+// Methods for property password
+//-----------------------------------------
+
+QString Player::password() const
+{
+    return m_password;
+}
+
+void Player::setPassword(QString password)
+{
+    if (m_password == password)
+        return;
+
+    m_password = password;
+    invokeOnPeer("setPassword", false, password);
+    emit passwordChanged();
+}
+
+
+//-----------------------------------------
+// Methods for property email
+//-----------------------------------------
+
+QString Player::email() const
+{
+    return m_email;
+}
+
+void Player::setEmail(QString email)
+{
+    if (m_email == email)
+        return;
+
+    m_email = email;
+    invokeOnPeer("setEmail", false, email);
+    emit emailChanged();
+}
+

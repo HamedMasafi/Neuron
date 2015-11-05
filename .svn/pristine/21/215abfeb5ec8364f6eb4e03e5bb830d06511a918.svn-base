@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>snippets/implement_slot</file>
+        <file>snippets/implement_signal</file>
+        <file>snippets/header</file>
+        <file>snippets/implement</file>
+        <file>snippets/implement_fresh</file>
+        <file>snippets/implement_func</file>
+        <file>snippets/header_func</file>
+        <file>snippets/implement_property</file>
+        <file>snippets/implement_func_void</file>
+    </qresource>
+</RCC>

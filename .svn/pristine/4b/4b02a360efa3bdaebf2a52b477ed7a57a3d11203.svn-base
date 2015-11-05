@@ -1,0 +1,19 @@
+class User{
+	Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
+	Q_PROPERTY(QPixmap avator READ avator WRITE setAvator NOTIFY avatorChanged)
+	Q_PROPERTY(bool typing READ typing WRITE setTyping NOTIFY typingChanged)
+	
+	void sendMessage(QString message);
+	void messageRecived(QString username, QString message);
+	void roomMessage(QString message);
+}
+
+class Server{
+	Q_PROPERTY(QStringList users READ users WRITE setUsers NOTIFY usersChanged)
+	
+	void broadcastMessage(QString message);
+	void userJoined(QString username);
+	void userLeaved(QString username);
+	QStringList getUsers();
+	int getTest();
+}

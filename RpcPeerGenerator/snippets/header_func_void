@@ -1,0 +1,5 @@
+    %TYPE% %NAME%Slot(%SIGN%);
+    %TYPE% %NAME%(%SIGN%);
+    %TYPE% %NAME%Async(%SIGN%);
+    %TYPE% %NAME%(%SIGN%%SEP%QObject *obj, char *slotName);
+    %TYPE% %NAME%(%SIGN%%SEP%std::function<void(%TYPE%)> func);

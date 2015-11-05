@@ -1,0 +1,42 @@
+#ifndef RPCJSONSERIALIZER_H
+#define RPCJSONSERIALIZER_H
+
+#include "rpcglobal.h"
+#include "rpcserializerbase_p.h"
+
+class TOOJ_EXPORT RpcJsonSerializer : public RpcSerializerBase
+{
+
+public:
+    RpcJsonSerializer(QObject *parent = 0);
+
+    QVariantMap createRequest(
+            qlonglong id,
+            QString sender,
+            QString methodName,
+            QString packetType,
+            QVariant val0 = QVariant(),
+            QVariant val1 = QVariant(),
+            QVariant val2 = QVariant(),
+            QVariant val3 = QVariant(),
+            QVariant val4 = QVariant(),
+            QVariant val5 = QVariant(),
+            QVariant val6 = QVariant(),
+            QVariant val7 = QVariant(),
+            QVariant val8 = QVariant(),
+            QVariant val9 = QVariant());
+
+    QJsonValue normalizeVariant(QVariant *v);
+    void denormalizeVariant(QVariant *v);
+
+    void validateMap(QVariantMap *map);
+
+    QByteArray serialize(const QVariantMap &map);
+    QVariantList deserialize(const QByteArray &array);
+
+private:
+    void addToMap(QVariantMap *map, QVariant var, int index);
+
+};
+
+#endif // RPCJSONSERIALIZER_H

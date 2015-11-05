@@ -1,0 +1,9 @@
+#include "%HEADER_FILE%.h"
+#include <QMetaObject>
+#include <QMetaMethod>
+
+%NAME%::%NAME%(QObject *parent) : RpcPeer(parent)
+{
+
+}
+

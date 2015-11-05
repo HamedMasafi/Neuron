@@ -1,0 +1,68 @@
+
+//-----------------------------------------
+// Methods for %NAME%
+//-----------------------------------------
+
+%TYPE% %CLASS_NAME%::%NAME%Slot(%SIGN%)
+{
+	%TYPE% ret;
+    emit %NAME%Handle(%SIGN_NAME%%SEP%&ret);
+    return ret;
+}
+
+void %CLASS_NAME%::%NAME%Async(%SIGN%)
+{
+    qlonglong id = invokeOnPeer("%NAME%Slot"%SEP%%SIGN_NAME%);
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+        addCall(id, call);
+    }
+}
+
+%TYPE% %CLASS_NAME%::%NAME%(%SIGN%)
+{
+    qlonglong id = invokeOnPeer("%NAME%Slot"%SEP%%SIGN_NAME%);
+
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+        addCall(id, call);
+        call->eventLoop->exec();
+        %TYPE% ret = call->returnData.value<%TYPE%>();
+        removeCall(id);
+        delete call;
+        return ret;
+    }
+}
+
+#if __cplusplus >= 201103L
+void %CLASS_NAME%::%NAME%(%SIGN%%SEP%std::function<void(%TYPE%)> func)
+{
+    qlonglong id = invokeOnPeer("%NAME%Slot"%SEP%%SIGN_NAME%);
+
+    if(id){
+        RemoteCall<%TYPE%> *call = new RemoteCall<%TYPE%>(func);
+        addCall(id, call);
+    }
+}
+#endif
+
+void %CLASS_NAME%::%NAME%(%SIGN%%SEP%const QObject *obj, char *slotName)
+{
+    qlonglong id = invokeOnPeer("%NAME%Slot"%SEP%%SIGN_NAME%);
+
+    if(id){
+        RemoteCall<%TYPE%> *call = new RemoteCall<%TYPE%>(const_cast<QObject *>(obj), slotName);
+        addCall(id, call);
+    }
+}
+
+void %CLASS_NAME%::%NAME%(%SIGN%%SEP%const QObject *obj, const QMetaMethod *method)
+{
+    qlonglong id = invokeOnPeer("%NAME%Slot"%SEP%%SIGN_NAME%);
+
+    if(id){
+        RemoteCall<%TYPE%> *call = new RemoteCall<%TYPE%>(const_cast<QObject *>(obj),
+                                                          const_cast<QMetaMethod *>(method));
+        addCall(id, call);
+    }
+}

@@ -1,0 +1,345 @@
+#include "rpcjsonserializer.h"
+
+#include <QVariantMap>
+#include <QJsonDocument>
+#include <QPixmap>
+#include <QBuffer>
+#include <QBitmap>
+#include <QDebug>
+#include <QJsonObject>
+#include <QJsonArray>
+
+#define MAP_ID              "_id"
+#define MAP_CLASS_NAME      "_c"
+#define MAP_METHOD_NAME     "_m"
+#define MAP_TYPE            "_t"
+#define MAP_RETURN_VALUE    "_return_value"
+#define MAP_TYPE_REQUEST    "request"
+#define MAP_TYPE_RESPONSE   "response"
+#define MAP_TOKEN_ITEM      "_token"
+
+#define VARIANT_ISFAKE "_isfake"
+#define VARIANT_ISFAKE_VALUE true
+#define VARIANT_TYPE "_type"
+#define VARIANT_VALUE "_value"
+
+#define VAL "val"
+#define TYPE "type"
+#define DATA "data"
+
+#define IMAGE_FORMAT "PNG"
+
+#define CLASS_NAME(x) QString(#x)
+
+
+/*
+ * Request structure:
+ * Map{
+ *      ID = <String>
+ *      Type = <String>
+ *      MethodName = <String>
+ *      Val0 = <Variant>
+ *      Val1 = <Variant>
+ *      Val2 = <Variant>
+ *      ...
+ *      Val9 = <Variant>
+ * }
+ */
+RpcJsonSerializer::RpcJsonSerializer(QObject *parent) : RpcSerializerBase(parent)
+{
+
+}
+
+QVariantMap RpcJsonSerializer::createRequest(qlonglong id, QString sender, QString methodName, QString packetType, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
+{
+    QVariantMap map;
+    map[MAP_METHOD_NAME] = methodName;
+    map[MAP_TYPE] = packetType;
+    map[MAP_ID] = QVariant(id);
+    map[MAP_CLASS_NAME] = sender;
+
+    addToMap(&map, val0, 0);
+    addToMap(&map, val1, 1);
+    addToMap(&map, val2, 2);
+    addToMap(&map, val3, 3);
+    addToMap(&map, val4, 4);
+    addToMap(&map, val5, 5);
+    addToMap(&map, val6, 6);
+    addToMap(&map, val7, 7);
+    addToMap(&map, val8, 8);
+    addToMap(&map, val9, 9);
+
+    if(!validateToken().isNull())
+        addValidateToken(&map);
+    else
+        qDebug() << "validate token is null";
+
+    return map;
+}
+
+QJsonValue RpcJsonSerializer::normalizeVariant(QVariant *v)
+{
+    switch(v->type()){
+    case QVariant::Map:{
+        QVariantMap map = v->toMap();
+        QJsonObject o;
+        foreach (QString key, map.keys()) {
+            o.insert(key, normalizeVariant(&map[key]));
+        }
+        return QJsonValue(o);
+        break;
+    }
+    case QVariant::List:{
+        QVariantList list = v->toList();
+
+        QJsonArray a;
+
+
+        foreach (QVariant var, list)
+            a.append(normalizeVariant(&var));
+
+        return QJsonValue(a);
+    }
+    case QVariant::Invalid:
+        qWarning("QVariant type is Invalid!");
+        break;
+
+    case QVariant::Bool:
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+    case QVariant::Double:
+    case QVariant::Char:
+    case QVariant::String:
+    case QVariant::StringList:
+    case QVariant::ByteArray:
+    case QVariant::BitArray:
+    case QVariant::Date:
+    case QVariant::Time:
+    case QVariant::DateTime:
+    case QVariant::Url:
+    case QVariant::Locale:
+    case QVariant::Rect:
+    case QVariant::RectF:
+    case QVariant::Size:
+    case QVariant::SizeF:
+    case QVariant::Line:
+    case QVariant::LineF:
+    case QVariant::Point:
+    case QVariant::PointF:
+    case QVariant::RegExp:
+    case QVariant::RegularExpression:
+    case QVariant::Hash:
+    case QVariant::EasingCurve:
+    case QVariant::Uuid:
+    case QVariant::ModelIndex:{
+        QJsonObject o{
+            {VARIANT_TYPE, v->typeName()},
+            {VARIANT_VALUE, v->toString()}
+        };
+        return QJsonValue(o);
+
+        QVariantMap map;
+        map.insert(VARIANT_ISFAKE, VARIANT_ISFAKE_VALUE);
+        map.insert(VARIANT_TYPE, v->typeName());
+        map.insert(VARIANT_VALUE, v->toString());
+
+        v->setValue<QVariantMap>(map);
+        break;
+    }
+    case QVariant::Pixmap:{
+        QPixmap data = v->value<QPixmap>();
+        QByteArray ba;
+        QBuffer buffer(&ba, this);
+        buffer.open(QIODevice::WriteOnly);
+        data.save(&buffer, IMAGE_FORMAT);
+
+        QJsonObject o{
+            {VARIANT_TYPE, v->typeName()},
+            {VARIANT_VALUE, QString(ba.toBase64())},
+            {VARIANT_ISFAKE, VARIANT_ISFAKE_VALUE}
+        };
+        return QJsonValue(o);
+
+        QVariantMap map;
+
+
+        map.insert(VARIANT_ISFAKE, VARIANT_ISFAKE_VALUE);
+        map.insert(VARIANT_TYPE, CLASS_NAME(QPixmap));
+        map.insert(VARIANT_VALUE, ba.toBase64());
+
+        v->setValue<QVariantMap>(map);
+        break;
+    }
+    case QVariant::Font:
+    case QVariant::Brush:
+    case QVariant::Color:
+    case QVariant::Palette:
+    case QVariant::Image:
+    case QVariant::Polygon:
+    case QVariant::Region:
+    case QVariant::Bitmap:
+    case QVariant::Cursor:
+    case QVariant::KeySequence:
+    case QVariant::Pen:
+    case QVariant::TextLength:
+    case QVariant::TextFormat:
+    case QVariant::Matrix:
+    case QVariant::Transform:
+    case QVariant::Matrix4x4:
+    case QVariant::Vector2D:
+    case QVariant::Vector3D:
+    case QVariant::Vector4D:
+    case QVariant::Quaternion:
+    case QVariant::PolygonF:
+    case QVariant::Icon:
+
+    case QVariant::SizePolicy:
+        qWarning("Type '" + QByteArray(v->typeName()) + "' not wupported for serialization!");
+        break;
+    }
+}
+
+void RpcJsonSerializer::denormalizeVariant(QVariant *v)
+{
+    if(v->type() == QVariant::List){
+        QVariantList list = v->toList();
+
+        foreach (QVariant var, list) {
+            denormalizeVariant(&var);
+        }
+    }
+
+    if(v->type() == QVariant::Map){
+        QVariantMap map = v->toMap();
+
+        if(map.contains(VARIANT_ISFAKE)){
+            QString type = map[VARIANT_TYPE].toString();
+
+            if(type == CLASS_NAME(QPixmap)){
+                QPixmap data;
+                data.loadFromData(QByteArray::fromBase64(map.value(VARIANT_VALUE).toByteArray()));
+
+                v->setValue<QPixmap>(data);
+            }else{
+                //                v->setValue<QVariant>(v[])
+            }
+        }
+    }
+}
+
+void RpcJsonSerializer::validateMap(QVariantMap *map)
+{
+    int index;
+
+    for(index = 0; index < 10; index++){
+        QString i = QString::number(index);
+        if(!map->contains(VAL + i))
+            break;
+
+        if(map->value(TYPE + i) == CLASS_NAME(QPixmap)){
+            QPixmap data;
+            data.loadFromData(QByteArray::fromBase64(map->value(DATA  + i).toByteArray()));
+
+            map->insert(VAL + i, data);
+        }
+    }
+}
+
+
+
+QByteArray RpcJsonSerializer::serialize(const QVariantMap &map)
+{
+    QJsonObject obj;
+    QJsonValue v;
+    obj[TYPE] = QJsonValue("");
+
+    return QJsonDocument::fromVariant(map).toJson();
+}
+
+QVariantList RpcJsonSerializer::deserialize(const QByteArray &array)
+{
+    QVariantList ret;
+    //    array = "[" + array.replace("}\n{", "},{") + "]";
+    QByteArray ba = array;
+    ba = "[" + ba.replace("}\n{", "},{") + "]";
+    QVariantList list = QJsonDocument::fromJson(ba).toVariant().toList();
+
+    //qDebug()<<"deserializer: "<<ba<<"\n"<< QJsonDocument::fromJson(ba).toVariant();
+    //    if(list == QVariant())
+    //        qDebug()<<"is invalid variant " << ba;
+
+    //    foreach (QVariant v, list) {
+    //        if(v.type() != QVariant::Map)
+    //            continue;
+
+    //        QVariantMap map = v.toMap();
+    //        qDebug()<<"process map\n"<<map;
+
+    //        if(map[MAP_TYPE] == MAP_TYPE_REQUEST){
+    //            if(checkValidateToken(&map))
+    //            {
+    //                validateMap(&map);
+    //                ret.append(map);
+    //            }else{
+    //                qWarning("Validate token is invalid");
+    //            }
+    //        }
+
+    //        if(map[MAP_TYPE] == MAP_TYPE_RESPONSE)
+    //            ret.append(map);
+    //    }
+
+    //    qDebug()<<"COUNT="<<ret.count();
+
+
+    foreach (QVariant v, list) {
+        denormalizeVariant(&v);
+        ret.append(v);
+    }
+    return ret;//QJsonDocument::fromJson(ba).toVariant().toList();
+}
+
+void RpcJsonSerializer::addToMap(QVariantMap *map, QVariant var, int index)
+{
+    QString i = QString::number(index);
+
+    if(var == QVariant())
+        return;
+
+    //    map->insert(VAL + i, var);
+    //    map->insert(TYPE + i, var.typeName());
+
+    //    if(var.typeName() == CLASS_NAME(QPixmap)){
+    //        QPixmap data = var.value<QPixmap>();
+    //        QByteArray ba;
+    //        QBuffer buffer(&ba, this);
+    //        buffer.open(QIODevice::WriteOnly);
+    //        data.save(&buffer, IMAGE_FORMAT);
+    //        map->insert(DATA + i, ba.toBase64());
+    //        map->insert(VAL + i, "");
+    //    }
+    //    if(var.typeName() == CLASS_NAME(QBitmap)){
+    //        QBitmap data = var.value<QBitmap>();
+    //        QByteArray ba;
+    //        QBuffer buffer(&ba, this);
+    //        buffer.open(QIODevice::WriteOnly);
+    //        data.save(&buffer, IMAGE_FORMAT);
+    //        map->insert(DATA + i, ba.toBase64());
+    //    }
+    //    if(var.typeName() == CLASS_NAME(QImage)){
+    //        QImage data = var.value<QImage>();
+    //        QByteArray ba;
+    //        QBuffer buffer(&ba, this);
+    //        buffer.open(QIODevice::WriteOnly);
+    //        data.save(&buffer, IMAGE_FORMAT);
+    //        map->insert(DATA + i, ba.toBase64());
+    //    }
+    //    if(var.typeName() == CLASS_NAME(QColor)){
+    //        QColor data = var.value<QColor>();
+    //        map->insert(DATA + i, data.name(QColor::HexArgb));
+    //    }
+
+    //    map->insert(TYPE + i, var.typeName());
+}

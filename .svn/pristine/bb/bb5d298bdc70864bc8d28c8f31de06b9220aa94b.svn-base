@@ -1,0 +1,17 @@
+class Player{
+	bool login();
+	qlonglong getRandom();
+
+	Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
+	Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+	Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
+
+}
+
+class WebStorage{
+	int getCount();
+}
+
+class Server{
+	void loginToServer();
+}

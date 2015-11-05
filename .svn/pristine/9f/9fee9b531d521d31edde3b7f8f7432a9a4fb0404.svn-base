@@ -1,0 +1,66 @@
+#include "rpcserializerbase_p.h"
+
+#include <QCryptographicHash>
+
+#define MAP_TOKEN_ITEM  "_token"
+
+RpcSerializerBase::RpcSerializerBase(QObject *parent) : QObject(parent),
+    m_validateToken(QString::null)
+{
+
+}
+
+QString RpcSerializerBase::validateToken() const
+{
+    return m_validateToken;
+}
+
+void RpcSerializerBase::setValidateToken(QString validateToken)
+{
+    if (m_validateToken == validateToken)
+        return;
+
+    m_validateToken = validateToken;
+    emit validateTokenChanged(validateToken);
+}
+
+void RpcSerializerBase::addValidateToken(QVariantMap *map)
+{
+    QByteArray s;
+
+    map->insert(MAP_TOKEN_ITEM, QVariant(""));
+
+    QMapIterator<QString, QVariant> i(*map);
+    while (i.hasNext()) {
+        i.next();
+        s.append(i.key() + ": " + i.value().toString() + "*");
+    }
+
+    map->insert(MAP_TOKEN_ITEM, QVariant(MD5(s + validateToken())));
+}
+
+bool RpcSerializerBase::checkValidateToken(QVariantMap *map)
+{
+    QString token = map->value(MAP_TOKEN_ITEM).toString();
+    map->insert(MAP_TOKEN_ITEM, QVariant(""));
+
+    QByteArray s;
+
+    QMapIterator<QString, QVariant> i(*map);
+    while (i.hasNext()) {
+        i.next();
+        s.append(i.key() + ": " + i.value().toString() + "*");
+    }
+
+    return token == MD5(s + validateToken());
+}
+
+QString RpcSerializerBase::MD5(QString text)
+{
+    return MD5(text.toLocal8Bit());
+}
+QString RpcSerializerBase::MD5(QByteArray text)
+{
+    return QString(QCryptographicHash::hash(text, QCryptographicHash::Md5).toHex());
+}
+

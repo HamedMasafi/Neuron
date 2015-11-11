@@ -1,1 +1,0 @@
-when a hub is closed in each sharedObjects that it's hub equal to this should be deleted

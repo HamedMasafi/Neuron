@@ -11,7 +11,10 @@ HEADERS += \
     $$PWD/src/rpchubbase.h \
     $$PWD/src/rpcremotecall_p.h \
     $$PWD/src/rpcserializerbase_p.h \
-    $$PWD/src/rpcjsondataserializer.h
+    $$PWD/src/rpcjsondataserializer.h \
+    $$PWD/src/rpchubbase_p.h \
+    $$PWD/src/rpcserver_p.h \
+    $$PWD/src/rpchub_p.h
 
 SOURCES += \
     $$PWD/src/rpchub.cpp \

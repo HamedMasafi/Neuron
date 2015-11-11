@@ -1,0 +1,7 @@
+qlonglong id = invokeOnPeer("%1Slot"%2%3);
+
+if(id){
+	RemoteCall<%4> *call = new RemoteCall<%4>(const_cast<QObject *>(obj),
+													  const_cast<QMetaMethod *>(method));
+	addCall(id, call);
+}

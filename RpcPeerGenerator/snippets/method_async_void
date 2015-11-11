@@ -1,0 +1,6 @@
+qlonglong id = invokeOnPeer("%1Slot"%2%3);
+
+if(id){
+	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+	addCall(id, call);
+}

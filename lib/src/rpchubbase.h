@@ -4,25 +4,24 @@
 #include "rpcglobal.h"
 #include "rpcremotecall_p.h"
 
+QT_BEGIN_NAMESPACE
+
 class RpcPeer;
 class RpcSerializerBase;
+class RpcHubBasePrivate;
 class TOOJ_EXPORT RpcHubBase : public QObject
 {
     Q_OBJECT
+
+    RpcHubBasePrivate *d_ptr;
+    Q_DECLARE_PRIVATE(RpcHubBase)
+
     Q_PROPERTY(qint16 port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString serverAddress READ serverAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(bool autoReconnect READ autoReconnect WRITE setAutoReconnect NOTIFY autoReconnectChanged)
     Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
     Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(RpcSerializerBase* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
-
-    qint16 m_port;
-    QString m_serverAddress;
-    bool m_autoReconnect;
-    bool m_isConnected;
-    QString m_validateToken;
-
-    RpcSerializerBase *m_serializer;
 
 public:
     explicit RpcHubBase(QObject *parent = 0);
@@ -31,9 +30,9 @@ public:
     virtual void connectToServer(QString address, qint16 port);
     virtual bool setSocketDescriptor(qintptr socketDescriptor);
 
-    virtual void beginTransaction();
-    virtual void rollback();
-    virtual void commit();
+    virtual void beginTransaction() = 0;
+    virtual void rollback() = 0;
+    virtual void commit() = 0;
 
     Q_INVOKABLE qint16 port() const;
     Q_INVOKABLE QString serverAddress() const;
@@ -44,7 +43,7 @@ public:
 
 protected:
     QHash<long, RemoteCallBase*> _calls;
-    QHash<QString, QObject*> _classes;
+    QHash<QString, RpcPeer*> _classes;
 
 signals:
     void disconnected();
@@ -80,5 +79,7 @@ public slots:
 
     friend class RpcPeer;
 };
+
+QT_END_NAMESPACE
 
 #endif // RPCHUBBASE_H

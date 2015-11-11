@@ -3,6 +3,8 @@
 
 #include <QTcpServer>
 
+QT_BEGIN_NAMESPACE
+
 class RpcPeer;
 class QTcpServer;
 class RpcServer;
@@ -19,5 +21,7 @@ protected:
 signals:
 	void newIncomingConnection(qintptr socketDescriptor);
 };
+
+QT_END_NAMESPACE
 
 #endif // RPCTCPSOCKETSERVER_H

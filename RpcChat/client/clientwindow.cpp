@@ -79,13 +79,13 @@ void ClientWindow::on_pushButtonChangeAvator_clicked()
     }
 }
 
-void ClientWindow::on_server_userJoinedHandle(QString username)
+void ClientWindow::on_server_userJoinedSignal(QString username)
 {
     textEdit->append(QString("<span style=\" font-weight:600; color:#aa0000;\">%1 has joined to channel.</span>")
                      .arg(username));
 }
 
-void ClientWindow::on_server_imageSentHandle(QString username, QPixmap image)
+void ClientWindow::on_server_imageSentSignal(QString username, QPixmap image)
 {
     QString url = QString("res://image_%1.png").arg(_resourceId++);
     textEdit->document()->addResource(QTextDocument::ImageResource,
@@ -95,7 +95,7 @@ void ClientWindow::on_server_imageSentHandle(QString username, QPixmap image)
     textEdit->append("<b>" + username + "</b> Sent an image:<br /><img src=\"" + url + "\" />");
 }
 
-void ClientWindow::on_server_broadcastMessageHandle(QString message)
+void ClientWindow::on_server_broadcastMessageSignal(QString message)
 {
     QMessageBox::information(this, "Broadcast", message);
 }
@@ -108,7 +108,7 @@ void ClientWindow::on_hub_isConnectedChanged(bool isConnected)
         statusBar()->showMessage("Disonnected");
 }
 
-void ClientWindow::on_user_messageRecivedHandle(QString username, QString message)
+void ClientWindow::on_user_messageRecivedSignal(QString username, QString message)
 {
     textEdit->append(QString("<b><font color=%3>%1 :</font></b> %2")
                      .arg(username)
@@ -116,7 +116,7 @@ void ClientWindow::on_user_messageRecivedHandle(QString username, QString messag
                      .arg(username == user->username() ? "red" : "blue"));
 }
 
-void ClientWindow::on_user_roomMessageHandle(QString message)
+void ClientWindow::on_user_roomMessageSignal(QString message)
 {
     textEdit->append(QString("<span style=\" font-weight:600; color:#aa0000;\">%1</span>")
                      .arg(message));

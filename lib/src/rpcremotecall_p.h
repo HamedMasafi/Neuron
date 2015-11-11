@@ -7,20 +7,31 @@
 #include <QEventLoop>
 #include <QMetaMethod>
 
+#ifdef QT_QML_LIB
+#   include <QJSValue>
+#endif
 #if __cplusplus >= 201103L
 #   include <functional>
 #endif
+
+QT_BEGIN_NAMESPACE
 
 class RemoteCallBase{
 public:
 #if __cplusplus >= 201103L
     std::function<void()> func;
 #endif
+#ifdef QT_QML_LIB
+    QJSValue jsvalue;
+#endif
 
     enum ReturnType{
         None,
 #if __cplusplus >= 201103L
         Function,
+#endif
+#ifdef QT_QML_LIB
+        JSValue,
 #endif
         Slot,
         EventLoop,
@@ -41,7 +52,9 @@ public:
 #if __cplusplus >= 201103L
     RemoteCallBase(std::function<void()> func);
 #endif
-
+#ifdef QT_QML_LIB
+    RemoteCallBase(QJSValue jsvalue);
+#endif
     void setReturnData(){
 
     }
@@ -61,70 +74,38 @@ public:
 
     RemoteCall(std::function<void(T)> func){}
 #endif
-    RemoteCall(){}
-    RemoteCall(QObject *obj, char *slotName){}
-    RemoteCall(QObject *obj, QMetaMethod *method){}
+#ifdef QT_QML_LIB
+    RemoteCall(QJSValue jsvalue) : RemoteCallBase(jsvalue) {}
+#endif
+    RemoteCall() : RemoteCallBase() {}
+    RemoteCall(QObject *obj, char *slotName) : RemoteCallBase(obj, slotName) {}
+    RemoteCall(QObject *obj, QMetaMethod *method) : RemoteCallBase(obj, method) {}
     ~RemoteCall(){}
 
     void returnToCaller(){
 #if __cplusplus >= 201103L
-    if(type == Function)
-        func(returnData.value<T>());
+        if(type == Function)
+            func(returnData.value<T>());
 #endif
+#ifdef QT_QML_LIB
+        if(type == JSValue){
+            QJSValueList values;
+            values.append(QJSValue(returnData.toString()));
+            jsvalue.call(values);
+        }
+#endif
+        if(type == Slot)
+            obj->metaObject()->invokeMethod(obj, slotName, Q_ARG(T, returnData.value<T>()));
 
-    if(type == Slot)
-        obj->metaObject()->invokeMethod(obj,
-                                        slotName,
-                                        Q_ARG(T, returnData.value<T>()));
+        if(type == EventLoop)
+            eventLoop->quit();
 
-    if(type == EventLoop)
-        eventLoop->quit();
-
-    if(type == MetaMethod)
-        method->invoke(obj,
-                       Q_ARG(T, returnData.value<T>()));
-
-    //        RemoteCallBase::returnToCaller();
-}
+        if(type == MetaMethod)
+            method->invoke(obj, Q_ARG(T, returnData.value<T>()));
+    }
 
 };
 
-class RpcRemoteCall{
-    enum ReturnType{
-        None,
-#if __cplusplus >= 201103L
-        Function,
-#endif
-        Slot,
-        EventLoop,
-        MetaMethod
-    };
-
-    char *_slotName;
-    QEventLoop *eventLoop;
-    QObject *_target;
-    ReturnType returnType;
-    QVariant returnData;
-    QMetaMethod *_method;
-    QVariant::Type _type;
-#if __cplusplus >= 201103L
-    std::function<void()> _funcVoid;
-    std::function<void(QVariant)> _func;
-#endif
-
-public:
-    RpcRemoteCall(QVariant::Type type);
-#if __cplusplus >= 201103L
-    RpcRemoteCall(QVariant::Type type, std::function<void()> func);
-    RpcRemoteCall(QVariant::Type type, std::function<void(QVariant)> func);
-
-    template<typename T>
-    RpcRemoteCall(QVariant::Type type, std::function<void(T)> func);
-#endif
-    RpcRemoteCall(QVariant::Type type, QObject *obj, char *slotName);
-    RpcRemoteCall(QVariant::Type type, QObject *obj, QMetaMethod *method);
-
-    void returnToCaller();
-};
+QT_END_NAMESPACE
 
 #endif // RPCREMOTECALL_H

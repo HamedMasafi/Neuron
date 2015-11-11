@@ -1,13 +1,23 @@
 <RCC>
     <qresource prefix="/">
-        <file>snippets/implement_slot</file>
-        <file>snippets/implement_signal</file>
-        <file>snippets/header</file>
-        <file>snippets/implement</file>
-        <file>snippets/implement_fresh</file>
-        <file>snippets/implement_func</file>
-        <file>snippets/header_func</file>
-        <file>snippets/implement_property</file>
-        <file>snippets/implement_func_void</file>
+        <file>snippets/template.h</file>
+        <file>snippets/template.cpp</file>
+        <file>snippets/method_slot</file>
+        <file>snippets/method_fresh_void</file>
+        <file>snippets/method_fresh</file>
+        <file>snippets/method_bysignal_void</file>
+        <file>snippets/method_bysignal</file>
+        <file>snippets/method_bymetamethod_void</file>
+        <file>snippets/method_bymetamethod</file>
+        <file>snippets/method_byfunc_void</file>
+        <file>snippets/method_byfunc</file>
+        <file>snippets/method_async_void</file>
+        <file>snippets/method_async</file>
+        <file>snippets/method_slot_void</file>
+        <file>snippets/property_read</file>
+        <file>snippets/property_write</file>
+        <file>snippets/method_byjsvalue_void</file>
+        <file>snippets/method_byjsvalue</file>
+        <file>snippets/property_write_nocheck</file>
     </qresource>
 </RCC>

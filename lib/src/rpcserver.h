@@ -10,22 +10,19 @@
 #include "rpchubbase.h"
 #include "rpcglobal.h"
 
+QT_BEGIN_NAMESPACE
 
 class RpcPeer;
+class RpcServerPrivate;
 class TOOJ_EXPORT RpcServer : public RpcHubBase
 {
     Q_OBJECT
+
+    RpcServerPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(RpcServer)
+
     Q_PROPERTY(int typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
     Q_PROPERTY(bool isMultiThread READ isMultiThread WRITE setIsMultiThread NOTIFY isMultiThreadChanged)
-
-    RpcTcpSocketServer *serverSocket;
-    QSet<RpcPeer*> _peers;
-
-    int m_typeId;
-
-    QHash<QString, RpcPeer*> _classes;
-
-    bool m_isMultiThread;
 
 public:
     explicit RpcServer(qint16 port, QObject *parent = 0);
@@ -35,11 +32,14 @@ public:
     int typeId() const;
     bool isMultiThread() const;
     template <typename T> void registerType(){
-        m_typeId = qRegisterMetaType<T>();
+        setTypeId(qRegisterMetaType<T>());
     }
 
+    void beginTransaction();
+    void rollback();
+    void commit();
+
 public slots:
-	void server_newIncomingConnection(qintptr socketDescriptor);
     void setTypeId(int typeId);
     void setIsMultiThread(bool isMultiThread);
 
@@ -50,6 +50,8 @@ signals:
     void isMultiThreadChanged(bool isMultiThread);
 
 private slots:
+    void peer_disconnected();
+    void server_newIncomingConnection(qintptr socketDescriptor);
 	qlonglong invokeOnPeer(
             QString sender,
             QString methodName,
@@ -63,8 +65,8 @@ private slots:
             QVariant val7 = QVariant(),
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
-    void peer_disconnected();
 };
 
+QT_END_NAMESPACE
 
 #endif // PRCSERVER_H

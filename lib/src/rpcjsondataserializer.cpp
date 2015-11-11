@@ -18,6 +18,8 @@
 #define IMAGE_FORMAT "PNG"
 #define CLASS_NAME(x) QString(#x)
 
+QT_BEGIN_NAMESPACE
+
 RpcJsonDataSerializer::RpcJsonDataSerializer(QObject *parent) : RpcSerializerBase(parent)
 {
 
@@ -63,27 +65,28 @@ QVariant RpcJsonDataSerializer::deserialize(QByteArray bytes)
 
     qWarning("Input string is not valid serialized json");
     qWarning(bytes);
+    return QVariant();
 }
 
-QJsonObject RpcJsonDataSerializer::serializeQObject(QObject *obj)
+QVariantMap RpcJsonDataSerializer::serializeQObject(QObject *obj)
 {
-    QJsonObject object;
+    QVariantMap map;
 
     for(int i = 0; i < obj->metaObject()->propertyCount(); i++){
         QMetaProperty property = obj->metaObject()->property(i);
         if(property.isReadable() && property.isWritable())
-            object.insert(property.name(), property.read(obj).toString());
+            map.insert(property.name(), property.read(obj).toString());
     }
 
-    return object;
+    return map;
 }
 
-void RpcJsonDataSerializer::deserializeQObject(QObject *obj, QJsonObject jsonObject)
+void RpcJsonDataSerializer::deserializeQObject(QObject *obj, QVariantMap map)
 {
     for(int i = 0; i < obj->metaObject()->propertyCount(); i++){
         QMetaProperty property = obj->metaObject()->property(i);
         if(property.isReadable() && property.isWritable())
-            property.write(obj, jsonObject[property.name()].toString());
+            property.write(obj, map[property.name()].toString());
     }
 }
 
@@ -186,3 +189,5 @@ QVariant RpcJsonDataSerializer::fromJson(QJsonArray array)
         list.append(fromJson(value.toObject()));
     return list;
 }
+
+QT_END_NAMESPACE

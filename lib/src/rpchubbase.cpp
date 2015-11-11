@@ -1,10 +1,19 @@
 #include "rpcpeer.h"
 #include "rpchubbase.h"
+#include "rpchubbase_p.h"
 #include "rpcserializerbase_p.h"
 
+QT_BEGIN_NAMESPACE
+
+RpcHubBasePrivate::RpcHubBasePrivate(RpcHubBase *parent) : q_ptr(parent),
+    autoReconnect(false),
+    serializer(0)
+{
+
+}
+
 RpcHubBase::RpcHubBase(QObject *parent) : QObject(parent),
-    m_autoReconnect(false),
-    m_serializer(0)
+    d_ptr(new RpcHubBasePrivate(this))
 {
 
 }
@@ -17,9 +26,6 @@ void RpcHubBase::addSharedObject(RpcPeer *o)
         return;
     }
     _classes[o->metaObject()->className()] = o;
-
-//    if(o->hub() != this)
-//        o->setHub(this);
 }
 
 void RpcHubBase::connectToServer(QString address, qint16 port)
@@ -39,103 +45,106 @@ bool RpcHubBase::setSocketDescriptor(qintptr socketDescriptor)
     return false;
 }
 
-void RpcHubBase::beginTransaction()
-{
-
-}
-
-void RpcHubBase::rollback()
-{
-
-}
-
-void RpcHubBase::commit()
-{
-
-}
-
 qint16 RpcHubBase::port() const
 {
-    return m_port;
+    Q_D(const RpcHubBase);
+    return d->port;
 }
 
 QString RpcHubBase::serverAddress() const
 {
-    return m_serverAddress;
+    Q_D(const RpcHubBase);
+    return d->serverAddress;
 }
 
 bool RpcHubBase::autoReconnect() const
 {
-    return m_autoReconnect;
+    Q_D(const RpcHubBase);
+    return d->autoReconnect;
 }
 
 bool RpcHubBase::isConnected() const
 {
-    return m_isConnected;
+    Q_D(const RpcHubBase);
+    return d->isConnected;
 }
 
 QString RpcHubBase::validateToken() const
 {
-    return m_validateToken;
+    Q_D(const RpcHubBase);
+    return d->validateToken;
 }
 
 RpcSerializerBase *RpcHubBase::serializer() const
 {
-    return m_serializer;
+    Q_D(const RpcHubBase);
+    return d->serializer;
 }
 
 void RpcHubBase::setPort(qint16 port)
 {
-    if (m_port == port)
+    Q_D(RpcHubBase);
+
+    if (d->port == port)
         return;
 
-    m_port = port;
+    d->port = port;
     emit portChanged(port);
 }
 
 void RpcHubBase::setServerAddress(QString serverAddress)
 {
-    if (m_serverAddress == serverAddress)
+    Q_D(RpcHubBase);
+
+    if (d->serverAddress == serverAddress)
         return;
 
-    m_serverAddress = serverAddress;
+    d->serverAddress = serverAddress;
     emit serverAddressChanged(serverAddress);
 }
 
 void RpcHubBase::setAutoReconnect(bool autoReconnect)
 {
-    if (m_autoReconnect == autoReconnect)
+    Q_D(RpcHubBase);
+
+    if (d->autoReconnect == autoReconnect)
         return;
 
-    m_autoReconnect = autoReconnect;
+    d->autoReconnect = autoReconnect;
     emit autoReconnectChanged(autoReconnect);
 }
 
 void RpcHubBase::setIsConnected(bool isConnected)
 {
-    if (m_isConnected == isConnected)
+    Q_D(RpcHubBase);
+
+    if (d->isConnected == isConnected)
         return;
 
-    m_isConnected = isConnected;
+    d->isConnected = isConnected;
     emit isConnectedChanged(isConnected);
 }
 
 void RpcHubBase::setValidateToken(QString validateToken)
 {
+    Q_D(RpcHubBase);
 
-    if (m_validateToken == validateToken)
+    if (d->validateToken == validateToken)
         return;
 
-    m_validateToken = validateToken;
+    d->validateToken = validateToken;
     emit validateTokenChanged(validateToken);
 }
 
 void RpcHubBase::setSerializer(RpcSerializerBase *serializerObject)
 {
-    if (m_serializer == serializerObject)
+    Q_D(RpcHubBase);
+
+    if (d->serializer == serializerObject)
         return;
 
-    m_serializer = serializerObject;
+    d->serializer = serializerObject;
     emit serializerChanged(serializerObject);
 }
 
+QT_END_NAMESPACE

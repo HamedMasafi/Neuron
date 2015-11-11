@@ -12,14 +12,15 @@
 #   include <QJSValue>
 #endif
 
-#include <ToojRpc>
+#include <RpcPeer>
 %4
 
 QT_BEGIN_NAMESPACE
 
-class %1 : public ToojRpc
+class %1 : public RpcPeer
 {
     Q_OBJECT
+%5
 
 public:
     Q_INVOKABLE %1(QObject *parent = 0);

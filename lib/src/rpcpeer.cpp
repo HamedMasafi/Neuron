@@ -11,6 +11,8 @@
 #include "rpcpeer.h"
 #include "rpchubbase.h"
 
+QT_BEGIN_NAMESPACE
+
 RpcPeer::RpcPeer(QObject *parent) : QObject(parent), _hub(0)
 {
     if(qobject_cast<RpcHub*>(parent)){
@@ -71,7 +73,7 @@ void RpcPeer::setHub(RpcHubBase *hub)
     if (_hub == hub)
         return;
 
-    //TODO: check this. I this this is correct
+    //TODO: check this.
     hub->addSharedObject(this);
     _hub = hub;
     emit hubChanged(hub);
@@ -85,3 +87,5 @@ RpcHubBase *RpcPeer::hub() const
 {
     return _hub;
 }
+
+QT_END_NAMESPACE

@@ -6,6 +6,8 @@
 
 #include <QVariant>
 
+QT_BEGIN_NAMESPACE
+
 class QByteArray;
 class RpcSerializerBase : public QObject
 {
@@ -22,5 +24,7 @@ public:
     virtual QVariant deserialize(QByteArray bytes) = 0;
 
 };
+
+QT_END_NAMESPACE
 
 #endif // RPCSERIALIZERBASE_H

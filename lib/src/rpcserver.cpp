@@ -3,40 +3,78 @@
 #include <QSet>
 #include <QThread>
 
-#include "rpctcpsocketserver_p.h"
 #include "rpcserver.h"
+#include "rpcserver_p.h"
+#include "rpctcpsocketserver_p.h"
 #include "rpcjsondataserializer.h"
 
-RpcServer::RpcServer(qint16 port, QObject *parent) : RpcHubBase(parent), m_isMultiThread(false)
-{
-    serverSocket = new RpcTcpSocketServer(this);
+QT_BEGIN_NAMESPACE
 
-    serverSocket->listen(QHostAddress::Any, port);
-    serverSocket->setObjectName("serverSocket");
+RpcServerPrivate::RpcServerPrivate(RpcServer *parent) : q_ptr(parent), isMultiThread(false)
+{
+
+}
+
+RpcServer::RpcServer(qint16 port, QObject *parent) : RpcHubBase(parent),
+    d_ptr(new RpcServerPrivate(this))
+{
+    Q_D(RpcServer);
+
+    d->serverSocket = new RpcTcpSocketServer(this);
+
+    d->serverSocket->listen(QHostAddress::Any, port);
+    d->serverSocket->setObjectName("serverSocket");
 
     setSerializer(new RpcJsonDataSerializer(this));
 
-    connect(serverSocket, &RpcTcpSocketServer::newIncomingConnection, this, &RpcServer::server_newIncomingConnection);
+    connect(d->serverSocket, &RpcTcpSocketServer::newIncomingConnection, this, &RpcServer::server_newIncomingConnection);
 }
 
 QSet<RpcPeer *> RpcServer::peers()
 {
-    return _peers;
+    Q_D(RpcServer);
+    return d->peers;
 }
 
 int RpcServer::typeId() const
 {
-    return m_typeId;
+    Q_D(const RpcServer);
+    return d->typeId;
 }
 
 bool RpcServer::isMultiThread() const
 {
-    return m_isMultiThread;
+    Q_D(const RpcServer);
+    return d->isMultiThread;
+}
+
+void RpcServer::beginTransaction()
+{
+    Q_D(const RpcServer);
+
+    foreach(RpcPeer *peer, d->peers)
+        peer->hub()->beginTransaction();
+}
+
+void RpcServer::rollback()
+{
+    Q_D(const RpcServer);
+    foreach(RpcPeer *peer, d->peers)
+        peer->hub()->rollback();
+}
+
+void RpcServer::commit()
+{
+    Q_D(const RpcServer);
+    foreach(RpcPeer *peer, d->peers)
+        peer->hub()->commit();
 }
 
 void RpcServer::server_newIncomingConnection(qintptr socketDescriptor)
 {
-    const QMetaObject *metaObject = QMetaType::metaObjectForType(m_typeId);
+    Q_D(RpcServer);
+
+    const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
     QObject *o = metaObject->newInstance();
     RpcPeer *peer = qobject_cast<RpcPeer*>(o);
 
@@ -73,33 +111,39 @@ void RpcServer::server_newIncomingConnection(qintptr socketDescriptor)
         peer->deleteLater();
     } );
 
-    _peers.insert(peer);
+    d->peers.insert(peer);
     emit peerConnected(peer);
 }
 
 void RpcServer::setTypeId(int typeId)
 {
-    if (m_typeId == typeId)
+    Q_D(RpcServer);
+
+    if (d->typeId == typeId)
         return;
 
-    m_typeId = typeId;
+    d->typeId = typeId;
     emit typeIdChanged(typeId);
 }
 
 void RpcServer::setIsMultiThread(bool isMultiThread)
 {
-    if (m_isMultiThread == isMultiThread)
+    Q_D(RpcServer);
+
+    if (d->isMultiThread == isMultiThread)
         return;
 
-    m_isMultiThread = isMultiThread;
+    d->isMultiThread = isMultiThread;
     emit isMultiThreadChanged(isMultiThread);
 }
 
 void RpcServer::peer_disconnected()
 {
+    Q_D(RpcServer);
+
     RpcPeer *peer = qobject_cast<RpcPeer*>(sender());
 
-    _peers.remove(peer);
+    d->peers.remove(peer);
     peer->deleteLater();
 }
 
@@ -110,7 +154,9 @@ qlonglong RpcServer::invokeOnPeer(QString sender, QString methodName,
                                   QVariant val6, QVariant val7,
                                   QVariant val8, QVariant val9)
 {
-    foreach(RpcPeer *peer, _peers)
+    Q_D(RpcServer);
+
+    foreach(RpcPeer *peer, d->peers)
         peer->hub()->invokeOnPeer(sender, methodName,
                                   val0, val1, val2, val3, val4,
                                   val5, val6, val7, val8, val9);
@@ -118,3 +164,4 @@ qlonglong RpcServer::invokeOnPeer(QString sender, QString methodName,
     return 0;
 }
 
+QT_END_NAMESPACE

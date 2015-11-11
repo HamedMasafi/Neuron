@@ -7,6 +7,8 @@
 #include <QtCore/QObject>
 #include <QtCore/qglobal.h>
 
+QT_BEGIN_NAMESPACE
+
 class TOOJ_EXPORT RpcJsonDataSerializer : public RpcSerializerBase
 {
     Q_OBJECT
@@ -27,9 +29,11 @@ public:
     QVariant fromJson(QJsonObject object);
     QVariant fromJson(QJsonArray array);
 
-    QJsonObject serializeQObject(QObject *obj);
-    void deserializeQObject(QObject *obj, QJsonObject jsonObject);
+    QVariantMap serializeQObject(QObject *obj);
+    void deserializeQObject(QObject *obj, QVariantMap jsonObject);
 public slots:
 };
+
+QT_END_NAMESPACE
 
 #endif // RPCJSONDATASERIALIZER_H

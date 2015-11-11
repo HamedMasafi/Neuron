@@ -1,1 +1,5 @@
- 
+if (m_%1 == %1)
+    return;
+
+m_%1 = %1;
+emit %1Changed(%1);

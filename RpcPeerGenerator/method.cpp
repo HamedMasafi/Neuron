@@ -3,10 +3,48 @@
 
 #include <QDebug>
 #include <QRegularExpression>
+#include "texthelper.h"
 
-Method::Method(QObject *parent) : QObject(parent), parentClass((Class*)parent)
+Method::Method(QObject *parent) : QObject(parent), parentClass((Class*)parent),
+    m_code(QString::null), m_isInvokable(false)
 {
+    parentClass = qobject_cast<Class*>(parent);
+}
 
+QString Method::declare()
+{
+    QString ret = QString("%4%1 %2(%3);")
+            .arg(returnType())
+            .arg(name())
+            .arg(signature())
+            .arg(isInvokable() ? "Q_INVOKABLE " : "");
+
+    if(!wrapperMacro().isNull()){
+        if(wrapperMacro().contains("<") || wrapperMacro().contains(">") || wrapperMacro().contains("=") )
+            ret.prepend("#if " + wrapperMacro() + "\n");
+        else
+            ret.prepend("#ifdef " + wrapperMacro() + "\n");
+        ret.append("\n#endif");
+	}
+    return ret;
+}
+
+QString Method::implement()
+{
+    if(code().isNull())
+        return QString::null;
+
+    QString ret = QString("%1 %5::%2(%3)\n{\n%4\n}")
+            .arg(returnType())
+            .arg(name())
+            .arg(signature())
+            .arg(TextHelper::instance()->indent(code()))
+            .arg(parentClass->name());
+    if(!wrapperMacro().isNull()){
+        ret.prepend("#ifdef " + wrapperMacro() + "\n");
+        ret.append("\n#endif");
+	}
+    return ret;
 }
 
 QString Method::declType() const
@@ -37,6 +75,16 @@ QString Method::wrapperMacro() const
 QString Method::seprator() const
 {
     return m_seprator;
+}
+
+QString Method::code() const
+{
+    return m_code;
+}
+
+bool Method::isInvokable() const
+{
+    return m_isInvokable;
 }
 
 void Method::setDeclType(QString declType)
@@ -93,17 +141,33 @@ void Method::setSeprator(QString seprator)
     emit sepratorChanged(seprator);
 }
 
+void Method::setCode(QString code)
+{
+    if (m_code == code)
+        return;
+
+    m_code = code;
+    emit codeChanged(code);
+}
+
+void Method::setIsInvokable(bool isInvokable)
+{
+    if (m_isInvokable == isInvokable)
+        return;
+
+    m_isInvokable = isInvokable;
+    emit isInvokableChanged(isInvokable);
+}
+
 QString Method::getParametereNames(){
     QString s = signature();
-    qDebug() << "before "<< s;
-    s.replace(QRegularExpression("(,|^)\\s*\\S+\\s*\\*?"), "\\1");
-    qDebug() << "after "<< s;
+    s.replace(QRegularExpression("(,|^)\\s*(const\\s+)?\\S+\\s*\\*?"), "\\1");
     return s;
 }
 
 QString Method::getParametereTypes(){
     QString s = signature();
-    s.replace(QRegularExpression("(\\*)?(\\S*)\\s*(,|$)"), "\\1");
+    s.replace(QRegularExpression("(\\*)?(\\S*)\\s*(,|$)"), "\\1\\3");
     return s;
 }
 

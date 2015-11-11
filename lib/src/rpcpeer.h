@@ -6,6 +6,8 @@
 #include "rpchub.h"
 #include "rpcglobal.h"
 
+QT_BEGIN_NAMESPACE
+
 class QEventLoop;
 class RpcHubBase;
 class RpcServer;
@@ -46,5 +48,7 @@ public slots:
                       QVariant val9 = QVariant());
     void setHub(RpcHubBase* hub);
 };
+
+QT_END_NAMESPACE
 
 #endif // TOOJRCP_H

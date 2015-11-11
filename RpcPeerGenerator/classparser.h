@@ -7,6 +7,14 @@
 class ClassParser : public QObject
 {
     Q_OBJECT
+
+    QString cppTemplate;
+    QString hTemplate;
+
+    void replaceBlock(QString *content, QString blockName, QString(*callbackfunc)(QString));
+
+    QString replaceMethod(QString block);
+
 public:
     explicit ClassParser(QObject *parent = 0);
 

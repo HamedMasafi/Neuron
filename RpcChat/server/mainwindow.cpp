@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     serverManager->setIsMultiThread(true);
     serverManager->registerType<User*>();
     serverManager->setObjectName("serverManager");
-//    serverManager->addSharedObject(server);
     serverManager->setValidateToken(RPC_TOKEN);
 
     server = new Server(this);
@@ -43,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
                 }
             }
         });
-        connect(peer, &UserBase::sendMessageHandle, this, [this] (QString message) {
+        connect(peer, &UserBase::sendMessageSignal, this, [this] (QString message) {
             User  *s = qobject_cast<User*>(sender());
             foreach (RpcPeer *p, serverManager->peers()) {
                 User *peer = qobject_cast<User*>(p);
@@ -88,24 +87,24 @@ void MainWindow::server_peerConnected(RpcPeer *peer)
 
     connect(user, &User::avatorChanged, this, &MainWindow::populatePeersList);
     connect(user, &User::usernameChanged, this, &MainWindow::user_usernameChanged);
-    connect(user, &User::sendMessageHandle, this, &MainWindow::user_sendMessageHandle);
-    connect(user, &User::sendImageHandle, this, &MainWindow::user_sendImageHandle);
+    connect(user, &User::sendMessageSignal, this, &MainWindow::user_sendMessageSignal);
+    connect(user, &User::sendImageSignal, this, &MainWindow::user_sendImageSignal);
 }
 
 void MainWindow::server_peerDisconnected(RpcPeer *peer)
 {
+    Q_UNUSED(peer);
     populatePeersList();
 }
 
-void MainWindow::user_sendImageHandle(QPixmap image)
+void MainWindow::user_sendImageSignal(QPixmap image)
 {
     User *user = qobject_cast<User*>(sender());
     server->imageSent(user->username(), image);
 }
 
-void MainWindow::user_sendMessageHandle(QString message)
+void MainWindow::user_sendMessageSignal(QString message)
 {
-    qDebug()<< "User send message; "<<message;
     User *s = qobject_cast<User*>(sender());
     foreach (RpcPeer *p, serverManager->peers()) {
         User *peer = qobject_cast<User*>(p);
@@ -115,26 +114,17 @@ void MainWindow::user_sendMessageHandle(QString message)
 
 void MainWindow::user_usernameChanged()
 {
-    User *peer = qobject_cast<User*>(sender());
+    User *messageSender = qobject_cast<User*>(sender());
     populatePeersList();
 
-    foreach (RpcPeer *p, serverManager->peers()) {
-        if(peer != sender()){
-            User *s = qobject_cast<User*>(sender());
-            peer->roomMessage(s->username() + " joined room.");
+    foreach (RpcPeer *peer, serverManager->peers()) {
+        if(messageSender != sender()){
+            qobject_cast<User*>(peer)->roomMessage(messageSender->username() + " joined room.");
         }
     }
 
-    server->userJoined(peer->username());
+    server->userJoined(messageSender->username());
 }
-
-void MainWindow::user_avatorChanged()
-{
-    User *u = qobject_cast<User*>(sender());
-    labelAvator->setPixmap(u->avator());
-    labelUsername->setText(u->username());
-}
-
 
 void MainWindow::on_pushButtonSendBroadcast_clicked()
 {

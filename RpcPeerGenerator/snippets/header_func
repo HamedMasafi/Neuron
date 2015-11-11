@@ -1,9 +1,0 @@
-	// %NAME%
-    %TYPE% %NAME%Slot(%SIGN%);
-    %TYPE% %NAME%(%SIGN%);
-    void %NAME%Async(%SIGN%);
-    void %NAME%(%SIGN%%SEP%const QObject *obj, char *slotName);
-    void %NAME%(%SIGN%%SEP%const QObject *obj, const QMetaMethod *method);
-#if __cplusplus >= 201103L
-    void %NAME%(%SIGN%%SEP%std::function<void(%TYPE%)> func);
-#endif

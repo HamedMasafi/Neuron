@@ -5,115 +5,21 @@
 #include <QCryptographicHash>
 
 #include "rpchub.h"
+#include "rpchub_p.h"
 #include "rpcpeer.h"
 #include "rpcjsondataserializer.h"
 
-RpcHub::RpcHub(QObject *parent) : RpcHubBase(parent),
-    _isTransaction(false), requestId(0)
+QT_BEGIN_NAMESPACE
+
+RpcHubPrivate::RpcHubPrivate(RpcHub *parent) : q_ptr(parent),
+    isTransaction(false), requestId(0)
 {
-    _socket = new QTcpSocket(this);
 
-    connect(_socket, &QIODevice::readyRead, this, &RpcHub::socket_onReadyRead);
-    connect(_socket, &QTcpSocket::disconnected, this, &RpcHub::socket_disconnected);
-    connect(_socket, &QTcpSocket::connected, this, &RpcHub::socket_connected);
-
-    setSerializer(new RpcJsonDataSerializer(this));
 }
 
-RpcHub::RpcHub(RpcSerializerBase *serializer, QObject *parent) : RpcHubBase(parent),
-    _isTransaction(false), requestId(0)
+void RpcHubPrivate::addToMap(QVariantMap *map, QVariant var, int index)
 {
-    _socket = new QTcpSocket(this);
 
-    connect(_socket, &QIODevice::readyRead, this, &RpcHub::socket_onReadyRead);
-    connect(_socket, &QTcpSocket::disconnected, this, &RpcHub::socket_disconnected);
-    connect(_socket, &QTcpSocket::connected, this, &RpcHub::socket_connected);
-
-    setSerializer(serializer);
-}
-
-void RpcHub::connectToServer(QString address, qint16 port)
-{
-    if(!address.isNull())
-        setServerAddress(address);
-
-    if(port)
-        setPort(port);
-
-    _socket->connectToHost(this->serverAddress(), this->port());
-}
-
-void RpcHub::disconnectFromServer()
-{
-    setAutoReconnect(false);
-    _socket->disconnectFromHost();
-}
-
-bool RpcHub::setSocketDescriptor(qintptr socketDescriptor)
-{
-    return _socket->setSocketDescriptor(socketDescriptor);
-}
-
-void RpcHub::timerEvent(QTimerEvent *)
-{
-    if(_socket->state() == QAbstractSocket::UnconnectedState){
-        connectToServer();
-    }else if(_socket->state() == QAbstractSocket::ConnectedState){
-        killTimer(reconnectTimerId);
-
-        sync();
-    }
-}
-
-void RpcHub::sync()
-{
-    beginTransaction();
-    foreach (QObject *o, _classes) {
-
-        int pcount = o->metaObject()->propertyCount();
-        for(int i = 0; i < pcount; i++){
-            QMetaProperty p = o->metaObject()->property(i);
-
-            if(!p.isUser())
-                continue;
-
-            QString w = p.name();
-            w[0] = w[0].toUpper();
-            invokeOnPeer(o->metaObject()->className(),
-                         "set" + w,
-                         p.read(o));
-        }
-    }
-    commit();
-}
-
-void RpcHub::beginTransaction()
-{
-    _isTransaction = true;
-}
-
-bool RpcHub::isTransaction() const
-{
-    return _isTransaction;
-}
-
-void RpcHub::rollback()
-{
-    _buffer.clear();
-    _isTransaction = false;
-}
-
-void RpcHub::commit()
-{
-    _socket->write(QJsonDocument::fromVariant(_buffer).toJson());
-    _socket->flush();
-    _isTransaction = false;
-    _buffer.clear();
-}
-
-
-void RpcHub::addToMap(QVariantMap *map, QVariant var, int index)
-{
     QString i = QString::number(index);
 
     if(var != QVariant()){
@@ -122,8 +28,10 @@ void RpcHub::addToMap(QVariantMap *map, QVariant var, int index)
     }
 }
 
-void RpcHub::procMap(QVariantMap map)
+void RpcHubPrivate::procMap(QVariantMap map)
 {
+    Q_Q(RpcHub);
+
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
 
@@ -133,20 +41,20 @@ void RpcHub::procMap(QVariantMap map)
     }
 
     if(map[MAP_TYPE] == MAP_TYPE_RESPONSE){
-        if(_calls[id]){
-            _calls[id]->returnData = map[MAP_RETURN_VALUE];
-            _calls[id]->returnToCaller();
+        if(q->_calls[id]){
+            q->_calls[id]->returnData = map[MAP_RETURN_VALUE];
+            q->_calls[id]->returnToCaller();
         }
         return;
     }
 
-    if(!validateToken().isNull())
+    if(!q->validateToken().isNull())
         if(!checkValidateToken(&map)){
             qWarning("Map token validate is invalid!");
             return;
         }
 
-    QObject *target = _classes[map[CLASS_NAME].toString()];
+    QObject *target = q->_classes[map[CLASS_NAME].toString()];
 
     if(!target){
         qWarning("There are no '" + map[CLASS_NAME].toString().toLatin1() + "' service");
@@ -194,7 +102,7 @@ void RpcHub::procMap(QVariantMap map)
 
     QString lockName = map[CLASS_NAME].toString() + "::" + methodName;
 
-    _locks.insert(lockName);
+    locks.insert(lockName);
 
     if(returnData.type() == QVariant::Invalid)
         ok = QMetaObject::invokeMethod(
@@ -234,11 +142,13 @@ void RpcHub::procMap(QVariantMap map)
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant() : returnData);
 
-    _locks.remove(lockName);
+    locks.remove(lockName);
 }
 
-bool RpcHub::response(qlonglong id, QString senderName, QVariant returnValue)
+bool RpcHubPrivate::response(qlonglong id, QString senderName, QVariant returnValue)
 {
+    Q_Q(RpcHub);
+
     QVariantMap map;
     map[MAP_TYPE] = MAP_TYPE_RESPONSE;
     map[ID] = QVariant(id);
@@ -247,13 +157,15 @@ bool RpcHub::response(qlonglong id, QString senderName, QVariant returnValue)
     if(returnValue != QVariant())
         map[MAP_RETURN_VALUE] = returnValue;
 
-    int res = _socket->write(serializer()->serialize(map));
+    int res = socket->write(q->serializer()->serialize(map));
 
     return 0 != res;
 }
 
-void RpcHub::addValidateToken(QVariantMap *map)
+void RpcHubPrivate::addValidateToken(QVariantMap *map)
 {
+    Q_Q(RpcHub);
+
     QByteArray s;
 
     map->insert(MAP_TOKEN_ITEM, QVariant(""));
@@ -264,11 +176,13 @@ void RpcHub::addValidateToken(QVariantMap *map)
         s.append(i.key() + ": " + i.value().toString() + "*");
     }
 
-    map->insert(MAP_TOKEN_ITEM, QVariant(MD5(s + validateToken())));
+    map->insert(MAP_TOKEN_ITEM, QVariant(MD5(s + q->validateToken())));
 }
 
-bool RpcHub::checkValidateToken(QVariantMap *map)
+bool RpcHubPrivate::checkValidateToken(QVariantMap *map)
 {
+    Q_Q(RpcHub);
+
     QString token = map->value(MAP_TOKEN_ITEM).toString();
     map->insert(MAP_TOKEN_ITEM, QVariant(""));
 
@@ -280,17 +194,144 @@ bool RpcHub::checkValidateToken(QVariantMap *map)
         s.append(i.key() + ": " + i.value().toString() + "*");
     }
 
-    return token == MD5(s + validateToken());
+    return token == MD5(s + q->validateToken());
 }
 
-QString RpcHub::MD5(QString text)
+QString RpcHubPrivate::MD5(QString text)
 {
     return MD5(text.toLocal8Bit());
 }
 
-QString RpcHub::MD5(QByteArray text)
+QString RpcHubPrivate::MD5(QByteArray text)
 {
     return QString(QCryptographicHash::hash(text, QCryptographicHash::Md5).toHex());
+}
+
+RpcHub::RpcHub(QObject *parent) : RpcHubBase(parent),
+    d_ptr(new RpcHubPrivate(this))
+{
+    Q_D(RpcHub);
+
+    d->socket = new QTcpSocket(this);
+
+    connect(d->socket, &QIODevice::readyRead, this, &RpcHub::socket_onReadyRead);
+    connect(d->socket, &QTcpSocket::disconnected, this, &RpcHub::socket_disconnected);
+    connect(d->socket, &QTcpSocket::connected, this, &RpcHub::socket_connected);
+
+    setSerializer(new RpcJsonDataSerializer(this));
+}
+
+RpcHub::RpcHub(RpcSerializerBase *serializer, QObject *parent) : RpcHubBase(parent),
+    d_ptr(new RpcHubPrivate(this))
+{
+    Q_D(RpcHub);
+
+    d->socket = new QTcpSocket(this);
+
+    connect(d->socket, &QIODevice::readyRead, this, &RpcHub::socket_onReadyRead);
+    connect(d->socket, &QTcpSocket::disconnected, this, &RpcHub::socket_disconnected);
+    connect(d->socket, &QTcpSocket::connected, this, &RpcHub::socket_connected);
+
+    setSerializer(serializer);
+}
+
+RpcHub::~RpcHub()
+{
+    foreach (QObject *o, _classes) {
+        RpcPeer *peer = qobject_cast<RpcPeer*>(o);
+        if(peer->hub() == this)
+            o->deleteLater();
+    }
+}
+
+void RpcHub::connectToServer(QString address, qint16 port)
+{
+    Q_D(RpcHub);
+
+    if(!address.isNull())
+        setServerAddress(address);
+
+    if(port)
+        setPort(port);
+
+    d->socket->connectToHost(this->serverAddress(), this->port());
+}
+
+void RpcHub::disconnectFromServer()
+{
+    Q_D(RpcHub);
+
+    setAutoReconnect(false);
+    d->socket->disconnectFromHost();
+}
+
+bool RpcHub::setSocketDescriptor(qintptr socketDescriptor)
+{
+    Q_D(RpcHub);
+    return d->socket->setSocketDescriptor(socketDescriptor);
+}
+
+void RpcHub::timerEvent(QTimerEvent *)
+{
+    Q_D(RpcHub);
+
+    if(d->socket->state() == QAbstractSocket::UnconnectedState){
+        connectToServer();
+    }else if(d->socket->state() == QAbstractSocket::ConnectedState){
+        killTimer(d->reconnectTimerId);
+
+        sync();
+    }
+}
+
+void RpcHub::sync()
+{
+    beginTransaction();
+    foreach (QObject *o, _classes) {
+
+        int pcount = o->metaObject()->propertyCount();
+        for(int i = 0; i < pcount; i++){
+            QMetaProperty p = o->metaObject()->property(i);
+
+            if(!p.isUser())
+                continue;
+
+            QString w = p.name();
+            w[0] = w[0].toUpper();
+            invokeOnPeer(o->metaObject()->className(),
+                         "set" + w,
+                         p.read(o));
+        }
+    }
+    commit();
+}
+
+void RpcHub::beginTransaction()
+{
+    Q_D(RpcHub);
+    d->isTransaction = true;
+}
+
+bool RpcHub::isTransaction() const
+{
+    Q_D(const RpcHub);
+    return d->isTransaction;
+}
+
+void RpcHub::rollback()
+{
+    Q_D(RpcHub);
+    d->buffer.clear();
+    d->isTransaction = false;
+}
+
+void RpcHub::commit()
+{
+    Q_D(RpcHub);
+    d->socket->write(QJsonDocument::fromVariant(d->buffer).toJson());
+    d->socket->flush();
+    d->buffer.clear();
+    d->isTransaction = false;
 }
 
 void RpcHub::socket_connected()
@@ -300,29 +341,35 @@ void RpcHub::socket_connected()
 
 void RpcHub::socket_disconnected()
 {
+    Q_D(RpcHub);
+
     setIsConnected(false);
 
     if(autoReconnect()){
         connectToServer();
-        reconnectTimerId = startTimer(500);
+        d->reconnectTimerId = startTimer(500);
+    }else{
+        this->deleteLater();
     }
 }
 
 void RpcHub::socket_onReadyRead()
 {
-    QByteArray buffer = _socket->readAll();
+    Q_D(RpcHub);
+
+    QByteArray buffer = d->socket->readAll();
     //multi chunck support
     buffer = "[" + buffer.replace("}\n{", "},{") + "]";
 
     QVariant var = serializer()->deserialize(buffer);
 
     if(var.type() == QVariant::Map)
-        procMap(var.toMap());
+        d->procMap(var.toMap());
 
     if(var.type() == QVariant::List){
         QVariantList list = var.toList();
         foreach (QVariant map, list){
-            procMap(map.toMap());
+            d->procMap(map.toMap());
         }
     }
 }
@@ -334,42 +381,45 @@ qlonglong RpcHub::invokeOnPeer(QString sender, QString methodName,
                                QVariant val6, QVariant val7,
                                QVariant val8, QVariant val9)
 {
-    if(_locks.contains(sender + "::" + methodName))
+    Q_D(RpcHub);
+
+    if(d->locks.contains(sender + "::" + methodName))
         return 0;
 
-    if(requestId++ >= LONG_LONG_MAX - 1)
-        requestId = 0;
+    if(d->requestId++ >= LONG_LONG_MAX - 1)
+        d->requestId = 0;
 
     QVariantMap map;
     map[METHOD_NAME] = methodName;
     map[MAP_TYPE] = MAP_TYPE_REQUEST;
-    map[ID] = QVariant(requestId);
+    map[ID] = QVariant(d->requestId);
     map[CLASS_NAME] = sender;
 
-    addToMap(&map, val0, 0);
-    addToMap(&map, val1, 1);
-    addToMap(&map, val2, 2);
-    addToMap(&map, val3, 3);
-    addToMap(&map, val4, 4);
-    addToMap(&map, val5, 5);
-    addToMap(&map, val6, 6);
-    addToMap(&map, val7, 7);
-    addToMap(&map, val8, 8);
-    addToMap(&map, val9, 9);
+    d->addToMap(&map, val0, 0);
+    d->addToMap(&map, val1, 1);
+    d->addToMap(&map, val2, 2);
+    d->addToMap(&map, val3, 3);
+    d->addToMap(&map, val4, 4);
+    d->addToMap(&map, val5, 5);
+    d->addToMap(&map, val6, 6);
+    d->addToMap(&map, val7, 7);
+    d->addToMap(&map, val8, 8);
+    d->addToMap(&map, val9, 9);
 
     if(!validateToken().isNull())
-        addValidateToken(&map);
+        d->addValidateToken(&map);
 
-    if(_isTransaction){
-        _buffer.append(map);
+    if(d->isTransaction){
+        d->buffer.append(map);
         return 0;
     }else{
-        int res = _socket->write(serializer()->serialize(map));
+        int res = d->socket->write(serializer()->serialize(map));
 
         if(res == 0)
             return 0;
         else
-            return requestId;
+            return d->requestId;
     }
 }
 
+QT_END_NAMESPACE

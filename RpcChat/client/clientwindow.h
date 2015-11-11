@@ -21,12 +21,12 @@ protected:
 private slots:
     void on_hub_isConnectedChanged(bool isConnected);
 
-    void on_server_userJoinedHandle(QString username);
-    void on_server_imageSentHandle(QString username, QPixmap image);
-    void on_server_broadcastMessageHandle(QString message);
+    void on_server_userJoinedSignal(QString username);
+    void on_server_imageSentSignal(QString username, QPixmap image);
+    void on_server_broadcastMessageSignal(QString message);
 
-    void on_user_messageRecivedHandle(QString username, QString message);
-    void on_user_roomMessageHandle(QString message);
+    void on_user_messageRecivedSignal(QString username, QString message);
+    void on_user_roomMessageSignal(QString message);
 
     void imageSent();
 

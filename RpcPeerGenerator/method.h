@@ -15,17 +15,16 @@ class Method : public QObject
     Q_PROPERTY(QString signature READ signature WRITE setSignature NOTIFY signatureChanged)
     Q_PROPERTY(QString wrapperMacro READ wrapperMacro WRITE setWrapperMacro NOTIFY wrapperMacroChanged)
     Q_PROPERTY(QString seprator READ seprator WRITE setSeprator NOTIFY sepratorChanged)
+    Q_PROPERTY(QString code READ code WRITE setCode NOTIFY codeChanged)
+    Q_PROPERTY(bool isInvokable READ isInvokable WRITE setIsInvokable NOTIFY isInvokableChanged)
 
-    QString m_declType;
-    QString m_name;
-    QString m_returnType;
-    QString m_signature;
-    QString m_wrapperMacro;
-    QString m_seprator;
-
-    Class *parentClass;
 public:
     explicit Method(QObject *parent = 0);
+
+    QString declare();
+    QString implement();
+    QString getParametereNames();
+    QString getParametereTypes();
 
     QString declType() const;
     QString name() const;
@@ -33,6 +32,8 @@ public:
     QString signature() const;
     QString wrapperMacro() const;
     QString seprator() const;
+    QString code() const;
+    bool isInvokable() const;
 
 signals:
     void declTypeChanged(QString declType);
@@ -41,6 +42,8 @@ signals:
     void signatureChanged(QString signature);
     void wrapperMacroChanged(QString wrapperMacro);
     void sepratorChanged(QString seprator);
+    void codeChanged(QString code);
+    void isInvokableChanged(bool isInvokable);
 
 public slots:
     void setDeclType(QString declType);
@@ -49,12 +52,22 @@ public slots:
     void setSignature(QString signature);
     void setWrapperMacro(QString wrapperMacro);
     void setSeprator(QString seprator);
+    void setCode(QString code);
+    void setIsInvokable(bool isInvokable);
 
 private:
     QString replaceParams(QString text);
-    QString getParametereNames();
-    QString getParametereTypes();
 
+    Class *parentClass;
+
+    QString m_declType;
+    QString m_name;
+    QString m_returnType;
+    QString m_signature;
+    QString m_wrapperMacro;
+    QString m_seprator;
+    QString m_code;
+    bool m_isInvokable;
 };
 
 #endif // METHOD_H

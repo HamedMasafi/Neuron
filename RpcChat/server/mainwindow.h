@@ -23,10 +23,9 @@ public slots:
     void server_peerConnected(RpcPeer *peer);
     void server_peerDisconnected(RpcPeer *peer);
 
-    void user_sendImageHandle(QPixmap image);
-    void user_sendMessageHandle(QString message);
+    void user_sendImageSignal(QPixmap image);
+    void user_sendMessageSignal(QString message);
     void user_usernameChanged();
-    void user_avatorChanged();
 
 private slots:
     void on_pushButtonSendBroadcast_clicked();

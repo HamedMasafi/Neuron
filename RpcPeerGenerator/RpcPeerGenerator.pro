@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
+QT       += core qml
 
 CONFIG += c++11
 
@@ -14,15 +14,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     method.cpp \
-    class.cpp
+    class.cpp \
+    classparser.cpp \
+    texthelper.cpp
 
 RESOURCES += \
     snippets.qrc
 
-DISTFILES += \
-    Model.qmodel
-
 HEADERS += \
     method.h \
-    class.h
-
+    class.h \
+    classparser.h \
+    texthelper.h

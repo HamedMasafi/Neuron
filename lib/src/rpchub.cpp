@@ -237,10 +237,9 @@ RpcHub::RpcHub(RpcSerializerBase *serializer, QObject *parent) : RpcHubBase(pare
 
 RpcHub::~RpcHub()
 {
-    foreach (QObject *o, _classes) {
-        RpcPeer *peer = qobject_cast<RpcPeer*>(o);
+    foreach (RpcPeer *peer, _classes.values()) {
         if(peer->hub() == this)
-            o->deleteLater();
+            peer->deleteLater();
     }
 }
 
@@ -279,7 +278,6 @@ void RpcHub::timerEvent(QTimerEvent *)
         connectToServer();
     }else if(d->socket->state() == QAbstractSocket::ConnectedState){
         killTimer(d->reconnectTimerId);
-
         sync();
     }
 }
@@ -349,6 +347,8 @@ void RpcHub::socket_disconnected()
         connectToServer();
         d->reconnectTimerId = startTimer(500);
     }else{
+        qDebug()<<"emit disconnected()";
+        emit disconnected();
         this->deleteLater();
     }
 }

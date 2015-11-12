@@ -82,14 +82,15 @@ void RpcServer::server_newIncomingConnection(qintptr socketDescriptor)
         qWarning("PEER IS INCORRECT!!!");
         return;
     }
-    peer->setHub(new RpcHub(serializer(), this));
+    RpcHub *hub = new RpcHub(serializer(), this);
+    peer->setHub(hub);
     if (!peer->hub()->setSocketDescriptor(socketDescriptor)) {
         delete peer;
         return;
     }
 
-    peer->hub()->setValidateToken(validateToken());
-    peer->hub()->addSharedObject(peer);
+    hub->setValidateToken(validateToken());
+    hub->addSharedObject(peer);
     foreach (RpcPeer *o, _classes.values())
         peer->hub()->addSharedObject(o);
 
@@ -97,19 +98,24 @@ void RpcServer::server_newIncomingConnection(qintptr socketDescriptor)
 
     if(isMultiThread()){
         thread = new QThread(this);
+        hub->setThread(thread);
         peer->moveToThread(thread);
         thread->start();
 
         connect(thread, &QThread::finished, thread, &QObject::deleteLater);
     }
 
-    connect(peer->hub(), &RpcHubBase::disconnected, //this, &RpcServer::peer_disconnected);
-            [=] () {
-        if(isMultiThread())
-            thread->exit();
-        emit peerDisconnected(peer);
-        peer->deleteLater();
-    } );
+    connect(hub, &RpcHub::disconnected, this, &RpcServer::hub_disconnected);
+//            [=] () {
+//        //TODO: add a property QThread for RpcHub and in disconnect delete thread and all shared objects
+//        d->peers.remove(peer);
+//        emit peerDisconnected(peer);
+//        peer->deleteLater();
+//        if(peer->hub()->thread()){
+//            peer->hub()->thread()->exit();
+//            peer->hub()->thread()->deleteLater();
+//        }
+//    } );
 
     d->peers.insert(peer);
     emit peerConnected(peer);
@@ -137,14 +143,18 @@ void RpcServer::setIsMultiThread(bool isMultiThread)
     emit isMultiThreadChanged(isMultiThread);
 }
 
-void RpcServer::peer_disconnected()
+void RpcServer::hub_disconnected()
 {
     Q_D(RpcServer);
 
-    RpcPeer *peer = qobject_cast<RpcPeer*>(sender());
+    RpcHubBase *hub = qobject_cast<RpcHubBase*>(sender());
 
-    d->peers.remove(peer);
-    peer->deleteLater();
+    d->peers.remove(hub->sharedObjects().at(0));
+
+    if(hub->thread())
+        hub->thread()->exit();
+
+    emit peerDisconnected(hub->sharedObjects().at(0));
 }
 
 qlonglong RpcServer::invokeOnPeer(QString sender, QString methodName,

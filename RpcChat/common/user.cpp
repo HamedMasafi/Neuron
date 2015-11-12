@@ -16,6 +16,18 @@ QPixmap User::avator()
     
 }
 
+bool User::typing()
+{
+    return m_typing;
+    
+}
+
+QString User::username()
+{
+    return m_username;
+    
+}
+
 void User::messageRecived(QString username, QString message)
 {
     qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
@@ -29,19 +41,6 @@ void User::messageRecived(QString username, QString message)
     }
 }
 
-#ifdef QT_QML_LIB
-void User::messageRecived(QString username, QString message, QJSValue callbackFunction)
-{
-    qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
-    
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
-        addCall(id, call);
-    }
-    
-}
-#endif
-
 void User::messageRecived(QString username, QString message, const QObject *obj, const QMetaMethod *callbackMethod)
 {
     qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
@@ -54,8 +53,21 @@ void User::messageRecived(QString username, QString message, const QObject *obj,
     
 }
 
-#ifdef __cplusplus >= 201103L
+#if __cplusplus >= 201103L
 void User::messageRecived(QString username, QString message, std::function<void(void)> callbackFunction)
+{
+    qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        addCall(id, call);
+    }
+    
+}
+#endif
+
+#ifdef QT_QML_LIB
+void User::messageRecived(QString username, QString message, QJSValue callbackFunction)
 {
     qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
     
@@ -92,6 +104,18 @@ void User::messageRecivedAsync(QString username, QString message)
 void User::messageRecivedSlot(QString username, QString message)
 {
     emit messageRecivedSignal(username,message);
+    
+}
+
+void User::roomMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod)
+{
+    qlonglong id = invokeOnPeer("roomMessageSlot", message);
+    
+    if(id){
+        QObject *target = const_cast<QObject *>(obj);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        addCall(id, call);
+    }
     
 }
 
@@ -132,7 +156,7 @@ void User::roomMessage(QString message)
     }
 }
 
-#ifdef __cplusplus >= 201103L
+#if __cplusplus >= 201103L
 void User::roomMessage(QString message, std::function<void(void)> callbackFunction)
 {
     qlonglong id = invokeOnPeer("roomMessageSlot", message);
@@ -144,18 +168,6 @@ void User::roomMessage(QString message, std::function<void(void)> callbackFuncti
     
 }
 #endif
-
-void User::roomMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod)
-{
-    qlonglong id = invokeOnPeer("roomMessageSlot", message);
-    
-    if(id){
-        QObject *target = const_cast<QObject *>(obj);
-        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
-        addCall(id, call);
-    }
-    
-}
 
 void User::roomMessageAsync(QString message)
 {
@@ -199,8 +211,21 @@ void User::sendImage(QPixmap image, const QObject *obj, const QMetaMethod *callb
     
 }
 
-#ifdef __cplusplus >= 201103L
+#if __cplusplus >= 201103L
 void User::sendImage(QPixmap image, std::function<void(void)> callbackFunction)
+{
+    qlonglong id = invokeOnPeer("sendImageSlot", image);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        addCall(id, call);
+    }
+    
+}
+#endif
+
+#ifdef QT_QML_LIB
+void User::sendImage(QPixmap image, QJSValue callbackFunction)
 {
     qlonglong id = invokeOnPeer("sendImageSlot", image);
     
@@ -223,19 +248,6 @@ void User::sendImage(QPixmap image, const QObject *obj, char *callbackSlot)
     
 }
 
-#ifdef QT_QML_LIB
-void User::sendImage(QPixmap image, QJSValue callbackFunction)
-{
-    qlonglong id = invokeOnPeer("sendImageSlot", image);
-    
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
-        addCall(id, call);
-    }
-    
-}
-#endif
-
 void User::sendImageAsync(QPixmap image)
 {
     qlonglong id = invokeOnPeer("sendImageSlot", image);
@@ -250,6 +262,30 @@ void User::sendImageAsync(QPixmap image)
 void User::sendImageSlot(QPixmap image)
 {
     emit sendImageSignal(image);
+    
+}
+
+void User::sendMessage(QString message)
+{
+    qlonglong id = invokeOnPeer("sendMessageSlot", message);
+    
+    if(id){
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+    	addCall(id, call);
+    	call->eventLoop->exec();
+    	removeCall(id);
+    	delete call;
+    }
+}
+
+void User::sendMessage(QString message, const QObject *obj, char *callbackSlot)
+{
+    qlonglong id = invokeOnPeer("sendMessageSlot", message);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
+        addCall(id, call);
+    }
     
 }
 
@@ -278,31 +314,7 @@ void User::sendMessage(QString message, QJSValue callbackFunction)
 }
 #endif
 
-void User::sendMessage(QString message)
-{
-    qlonglong id = invokeOnPeer("sendMessageSlot", message);
-    
-    if(id){
-    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
-    	addCall(id, call);
-    	call->eventLoop->exec();
-    	removeCall(id);
-    	delete call;
-    }
-}
-
-void User::sendMessage(QString message, const QObject *obj, char *callbackSlot)
-{
-    qlonglong id = invokeOnPeer("sendMessageSlot", message);
-    
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
-        addCall(id, call);
-    }
-    
-}
-
-#ifdef __cplusplus >= 201103L
+#if __cplusplus >= 201103L
 void User::sendMessage(QString message, std::function<void(void)> callbackFunction)
 {
     qlonglong id = invokeOnPeer("sendMessageSlot", message);
@@ -332,21 +344,10 @@ void User::sendMessageSlot(QString message)
     
 }
 
-bool User::typing()
-{
-    return m_typing;
-    
-}
-
-QString User::username()
-{
-    return m_username;
-    
-}
-
 void User::setAvator(QPixmap avator)
 {
     m_avator = avator;
+    invokeOnPeer("setAvator", avator);
     emit avatorChanged(avator);
     
 }
@@ -357,6 +358,7 @@ void User::setTyping(bool typing)
         return;
     
     m_typing = typing;
+    invokeOnPeer("setTyping", typing);
     emit typingChanged(typing);
     
 }
@@ -367,6 +369,7 @@ void User::setUsername(QString username)
         return;
     
     m_username = username;
+    invokeOnPeer("setUsername", username);
     emit usernameChanged(username);
     
 }

@@ -19,6 +19,7 @@ public:
     bool isConnected;
     QString validateToken;
     RpcSerializerBase *serializer;
+    QThread* thread;
 };
 
 QT_END_NAMESPACE

@@ -20,8 +20,8 @@ protected:
     void populatePeersList();
 
 public slots:
-    void server_peerConnected(RpcPeer *peer);
-    void server_peerDisconnected(RpcPeer *peer);
+    void on_serverManager_peerConnected(RpcPeer *peer);
+    void on_serverManager_peerDisconnected(RpcPeer *peer);
 
     void user_sendImageSignal(QPixmap image);
     void user_sendMessageSignal(QString message);

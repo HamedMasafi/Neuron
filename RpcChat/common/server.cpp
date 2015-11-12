@@ -10,43 +10,10 @@ Server::Server(QObject *parent) : RpcPeer(parent)
 
 }
 
-#ifdef QT_QML_LIB
-void Server::broadcastMessage(QString message, QJSValue callbackFunction)
+QVariantList Server::users()
 {
-    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
+    return m_users;
     
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
-        addCall(id, call);
-    }
-    
-}
-#endif
-
-#ifdef __cplusplus >= 201103L
-void Server::broadcastMessage(QString message, std::function<void(void)> callbackFunction)
-{
-    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
-    
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
-        addCall(id, call);
-    }
-    
-}
-#endif
-
-void Server::broadcastMessage(QString message)
-{
-    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
-    
-    if(id){
-    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
-    	addCall(id, call);
-    	call->eventLoop->exec();
-    	removeCall(id);
-    	delete call;
-    }
 }
 
 void Server::broadcastMessage(QString message, const QObject *obj, char *callbackSlot)
@@ -72,6 +39,45 @@ void Server::broadcastMessage(QString message, const QObject *obj, const QMetaMe
     
 }
 
+#ifdef QT_QML_LIB
+void Server::broadcastMessage(QString message, QJSValue callbackFunction)
+{
+    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        addCall(id, call);
+    }
+    
+}
+#endif
+
+#if __cplusplus >= 201103L
+void Server::broadcastMessage(QString message, std::function<void(void)> callbackFunction)
+{
+    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        addCall(id, call);
+    }
+    
+}
+#endif
+
+void Server::broadcastMessage(QString message)
+{
+    qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
+    
+    if(id){
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+    	addCall(id, call);
+    	call->eventLoop->exec();
+    	removeCall(id);
+    	delete call;
+    }
+}
+
 void Server::broadcastMessageAsync(QString message)
 {
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
@@ -87,31 +93,6 @@ void Server::broadcastMessageSlot(QString message)
 {
     emit broadcastMessageSignal(message);
     
-}
-
-void Server::imageSent(QString username, QPixmap image, const QObject *obj, const QMetaMethod *callbackMethod)
-{
-    qlonglong id = invokeOnPeer("imageSentSlot", username,image);
-    
-    if(id){
-        QObject *target = const_cast<QObject *>(obj);
-        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
-        addCall(id, call);
-    }
-    
-}
-
-void Server::imageSent(QString username, QPixmap image)
-{
-    qlonglong id = invokeOnPeer("imageSentSlot", username,image);
-    
-    if(id){
-    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
-    	addCall(id, call);
-    	call->eventLoop->exec();
-    	removeCall(id);
-    	delete call;
-    }
 }
 
 #ifdef QT_QML_LIB
@@ -138,7 +119,32 @@ void Server::imageSent(QString username, QPixmap image, const QObject *obj, char
     
 }
 
-#ifdef __cplusplus >= 201103L
+void Server::imageSent(QString username, QPixmap image)
+{
+    qlonglong id = invokeOnPeer("imageSentSlot", username,image);
+    
+    if(id){
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
+    	addCall(id, call);
+    	call->eventLoop->exec();
+    	removeCall(id);
+    	delete call;
+    }
+}
+
+void Server::imageSent(QString username, QPixmap image, const QObject *obj, const QMetaMethod *callbackMethod)
+{
+    qlonglong id = invokeOnPeer("imageSentSlot", username,image);
+    
+    if(id){
+        QObject *target = const_cast<QObject *>(obj);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        addCall(id, call);
+    }
+    
+}
+
+#if __cplusplus >= 201103L
 void Server::imageSent(QString username, QPixmap image, std::function<void(void)> callbackFunction)
 {
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
@@ -168,8 +174,16 @@ void Server::imageSentSlot(QString username, QPixmap image)
     
 }
 
-#ifdef __cplusplus >= 201103L
-void Server::userJoined(QString username, std::function<void(void)> callbackFunction)
+void Server::setUsers(QVariantList users)
+{
+    m_users = users;
+    invokeOnPeer("setUsers", users);
+    emit usersChanged(users);
+    
+}
+
+#ifdef QT_QML_LIB
+void Server::userJoined(QString username, QJSValue callbackFunction)
 {
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
@@ -192,6 +206,18 @@ void Server::userJoined(QString username, const QObject *obj, char *callbackSlot
     
 }
 
+void Server::userJoined(QString username, const QObject *obj, const QMetaMethod *callbackMethod)
+{
+    qlonglong id = invokeOnPeer("userJoinedSlot", username);
+    
+    if(id){
+        QObject *target = const_cast<QObject *>(obj);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        addCall(id, call);
+    }
+    
+}
+
 void Server::userJoined(QString username)
 {
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
@@ -205,20 +231,8 @@ void Server::userJoined(QString username)
     }
 }
 
-void Server::userJoined(QString username, const QObject *obj, const QMetaMethod *callbackMethod)
-{
-    qlonglong id = invokeOnPeer("userJoinedSlot", username);
-    
-    if(id){
-        QObject *target = const_cast<QObject *>(obj);
-        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
-        addCall(id, call);
-    }
-    
-}
-
-#ifdef QT_QML_LIB
-void Server::userJoined(QString username, QJSValue callbackFunction)
+#if __cplusplus >= 201103L
+void Server::userJoined(QString username, std::function<void(void)> callbackFunction)
 {
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
@@ -247,6 +261,19 @@ void Server::userJoinedSlot(QString username)
     
 }
 
+#if __cplusplus >= 201103L
+void Server::userLeaved(QString username, std::function<void(void)> callbackFunction)
+{
+    qlonglong id = invokeOnPeer("userLeavedSlot", username);
+    
+    if(id){
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        addCall(id, call);
+    }
+    
+}
+#endif
+
 #ifdef QT_QML_LIB
 void Server::userLeaved(QString username, QJSValue callbackFunction)
 {
@@ -272,18 +299,16 @@ void Server::userLeaved(QString username, const QObject *obj, const QMetaMethod 
     
 }
 
-#ifdef __cplusplus >= 201103L
-void Server::userLeaved(QString username, std::function<void(void)> callbackFunction)
+void Server::userLeaved(QString username, const QObject *obj, char *callbackSlot)
 {
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
 }
-#endif
 
 void Server::userLeaved(QString username)
 {
@@ -296,17 +321,6 @@ void Server::userLeaved(QString username)
     	removeCall(id);
     	delete call;
     }
-}
-
-void Server::userLeaved(QString username, const QObject *obj, char *callbackSlot)
-{
-    qlonglong id = invokeOnPeer("userLeavedSlot", username);
-    
-    if(id){
-        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
-        addCall(id, call);
-    }
-    
 }
 
 void Server::userLeavedAsync(QString username)
@@ -323,22 +337,6 @@ void Server::userLeavedAsync(QString username)
 void Server::userLeavedSlot(QString username)
 {
     emit userLeavedSignal(username);
-    
-}
-
-QStringList Server::users()
-{
-    return m_users;
-    
-}
-
-void Server::setUsers(QStringList users)
-{
-    if (m_users == users)
-        return;
-    
-    m_users = users;
-    emit usersChanged(users);
     
 }
 

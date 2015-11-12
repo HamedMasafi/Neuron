@@ -4,11 +4,13 @@
 #include "ui_clientwindow.h"
 
 class User;
+class Server;
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
     User *user;
+    Server *server;
     qint32 _resourceId;
 
 public:
@@ -24,6 +26,7 @@ private slots:
     void on_server_userJoinedSignal(QString username);
     void on_server_imageSentSignal(QString username, QPixmap image);
     void on_server_broadcastMessageSignal(QString message);
+    void on_server_usersChanged(QVariantList users);
 
     void on_user_messageRecivedSignal(QString username, QString message);
     void on_user_roomMessageSignal(QString message);

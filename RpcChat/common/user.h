@@ -34,54 +34,54 @@ class User : public RpcPeer
 public:
     Q_INVOKABLE User(QObject *parent = 0);
     QPixmap avator();
-    Q_INVOKABLE void messageRecived(QString username, QString message);
-    #ifdef QT_QML_LIB
-    Q_INVOKABLE void messageRecived(QString username, QString message, QJSValue callbackFunction);
-    #endif
-    void messageRecived(QString username, QString message, const QObject *obj, const QMetaMethod *callbackMethod);
-    #if __cplusplus >= 201103L
-    void messageRecived(QString username, QString message, std::function<void(void)> callbackFunction);
-    #endif
-    void messageRecived(QString username, QString message, const QObject *obj, char *callbackSlot);
-    Q_INVOKABLE void messageRecivedAsync(QString username, QString message);
-    void messageRecivedSlot(QString username, QString message);
-    #ifdef QT_QML_LIB
-    Q_INVOKABLE void roomMessage(QString message, QJSValue callbackFunction);
-    #endif
-    void roomMessage(QString message, const QObject *obj, char *callbackSlot);
-    Q_INVOKABLE void roomMessage(QString message);
-    #if __cplusplus >= 201103L
-    void roomMessage(QString message, std::function<void(void)> callbackFunction);
-    #endif
-    void roomMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod);
-    Q_INVOKABLE void roomMessageAsync(QString message);
-    void roomMessageSlot(QString message);
-    Q_INVOKABLE void sendImage(QPixmap image);
-    void sendImage(QPixmap image, const QObject *obj, const QMetaMethod *callbackMethod);
-    #if __cplusplus >= 201103L
-    void sendImage(QPixmap image, std::function<void(void)> callbackFunction);
-    #endif
-    void sendImage(QPixmap image, const QObject *obj, char *callbackSlot);
-    #ifdef QT_QML_LIB
-    Q_INVOKABLE void sendImage(QPixmap image, QJSValue callbackFunction);
-    #endif
-    Q_INVOKABLE void sendImageAsync(QPixmap image);
-    void sendImageSlot(QPixmap image);
-    void sendMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod);
-    #ifdef QT_QML_LIB
-    Q_INVOKABLE void sendMessage(QString message, QJSValue callbackFunction);
-    #endif
-    Q_INVOKABLE void sendMessage(QString message);
-    void sendMessage(QString message, const QObject *obj, char *callbackSlot);
-    #if __cplusplus >= 201103L
-    void sendMessage(QString message, std::function<void(void)> callbackFunction);
-    #endif
-    Q_INVOKABLE void sendMessageAsync(QString message);
-    void sendMessageSlot(QString message);
     bool typing();
     QString username();
 
 public slots:
+    void messageRecived(QString username, QString message);
+    void messageRecived(QString username, QString message, const QObject *obj, const QMetaMethod *callbackMethod);
+    #if __cplusplus >= 201103L
+    void messageRecived(QString username, QString message, std::function<void(void)> callbackFunction);
+    #endif
+    #ifdef QT_QML_LIB
+    void messageRecived(QString username, QString message, QJSValue callbackFunction);
+    #endif
+    void messageRecived(QString username, QString message, const QObject *obj, char *callbackSlot);
+    void messageRecivedAsync(QString username, QString message);
+    void messageRecivedSlot(QString username, QString message);
+    void roomMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod);
+    #ifdef QT_QML_LIB
+    void roomMessage(QString message, QJSValue callbackFunction);
+    #endif
+    void roomMessage(QString message, const QObject *obj, char *callbackSlot);
+    void roomMessage(QString message);
+    #if __cplusplus >= 201103L
+    void roomMessage(QString message, std::function<void(void)> callbackFunction);
+    #endif
+    void roomMessageAsync(QString message);
+    void roomMessageSlot(QString message);
+    void sendImage(QPixmap image);
+    void sendImage(QPixmap image, const QObject *obj, const QMetaMethod *callbackMethod);
+    #if __cplusplus >= 201103L
+    void sendImage(QPixmap image, std::function<void(void)> callbackFunction);
+    #endif
+    #ifdef QT_QML_LIB
+    void sendImage(QPixmap image, QJSValue callbackFunction);
+    #endif
+    void sendImage(QPixmap image, const QObject *obj, char *callbackSlot);
+    void sendImageAsync(QPixmap image);
+    void sendImageSlot(QPixmap image);
+    void sendMessage(QString message);
+    void sendMessage(QString message, const QObject *obj, char *callbackSlot);
+    void sendMessage(QString message, const QObject *obj, const QMetaMethod *callbackMethod);
+    #ifdef QT_QML_LIB
+    void sendMessage(QString message, QJSValue callbackFunction);
+    #endif
+    #if __cplusplus >= 201103L
+    void sendMessage(QString message, std::function<void(void)> callbackFunction);
+    #endif
+    void sendMessageAsync(QString message);
+    void sendMessageSlot(QString message);
     void setAvator(QPixmap avator);
     void setTyping(bool typing);
     void setUsername(QString username);

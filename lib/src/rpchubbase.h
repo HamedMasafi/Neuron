@@ -22,11 +22,14 @@ class TOOJ_EXPORT RpcHubBase : public QObject
     Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
     Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(RpcSerializerBase* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
+    Q_PROPERTY(QThread* thread READ thread WRITE setThread NOTIFY threadChanged)
 
 public:
     explicit RpcHubBase(QObject *parent = 0);
 
     Q_INVOKABLE virtual void addSharedObject(RpcPeer *o);
+    QList<RpcPeer*> sharedObjects() const;
+
     virtual void connectToServer(QString address, qint16 port);
     virtual bool setSocketDescriptor(qintptr socketDescriptor);
 
@@ -34,26 +37,26 @@ public:
     virtual void rollback() = 0;
     virtual void commit() = 0;
 
-    Q_INVOKABLE qint16 port() const;
-    Q_INVOKABLE QString serverAddress() const;
-    Q_INVOKABLE bool autoReconnect() const;
-    Q_INVOKABLE bool isConnected() const;
-    Q_INVOKABLE QString validateToken() const;
-    Q_INVOKABLE RpcSerializerBase *serializer() const;
+    qint16 port() const;
+    QString serverAddress() const;
+    bool autoReconnect() const;
+    bool isConnected() const;
+    QString validateToken() const;
+    RpcSerializerBase *serializer() const;
+    QThread* thread() const;
 
 protected:
     QHash<long, RemoteCallBase*> _calls;
     QHash<QString, RpcPeer*> _classes;
 
 signals:
-    void disconnected();
     void portChanged(qint16 port);
     void serverAddressChanged(QString serverAddress);
     void autoReconnectChanged(bool autoReconnect);
     void isConnectedChanged(bool isConnected);
     void validateTokenChanged(QString validateToken);
-
     void serializerChanged(RpcSerializerBase *serializer);
+    void threadChanged(QThread* thread);
 
 public slots:
     virtual qlonglong invokeOnPeer(
@@ -76,6 +79,7 @@ public slots:
     void setIsConnected(bool isConnected);
     void setValidateToken(QString validateToken);
     void setSerializer(RpcSerializerBase *serializerObject);
+    void setThread(QThread* thread);
 
     friend class RpcPeer;
 };

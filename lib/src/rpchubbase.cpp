@@ -7,7 +7,7 @@ QT_BEGIN_NAMESPACE
 
 RpcHubBasePrivate::RpcHubBasePrivate(RpcHubBase *parent) : q_ptr(parent),
     autoReconnect(false),
-    serializer(0)
+    serializer(0), thread(0)
 {
 
 }
@@ -26,6 +26,11 @@ void RpcHubBase::addSharedObject(RpcPeer *o)
         return;
     }
     _classes[o->metaObject()->className()] = o;
+}
+
+QList<RpcPeer*> RpcHubBase::sharedObjects() const
+{
+    return _classes.values();
 }
 
 void RpcHubBase::connectToServer(QString address, qint16 port)
@@ -79,6 +84,12 @@ RpcSerializerBase *RpcHubBase::serializer() const
 {
     Q_D(const RpcHubBase);
     return d->serializer;
+}
+
+QThread *RpcHubBase::thread() const
+{
+    Q_D(const RpcHubBase);
+    return d->thread;
 }
 
 void RpcHubBase::setPort(qint16 port)
@@ -145,6 +156,17 @@ void RpcHubBase::setSerializer(RpcSerializerBase *serializerObject)
 
     d->serializer = serializerObject;
     emit serializerChanged(serializerObject);
+}
+
+void RpcHubBase::setThread(QThread *thread)
+{
+    Q_D(RpcHubBase);
+
+    if (d->thread == thread)
+        return;
+
+    d->thread = thread;
+    emit threadChanged(thread);
 }
 
 QT_END_NAMESPACE

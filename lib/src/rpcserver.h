@@ -50,7 +50,7 @@ signals:
     void isMultiThreadChanged(bool isMultiThread);
 
 private slots:
-    void peer_disconnected();
+    void hub_disconnected();
     void server_newIncomingConnection(qintptr socketDescriptor);
 	qlonglong invokeOnPeer(
             QString sender,

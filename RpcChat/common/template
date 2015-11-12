@@ -10,7 +10,7 @@ class User{
 }
 
 class Server{
-	Q_PROPERTY(QStringList users READ users WRITE setUsers NOTIFY usersChanged)
+	Q_PROPERTY(QVariantList users READ users WRITE setUsers NOTIFY usersChanged)
 	
 	void broadcastMessage(QString message);
 	void userJoined(QString username);

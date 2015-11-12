@@ -9,12 +9,14 @@ CONFIG += c++11
 
 SOURCES += main.cpp\
     ../common/user.cpp \
-    ../common/server.cpp
+    ../common/server.cpp \
+    pixmap.cpp
 
 HEADERS += \
     ../common/user.h \
     ../common/server.h \
-    ../common/defines.h
+    ../common/defines.h \
+    pixmap.h
 
 RESOURCES += qml.qrc
 

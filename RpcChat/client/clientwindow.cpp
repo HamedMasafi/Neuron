@@ -19,11 +19,11 @@ ClientWindow::ClientWindow(QWidget *parent) :
     hub->setAutoReconnect(true);
     hub->setValidateToken(RPC_TOKEN);
 
-    Server *server = new Server(this);
+    server = new Server(this);
     server->setObjectName("server");
     server->setHub(hub);
 
-    user = new User();
+    user = new User(this);
     user->setObjectName("user");
     user->setHub(hub);
 
@@ -51,7 +51,7 @@ void ClientWindow::keyPressEvent(QKeyEvent *e)
 void ClientWindow::on_pushButtonLogin_clicked()
 {
 
-    user->connectToServer(lineEditServer->text(), spinBoxPort->value());
+    user->connectToServer(lineEditServer->text(), PORT);
 
     user->setUsername(lineEditUsername->text());
     labelUsername->setText(user->username());
@@ -67,7 +67,7 @@ void ClientWindow::on_pushButtonSend_clicked()
 void ClientWindow::on_pushButtonChangeAvator_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                    "/home",
+                                                    QDir::homePath(),
                                                     tr("Images (*.png *.xpm *.jpg)"));
 
     if(!fileName.isNull()){
@@ -98,6 +98,19 @@ void ClientWindow::on_server_imageSentSignal(QString username, QPixmap image)
 void ClientWindow::on_server_broadcastMessageSignal(QString message)
 {
     QMessageBox::information(this, "Broadcast", message);
+}
+
+void ClientWindow::on_server_usersChanged(QVariantList users)
+{
+    listWidgetUsers->clear();
+    foreach (QVariant v, users) {
+        QVariantMap map = v.toMap();
+        QListWidgetItem *item = new QListWidgetItem(map["username"].toString());
+
+        if(map.contains("avator"))
+            item->setIcon(QIcon(map["avator"].value<QPixmap>()));
+        listWidgetUsers->addItem(item);
+    }
 }
 
 void ClientWindow::on_hub_isConnectedChanged(bool isConnected)

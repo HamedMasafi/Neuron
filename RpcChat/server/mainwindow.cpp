@@ -9,10 +9,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    setupUi(this);
-
-
-    serverManager = new RpcServer(8099, this);
+    serverManager = new RpcServer(PORT, this);
     serverManager->setIsMultiThread(true);
     serverManager->registerType<User*>();
     serverManager->setObjectName("serverManager");
@@ -21,9 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     server = new Server(this);
     server->setHub(serverManager);
 
-    connect(serverManager, &RpcServer::peerConnected, this, &MainWindow::server_peerConnected);
-    connect(serverManager, &RpcServer::peerDisconnected, this, &MainWindow::server_peerDisconnected);
-
+    setupUi(this);
 
     /*
      Or, ... with a c++11 simple way
@@ -67,7 +62,7 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::populatePeersList()
 {
-    QStringList users;
+    QVariantList users;
     listWidgetOnlineUsers->clear();
     foreach (QObject *p, serverManager->peers()) {
         User *peer = qobject_cast<User*>(p);
@@ -75,12 +70,16 @@ void MainWindow::populatePeersList()
         QListWidgetItem *item = new QListWidgetItem("User: " + peer->username());
         item->setIcon(QIcon(peer->avator()));
         listWidgetOnlineUsers->addItem(item);
-        users.append(peer->username());
+
+        QVariantMap userMap;
+        userMap["username"] = peer->username();
+        userMap["avator"] = peer->avator();
+        users.append(userMap);
     }
     server->setUsers(users);
 }
 
-void MainWindow::server_peerConnected(RpcPeer *peer)
+void MainWindow::on_serverManager_peerConnected(RpcPeer *peer)
 {
     User *user = qobject_cast<User*>(peer);
     populatePeersList();
@@ -91,7 +90,7 @@ void MainWindow::server_peerConnected(RpcPeer *peer)
     connect(user, &User::sendImageSignal, this, &MainWindow::user_sendImageSignal);
 }
 
-void MainWindow::server_peerDisconnected(RpcPeer *peer)
+void MainWindow::on_serverManager_peerDisconnected(RpcPeer *peer)
 {
     Q_UNUSED(peer);
     populatePeersList();

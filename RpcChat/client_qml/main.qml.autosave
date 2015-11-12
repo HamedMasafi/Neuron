@@ -56,7 +56,7 @@ ApplicationWindow {
         onImageSentSignal: {
             var s = '<b>' + username + ' sent an image:</b> ';
 
-            messages.append()
+            messages.append(s)
         }
     }
 

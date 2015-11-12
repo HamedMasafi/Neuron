@@ -28,6 +28,12 @@ QVariant Pixmap::pixmapVariant() const
     return m_pixmapVariant;
 }
 
+void Pixmap::load(QUrl fileUrl)
+{
+    m_pixmap.load(fileUrl.toLocalFile());
+    m_pixmapVariant = QVariant(m_pixmap);
+}
+
 void Pixmap::setPixmap(QPixmap pixmap)
 {
     //    if (m_pixmap == pixmap)

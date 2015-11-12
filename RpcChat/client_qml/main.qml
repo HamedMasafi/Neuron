@@ -19,6 +19,27 @@ ApplicationWindow {
     FileDialog{
         id: imageSelector
         nameFilters: ["Images (*.png *.xpm *.jpg)"]
+
+        onAccepted: {
+            imageToSend.load(imageSelector.fileUrl)
+
+            user.sendImage(imageToSend.pixmap, function(){
+                console.log(sent)
+            })
+        }
+    }
+    FileDialog{
+        id: avatorChanger
+        nameFilters: ["Images (*.png *.xpm *.jpg)"]
+
+        onAccepted: {
+            userAvator.load(avatorChanger.fileUrl)
+            user.avator = userAvator.pixmap
+        }
+    }
+    Pixmap{
+        id: imageToSend
+        visible: false
     }
 
     Hub{
@@ -39,10 +60,6 @@ ApplicationWindow {
                     message;
             messages.append(s)
         }
-        onRoomMessageSignal: {
-
-        }
-
     }
     Server{
         id: server
@@ -54,9 +71,9 @@ ApplicationWindow {
         }
 
         onImageSentSignal: {
-            var s = '<b>' + username + ' sent an image:</b> ';
+            var s = '<b>' + username + ' sent an image, but image show is not supported in qml version</b> ';
 
-            messages.append()
+            messages.append(s)
         }
     }
 
@@ -123,6 +140,23 @@ ApplicationWindow {
                     text: qsTr("Note: some features like send image or change avator does not work in qml!")
                 }
                 RowLayout{
+                    Pixmap{
+                        id: userAvator
+                        height: 50
+                        width: 50
+                    }
+                    ColumnLayout{
+                        Text {
+                            text: user.username
+                        }
+                        Button{
+                            text: "Change avator"
+                            onClicked: avatorChanger.open()
+                        }
+                    }
+                }
+
+                RowLayout{
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     TextArea{
@@ -142,9 +176,6 @@ ApplicationWindow {
                             clip: true
                             model: server.users
                             anchors.fill: parent
-                            //                        Layout.minimumWidth: 100
-                            //                        Layout.fillWidth: true
-                            //width: 200
                             delegate: RowLayout{
                                 Pixmap{
                                     pixmapVariant: server.users[index].avator
@@ -183,10 +214,6 @@ ApplicationWindow {
 
                             onClicked: {
                                 imageSelector.open()
-                                var img
-                                user.sendImage(img, function(){
-                                    console.log(sent)
-                                })
                             }
                         }
                         Item{
@@ -212,7 +239,7 @@ ApplicationWindow {
         }
 
         transitions: Transition {
-            NumberAnimation { target: rotation; property: "angle"; duration: 800 }
+            NumberAnimation { target: rotation; property: "angle"; duration: 400 }
         }
     }
 

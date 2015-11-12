@@ -26,6 +26,8 @@ public:
     QJSValue jsvalue() const;
     QVariant pixmapVariant() const;
 
+    Q_INVOKABLE void load(QUrl fileUrl);
+
 signals:
     void pixmapChanged(QPixmap pixmap);
 

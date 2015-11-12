@@ -13,9 +13,9 @@
 #endif
 
 #include <RpcPeer>
-#include <QString>
 #include <QVariantList>
 #include <QPixmap>
+#include <QString>
 
 
 QT_BEGIN_NAMESPACE

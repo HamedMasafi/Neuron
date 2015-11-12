@@ -1,7 +1,6 @@
 TEMPLATE = app
 QT += widgets
 INCLUDEPATH += $$PWD/../common
-CONFIG += c++11
 
 include(../../lib/rpc.pri)
 

@@ -113,16 +113,10 @@ void MainWindow::user_sendMessageSignal(QString message)
 
 void MainWindow::user_usernameChanged()
 {
-    User *messageSender = qobject_cast<User*>(sender());
+    User *user = qobject_cast<User*>(sender());
+
+    server->userJoined(user->username());
     populatePeersList();
-
-    foreach (RpcPeer *peer, serverManager->peers()) {
-        if(messageSender != sender()){
-            qobject_cast<User*>(peer)->roomMessage(messageSender->username() + " joined room.");
-        }
-    }
-
-    server->userJoined(messageSender->username());
 }
 
 void MainWindow::on_pushButtonSendBroadcast_clicked()

@@ -156,7 +156,7 @@ void Class::procLine(QString line)
         m->setReturnType(returnType);
         m->setSeprator(sep);
         m->setSignature(params);
-        m->setDeclType("public");
+        m->setDeclType("public slots");
     }
 
     QStringList types = methodsList[0]->getParametereTypes().split(",");
@@ -182,9 +182,9 @@ void Class::procLine(QString line)
     methodsList[METHOD_BYFUNC]->setSignature(params + sep + "std::function<void(" + returnType + ")> callbackFunction");
     methodsList[METHOD_BYJSVALUE]->setSignature(params + sep + "QJSValue callbackFunction");
 
-    methodsList[METHOD_FRESH]->setIsInvokable(true);
-    methodsList[METHOD_ASYNC]->setIsInvokable(true);
-    methodsList[METHOD_BYJSVALUE]->setIsInvokable(true);
+//    methodsList[METHOD_FRESH]->setIsInvokable(true);
+//    methodsList[METHOD_ASYNC]->setIsInvokable(true);
+//    methodsList[METHOD_BYJSVALUE]->setIsInvokable(true);
 
     methodsList[METHOD_SIGNAL]->setDeclType("signals");
     methodsList[METHOD_SIGNAL]->setName(name + "Signal");
@@ -243,7 +243,7 @@ void Class::procProperty(QString line)
 
     QString writeFileName = TextHelper::instance()->hasOperatorEqual(type) ? "property_write" : "property_write_nocheck";
     readMethod->setCode(TextHelper::instance()->getFileContent("property_read").arg(name));
-    writeMethod->setCode(TextHelper::instance()->getFileContent(writeFileName).arg(name));
+    writeMethod->setCode(TextHelper::instance()->getFileContent(writeFileName).arg(name).arg(write));
 
     methods.append(readMethod);
     methods.append(writeMethod);

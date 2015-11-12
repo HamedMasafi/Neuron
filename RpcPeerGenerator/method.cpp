@@ -41,9 +41,12 @@ QString Method::implement()
             .arg(TextHelper::instance()->indent(code()))
             .arg(parentClass->name());
     if(!wrapperMacro().isNull()){
-        ret.prepend("#ifdef " + wrapperMacro() + "\n");
+        if(wrapperMacro().contains("<") || wrapperMacro().contains(">") || wrapperMacro().contains("=") )
+            ret.prepend("#if " + wrapperMacro() + "\n");
+        else
+            ret.prepend("#ifdef " + wrapperMacro() + "\n");
         ret.append("\n#endif");
-	}
+    }
     return ret;
 }
 

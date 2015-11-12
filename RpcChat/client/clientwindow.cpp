@@ -85,6 +85,12 @@ void ClientWindow::on_server_userJoinedSignal(QString username)
                      .arg(username));
 }
 
+void ClientWindow::on_server_userLeavedSignal(QString username)
+{
+    textEdit->append(QString("<span style=\" font-weight:600; color:#aa0000;\">%1 has leaved channel.</span>")
+                     .arg(username));
+}
+
 void ClientWindow::on_server_imageSentSignal(QString username, QPixmap image)
 {
     QString url = QString("res://image_%1.png").arg(_resourceId++);
@@ -127,12 +133,6 @@ void ClientWindow::on_user_messageRecivedSignal(QString username, QString messag
                      .arg(username)
                      .arg(message)
                      .arg(username == user->username() ? "red" : "blue"));
-}
-
-void ClientWindow::on_user_roomMessageSignal(QString message)
-{
-    textEdit->append(QString("<span style=\" font-weight:600; color:#aa0000;\">%1</span>")
-                     .arg(message));
 }
 
 void ClientWindow::imageSent()

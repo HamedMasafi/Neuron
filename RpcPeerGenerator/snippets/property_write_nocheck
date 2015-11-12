@@ -1,2 +1,3 @@
 m_%1 = %1;
+invokeOnPeer("%2", %1);
 emit %1Changed(%1);

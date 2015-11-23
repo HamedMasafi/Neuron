@@ -1,0 +1,6 @@
+qlonglong id = invokeOnPeer("%1Slot"%2%3);
+
+if(id){
+    NoronRemoteCall<%4> *call = new NoronRemoteCall<%4>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+    addCall(id, call);
+}

@@ -1,0 +1,6 @@
+qlonglong id = invokeOnPeer("%1Slot"%2%3);
+
+if(id){
+    NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+    addCall(id, call);
+}

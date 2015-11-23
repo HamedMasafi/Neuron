@@ -1,0 +1,22 @@
+#!/bin/bash
+
+exec 3< <(egrep -o "class\sTOOJ_EXPORT\s(\S+)"  ../src -R 2>&1)
+
+pattern="\.\.\/src\/([a-z]+)\.h\:class\sTOOJ_EXPORT\s(\w+)"
+
+echo "" > "Noron"
+echo "" > "noron.h"
+
+while read line; do
+	if [[ $line =~ $pattern ]]; then
+		header=${BASH_REMATCH[1]}
+		class=${BASH_REMATCH[2]}
+		
+		echo "#include \"../src/$header.h\"" > $class
+		echo "#include \"../src/$header.h\"" > "$header.h"
+		
+		echo "#include \"../src/$header.h\"" >> "Noron"
+		echo "#include \"../src/$header.h\"" >> "noron.h"
+	fi
+done <&3
+exec 3<&-

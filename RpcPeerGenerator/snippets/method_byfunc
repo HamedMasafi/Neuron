@@ -1,6 +1,0 @@
-qlonglong id = invokeOnPeer("%1Slot"%2%3);
-
-if(id){
-    RemoteCall<%4> *call = new RemoteCall<%4>(callbackFunction);
-    addCall(id, call);
-}

@@ -1,36 +1,57 @@
-#include <QTcpSocket>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMetaMethod>
-#include <QCryptographicHash>
+/**************************************************************************
+**
+** This file is part of Noron.
+** https://github.com/HamedMasafi/Noron
+**
+** Noron is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** Noron is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with Noron.  If not, see <http://www.gnu.org/licenses/>.
+**
+**************************************************************************/
 
-#include "noronhub.h"
-#include "noronhub_p.h"
+#include <QtCore/QCryptographicHash>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QSet>
+#include <QtCore/QVariant>
+#include <QtNetwork/QTcpSocket>
+
 #include "noronpeer.h"
-#include "noronjsondataserializer.h"
+#include "noronabstracthub_p.h"
+#include "noronabstracthub.h"
+#include "noronabstractserializer.h"
+#include "noronremotecall_p.h"
+#include "noronsharedobject.h"
+#include "noronjsonbinaryserializer.h"
 
 QT_BEGIN_NAMESPACE
 
-NoronHubPrivate::NoronHubPrivate(NoronHub *parent) : q_ptr(parent),
-    isTransaction(false), requestId(0)
+NoronAbstractHubPrivate::NoronAbstractHubPrivate(NoronAbstractHub *parent) : q_ptr(parent),
+    peer(0), isConnected(false), validateToken(QString::null), serializer(0), requestId(0),
+    isTransaction(false)
 {
 
 }
 
-void NoronHubPrivate::addToMap(QVariantMap *map, QVariant var, int index)
+void NoronAbstractHubPrivate::addToMap(QVariantMap *map, QVariant var, int index)
 {
-
-    QString i = QString::number(index);
-
     if(var != QVariant()){
+        QString i = QString::number(index);
         map->insert("val" + i, var);
-        //        map->insert("type" + i, var.typeName());
     }
 }
 
-void NoronHubPrivate::procMap(QVariantMap map)
+void NoronAbstractHubPrivate::procMap(QVariantMap map)
 {
-    Q_Q(NoronHub);
+    Q_Q(NoronAbstractHub);
 
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
@@ -50,11 +71,14 @@ void NoronHubPrivate::procMap(QVariantMap map)
 
     if(!q->validateToken().isNull())
         if(!checkValidateToken(&map)){
-            qWarning("Map token validate is invalid!");
+            qWarning("Token validation was faild!");
             return;
         }
 
-    QObject *target = q->_classes[map[CLASS_NAME].toString()];
+    QObject *target = sharedObjects[map[CLASS_NAME].toString()];
+
+    if(!target && map[CLASS_NAME] == q->peer()->metaObject()->className())
+        target = q->peer();
 
     if(!target){
         qWarning("There are no '" + map[CLASS_NAME].toString().toLatin1() + "' service");
@@ -145,9 +169,9 @@ void NoronHubPrivate::procMap(QVariantMap map)
     locks.remove(lockName);
 }
 
-bool NoronHubPrivate::response(qlonglong id, QString senderName, QVariant returnValue)
+bool NoronAbstractHubPrivate::response(qlonglong id, QString senderName, QVariant returnValue)
 {
-    Q_Q(NoronHub);
+    Q_Q(NoronAbstractHub);
 
     QVariantMap map;
     map[MAP_TYPE] = MAP_TYPE_RESPONSE;
@@ -157,14 +181,14 @@ bool NoronHubPrivate::response(qlonglong id, QString senderName, QVariant return
     if(returnValue != QVariant())
         map[MAP_RETURN_VALUE] = returnValue;
 
-    int res = socket->write(q->serializer()->serialize(map));
+    int res = q->socket->write(q->serializer()->serialize(map));
 
     return 0 != res;
 }
 
-void NoronHubPrivate::addValidateToken(QVariantMap *map)
+void NoronAbstractHubPrivate::addValidateToken(QVariantMap *map)
 {
-    Q_Q(NoronHub);
+    Q_Q(NoronAbstractHub);
 
     QByteArray s;
 
@@ -179,9 +203,9 @@ void NoronHubPrivate::addValidateToken(QVariantMap *map)
     map->insert(MAP_TOKEN_ITEM, QVariant(MD5(s + q->validateToken())));
 }
 
-bool NoronHubPrivate::checkValidateToken(QVariantMap *map)
+bool NoronAbstractHubPrivate::checkValidateToken(QVariantMap *map)
 {
-    Q_Q(NoronHub);
+    Q_Q(NoronAbstractHub);
 
     QString token = map->value(MAP_TOKEN_ITEM).toString();
     map->insert(MAP_TOKEN_ITEM, QVariant(""));
@@ -197,170 +221,105 @@ bool NoronHubPrivate::checkValidateToken(QVariantMap *map)
     return token == MD5(s + q->validateToken());
 }
 
-QString NoronHubPrivate::MD5(QString text)
+QString NoronAbstractHubPrivate::MD5(QString text)
 {
     return MD5(text.toLocal8Bit());
 }
 
-QString NoronHubPrivate::MD5(QByteArray text)
+QString NoronAbstractHubPrivate::MD5(QByteArray text)
 {
     return QString(QCryptographicHash::hash(text, QCryptographicHash::Md5).toHex());
 }
 
-NoronHub::NoronHub(QObject *parent) : NoronHubBase(parent),
-    d_ptr(new NoronHubPrivate(this))
+NoronAbstractHub::NoronAbstractHub(QObject *parent) : QObject(parent),
+    d_ptr(new NoronAbstractHubPrivate(this)), _isMultiThread(false)
 {
-    Q_D(NoronHub);
+    socket = new QTcpSocket(this);
 
-    d->socket = new QTcpSocket(this);
+    connect(socket, &QIODevice::readyRead, this, &NoronAbstractHub::socket_onReadyRead);
+    connect(socket, &QTcpSocket::disconnected, this, &NoronAbstractHub::socket_disconnected);
+    connect(socket, &QTcpSocket::connected, this, &NoronAbstractHub::socket_connected);
 
-    connect(d->socket, &QIODevice::readyRead, this, &NoronHub::socket_onReadyRead);
-    connect(d->socket, &QTcpSocket::disconnected, this, &NoronHub::socket_disconnected);
-    connect(d->socket, &QTcpSocket::connected, this, &NoronHub::socket_connected);
-
-    setSerializer(new NoronJsonDataSerializer(this));
+    setSerializer(new NoronJsonBinarySerializer(this));
 }
 
-NoronHub::NoronHub(NoronSerializerBase *serializer, QObject *parent) : NoronHubBase(parent),
-    d_ptr(new NoronHubPrivate(this))
+NoronPeer *NoronAbstractHub::peer() const
 {
-    Q_D(NoronHub);
-
-    d->socket = new QTcpSocket(this);
-
-    connect(d->socket, &QIODevice::readyRead, this, &NoronHub::socket_onReadyRead);
-    connect(d->socket, &QTcpSocket::disconnected, this, &NoronHub::socket_disconnected);
-    connect(d->socket, &QTcpSocket::connected, this, &NoronHub::socket_connected);
-
-    setSerializer(serializer);
+    Q_D(const NoronAbstractHub);
+    return d->peer;
 }
 
-NoronHub::~NoronHub()
+bool NoronAbstractHub::isConnected() const
 {
-    foreach (NoronPeer *peer, _classes.values()) {
-        if(peer->hub() == this)
-            peer->deleteLater();
+    Q_D(const NoronAbstractHub);
+    return d->isConnected;
+}
+
+QString NoronAbstractHub::validateToken() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->validateToken;
+}
+
+NoronAbstractSerializer *NoronAbstractHub::serializer() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->serializer;
+}
+
+void NoronAbstractHub::addSharedObject(NoronSharedObject *o)
+{
+    Q_D(NoronAbstractHub);
+
+    o->addHub(this);
+    d->sharedObjects[o->metaObject()->className()] = o;
+}
+
+void NoronAbstractHub::removeSharedObject(NoronSharedObject *o)
+{
+    Q_D(NoronAbstractHub);
+
+    if(d->sharedObjects.contains(o->metaObject()->className())){
+        o->removeHub(this);
+        d->sharedObjects.remove(o->metaObject()->className());
     }
 }
 
-void NoronHub::connectToServer(QString address, qint16 port)
+QList<NoronSharedObject *> NoronAbstractHub::sharedObjects() const
 {
-    Q_D(NoronHub);
-
-    if(!address.isNull())
-        setServerAddress(address);
-
-    if(port)
-        setPort(port);
-
-    d->socket->connectToHost(this->serverAddress(), this->port());
+    Q_D(const NoronAbstractHub);
+    return d->sharedObjects.values();
 }
 
-void NoronHub::disconnectFromServer()
+bool NoronAbstractHub::isMultiThread() const
 {
-    Q_D(NoronHub);
-
-    setAutoReconnect(false);
-    d->socket->disconnectFromHost();
+    return _isMultiThread;
 }
 
-bool NoronHub::setSocketDescriptor(qintptr socketDescriptor)
-{
-    Q_D(NoronHub);
-    return d->socket->setSocketDescriptor(socketDescriptor);
-}
-
-void NoronHub::timerEvent(QTimerEvent *)
-{
-    Q_D(NoronHub);
-
-    if(d->socket->state() == QAbstractSocket::UnconnectedState){
-        connectToServer();
-    }else if(d->socket->state() == QAbstractSocket::ConnectedState){
-        killTimer(d->reconnectTimerId);
-        sync();
-    }
-}
-
-void NoronHub::sync()
-{
-    qDebug() << "sync";
-    beginTransaction();
-    foreach (QObject *o, _classes) {
-
-        int pcount = o->metaObject()->propertyCount();
-        for(int i = 0; i < pcount; i++){
-            QMetaProperty p = o->metaObject()->property(i);
-
-            if(!p.isUser())
-                continue;
-
-            QString w = p.name();
-            w[0] = w[0].toUpper();
-            invokeOnPeer(o->metaObject()->className(),
-                         "set" + w,
-                         p.read(o));
-            qDebug() << ("set" + w) << p.read(o);
-        }
-    }
-    qDebug() << "commit";
-    commit();
-}
-
-void NoronHub::beginTransaction()
-{
-    Q_D(NoronHub);
-    d->isTransaction = true;
-}
-
-bool NoronHub::isTransaction() const
-{
-    Q_D(const NoronHub);
-    return d->isTransaction;
-}
-
-void NoronHub::rollback()
-{
-    Q_D(NoronHub);
-    d->buffer.clear();
-    d->isTransaction = false;
-}
-
-void NoronHub::commit()
-{
-    Q_D(NoronHub);
-    d->socket->write(QJsonDocument::fromVariant(d->buffer).toJson());
-    d->socket->flush();
-    d->buffer.clear();
-    d->isTransaction = false;
-}
-
-void NoronHub::socket_connected()
+void NoronAbstractHub::socket_connected()
 {
     setIsConnected(true);
 }
 
-void NoronHub::socket_disconnected()
+void NoronAbstractHub::socket_disconnected()
 {
-    Q_D(NoronHub);
-
     setIsConnected(false);
+    emit disconnected();
 
-    if(autoReconnect()){
-        connectToServer();
-        d->reconnectTimerId = startTimer(500);
-    }else{
-        qDebug()<<"emit disconnected()";
-        emit disconnected();
+//TODO:    if(isAutoReconnect()){
+//        connectToServer();
+//        d->reconnectTimerId = startTimer(500);
+//    }else
+    {
         this->deleteLater();
     }
 }
 
-void NoronHub::socket_onReadyRead()
+void NoronAbstractHub::socket_onReadyRead()
 {
-    Q_D(NoronHub);
+    Q_D(NoronAbstractHub);
 
-    QByteArray buffer = d->socket->readAll();
+    QByteArray buffer = socket->readAll();
     //multi chunck support
     buffer = "[" + buffer.replace("}\n{", "},{") + "]";
 
@@ -377,14 +336,45 @@ void NoronHub::socket_onReadyRead()
     }
 }
 
-qlonglong NoronHub::invokeOnPeer(QString sender, QString methodName,
-                               QVariant val0, QVariant val1,
-                               QVariant val2, QVariant val3,
-                               QVariant val4, QVariant val5,
-                               QVariant val6, QVariant val7,
-                               QVariant val8, QVariant val9)
+void NoronAbstractHub::beginTransaction()
 {
-    Q_D(NoronHub);
+    Q_D(NoronAbstractHub);
+    d->isTransaction = true;
+}
+
+bool NoronAbstractHub::isTransaction() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->isTransaction;
+}
+
+void NoronAbstractHub::rollback()
+{
+    Q_D(NoronAbstractHub);
+
+    if(!d->isTransaction)
+        return;
+
+    d->buffer.clear();
+    d->isTransaction = false;
+}
+
+void NoronAbstractHub::commit()
+{
+    Q_D(NoronAbstractHub);
+
+    if(!d->isTransaction)
+        return;
+
+    socket->write(QJsonDocument::fromVariant(d->buffer).toJson());
+    socket->flush();
+    d->buffer.clear();
+    d->isTransaction = false;
+}
+
+qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
+{
+    Q_D(NoronAbstractHub);
 
     if(d->locks.contains(sender + "::" + methodName))
         return 0;
@@ -416,13 +406,53 @@ qlonglong NoronHub::invokeOnPeer(QString sender, QString methodName,
         d->buffer.append(map);
         return 0;
     }else{
-        int res = d->socket->write(serializer()->serialize(map));
-
-        if(res == 0)
-            return 0;
-        else
-            return d->requestId;
+        int res = socket->write(serializer()->serialize(map));
+        return res == 0 ? 0 : d->requestId;
     }
+}
+
+void NoronAbstractHub::setPeer(NoronPeer *peer)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->peer == peer)
+        return;
+
+    d->peer = peer;
+    emit peerChanged(peer);
+}
+
+void NoronAbstractHub::setIsConnected(bool isConnected)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->isConnected == isConnected)
+        return;
+
+    d->isConnected = isConnected;
+    emit isConnectedChanged(isConnected);
+}
+
+void NoronAbstractHub::setValidateToken(QString validateToken)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->validateToken == validateToken)
+        return;
+
+    d->validateToken = validateToken;
+    emit validateTokenChanged(validateToken);
+}
+
+void NoronAbstractHub::setSerializer(NoronAbstractSerializer *serializer)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->serializer == serializer)
+        return;
+
+    d->serializer = serializer;
+    emit serializerChanged(serializer);
 }
 
 QT_END_NAMESPACE

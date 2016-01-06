@@ -18,31 +18,27 @@
 **
 **************************************************************************/
 
-#ifndef NORONPEER_H
-#define NORONPEER_H
+#ifndef NORONSHAREDOBJECT_H
+#define NORONSHAREDOBJECT_H
 
-#include <QtCore/QObject>
-#include <QtCore/QVariant>
+#include <QtCore/QSet>
 
-#include "noronglobal.h"
-#include "noronremotecall_p.h"
+#include "noronpeer.h"
 
 QT_BEGIN_NAMESPACE
 
-class NoronAbstractHub;
-class NoronRemoteCallBase;
-class NORON_EXPORT NoronPeer : public QObject
+class NORON_EXPORT NoronSharedObject : public NoronPeer
 {
-    Q_OBJECT
-    Q_PROPERTY(NoronAbstractHub* hub READ hub WRITE setHub NOTIFY hubChanged)
-
-    NoronAbstractHub* m_hub;
-
 public:
-    explicit NoronPeer(QObject *parent = 0);
-    NoronPeer(NoronAbstractHub *hub, QObject *parent = 0);
-    NoronAbstractHub* hub() const;
+    NoronSharedObject(QObject *parent = 0);
+    NoronSharedObject(NoronAbstractHub *hub, QObject *parent = 0);
 
+    void addHub(NoronAbstractHub *hub);
+    void removeHub(NoronAbstractHub *hub);
+
+    QSet<NoronAbstractHub*> hubs;
+
+protected:
     qlonglong invokeOnPeer(
             QString methodName,
             QVariant val0 = QVariant(),
@@ -55,18 +51,8 @@ public:
             QVariant val7 = QVariant(),
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
-
-protected:
-    void addCall(long id, NoronRemoteCallBase *call);
-    void removeCall(long id);
-
-signals:
-    void hubChanged(NoronAbstractHub* hub);
-
-public slots:
-    void setHub(NoronAbstractHub* hub);
 };
 
 QT_END_NAMESPACE
 
-#endif // NORONPEER_H
+#endif // NORONSHAREDOBJECT_H

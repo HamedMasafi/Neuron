@@ -1,33 +1,51 @@
-#include "noronpeer.h"
-#include <QTcpServer>
-#include <QSet>
-#include <QThread>
+/**************************************************************************
+**
+** This file is part of Noron.
+** https://github.com/HamedMasafi/Noron
+**
+** Noron is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** Noron is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with Noron.  If not, see <http://www.gnu.org/licenses/>.
+**
+**************************************************************************/
 
-#include "noronserver.h"
-#include "noronserver_p.h"
+#include <QtCore/QThread>
+
+#include "noronserverhub.h"
+#include "noronpeer.h"
+#include "noronjsonbinaryserializer.h"
 #include "norontcpsocketserver_p.h"
-#include "noronjsondataserializer.h"
+#include "noronserver_p.h"
+#include "noronserver.h"
+#include "noronserverthread.h"
 
 QT_BEGIN_NAMESPACE
 
-NoronServerPrivate::NoronServerPrivate(NoronServer *parent) : q_ptr(parent), isMultiThread(false)
+NoronServerPrivate::NoronServerPrivate(NoronServer *parent) : q_ptr(parent),
+    serverSocket(0), typeId(0), serverType(NoronServer::SingleThread)
 {
-
 }
 
-NoronServer::NoronServer(qint16 port, QObject *parent) : NoronHubBase(parent),
-    d_ptr(new NoronServerPrivate(this))
+NoronServer::NoronServer(qint16 port, QObject *parent) : NoronAbstractHub(parent),
+     d_ptr(new NoronServerPrivate(this))
 {
     Q_D(NoronServer);
 
-    d->serverSocket = new NoronTcpSocketServer(this);
-
+    d->serverSocket = new NoronTcpSocketServer;
     d->serverSocket->listen(QHostAddress::Any, port);
     d->serverSocket->setObjectName("serverSocket");
 
-    setSerializer(new NoronJsonDataSerializer(this));
-
-    connect(d->serverSocket, &NoronTcpSocketServer::newIncomingConnection, this, &NoronServer::server_newIncomingConnection);
+    connect(d->serverSocket, &NoronTcpSocketServer::newIncomingConnection,
+            this, &NoronServer::server_newIncomingConnection);
 }
 
 QSet<NoronPeer *> NoronServer::peers()
@@ -42,32 +60,27 @@ int NoronServer::typeId() const
     return d->typeId;
 }
 
-bool NoronServer::isMultiThread() const
+NoronServer::ServerType NoronServer::serverType() const
 {
     Q_D(const NoronServer);
-    return d->isMultiThread;
+    return d->serverType;
 }
 
-void NoronServer::beginTransaction()
+void NoronServer::hub_disconnected()
 {
-    Q_D(const NoronServer);
+    Q_D(NoronServer);
 
-    foreach(NoronPeer *peer, d->peers)
-        peer->hub()->beginTransaction();
-}
+    NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
 
-void NoronServer::rollback()
-{
-    Q_D(const NoronServer);
-    foreach(NoronPeer *peer, d->peers)
-        peer->hub()->rollback();
-}
+    d->peers.remove(hub->peer());
+    d->hubs.remove(hub);
+    hub->peer()->deleteLater();
+    hub->deleteLater();
 
-void NoronServer::commit()
-{
-    Q_D(const NoronServer);
-    foreach(NoronPeer *peer, d->peers)
-        peer->hub()->commit();
+    if(d->serverType == NoronServer::MultiThread && hub->thread())
+        hub->thread()->exit();
+
+    emit peerDisconnected(hub->peer());
 }
 
 void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
@@ -79,45 +92,59 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
     NoronPeer *peer = qobject_cast<NoronPeer*>(o);
 
     if(!peer){
-        qWarning("PEER IS INCORRECT!!!");
-        return;
-    }
-    NoronHub *hub = new NoronHub(serializer(), this);
-    peer->setHub(hub);
-    if (!peer->hub()->setSocketDescriptor(socketDescriptor)) {
-        delete peer;
+        qWarning("Peer object is incorrect! Use peer-generator tool for peer generation.");
+        o->deleteLater();
         return;
     }
 
-    hub->setValidateToken(validateToken());
-    hub->addSharedObject(peer);
-    foreach (NoronPeer *o, _classes.values())
-        peer->hub()->addSharedObject(o);
-
-    QThread *thread;
-
-    if(isMultiThread()){
-        thread = new QThread(this);
-        hub->setThread(thread);
-        peer->moveToThread(thread);
+    NoronServerHub *hub;
+    bool hubIsValid;
+    if(d->serverType == NoronServer::MultiThread){
+        NoronServerThread *thread = new NoronServerThread(socketDescriptor, sender());
+        connect(thread, &QThread::finished, thread, &QObject::deleteLater);
         thread->start();
 
-        connect(thread, &QThread::finished, thread, &QObject::deleteLater);
+        while(!thread->isStarted()) ;
+
+        hub->_isMultiThread = true;
+        hub = thread->hub();
+        hubIsValid = (hub != 0);
+    }else{
+        hub = new NoronServerHub(this);
+        hubIsValid = hub->setSocketDescriptor(socketDescriptor);
     }
 
-    connect(hub, &NoronHub::disconnected, this, &NoronServer::hub_disconnected);
-//            [=] () {
-//        //TODO: add a property QThread for NoronHub and in disconnect delete thread and all shared objects
-//        d->peers.remove(peer);
-//        emit peerDisconnected(peer);
-//        peer->deleteLater();
-//        if(peer->hub()->thread()){
-//            peer->hub()->thread()->exit();
-//            peer->hub()->thread()->deleteLater();
-//        }
-//    } );
+    /*
+    hub = new NoronServerHub;
+    if(d->serverType == NoronServer::MultiThread){
+        QThread *t = new QThread(this);
+        hub->moveToThread(t);
+        t->start();
+    }
+    hubIsValid = hub->setSocketDescriptor(socketDescriptor);
+    */
 
+    if (!hubIsValid) {
+        qWarning("NoronServerHub creation faild");
+        hub->deleteLater();
+        peer->deleteLater();
+        return;
+    }
+
+
+    hub->setPeer(peer);
+    peer->setHub(hub);
+
+    hub->setSerializer(serializer());
+    hub->setValidateToken(validateToken());
+    foreach (NoronSharedObject *o, sharedObjects())
+        hub->addSharedObject(o);
+
+    connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+
+    d->hubs.insert(hub);
     d->peers.insert(peer);
+    qDebug() << "set....";
     emit peerConnected(peer);
 }
 
@@ -132,46 +159,15 @@ void NoronServer::setTypeId(int typeId)
     emit typeIdChanged(typeId);
 }
 
-void NoronServer::setIsMultiThread(bool isMultiThread)
+void NoronServer::setServerType(NoronServer::ServerType serverType)
 {
     Q_D(NoronServer);
 
-    if (d->isMultiThread == isMultiThread)
+    if (d->serverType == serverType)
         return;
 
-    d->isMultiThread = isMultiThread;
-    emit isMultiThreadChanged(isMultiThread);
-}
-
-void NoronServer::hub_disconnected()
-{
-    Q_D(NoronServer);
-
-    NoronHubBase *hub = qobject_cast<NoronHubBase*>(sender());
-
-    d->peers.remove(hub->sharedObjects().at(0));
-
-    if(hub->thread())
-        hub->thread()->exit();
-
-    emit peerDisconnected(hub->sharedObjects().at(0));
-}
-
-qlonglong NoronServer::invokeOnPeer(QString sender, QString methodName,
-                                  QVariant val0, QVariant val1,
-                                  QVariant val2, QVariant val3,
-                                  QVariant val4, QVariant val5,
-                                  QVariant val6, QVariant val7,
-                                  QVariant val8, QVariant val9)
-{
-    Q_D(NoronServer);
-
-    foreach(NoronPeer *peer, d->peers)
-        peer->hub()->invokeOnPeer(sender, methodName,
-                                  val0, val1, val2, val3, val4,
-                                  val5, val6, val7, val8, val9);
-
-    return 0;
+    d->serverType = serverType;
+    emit serverTypeChanged(serverType);
 }
 
 QT_END_NAMESPACE

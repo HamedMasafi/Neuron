@@ -18,29 +18,32 @@
 **
 **************************************************************************/
 
-#ifndef NORONSERVER_P_H
-#define NORONSERVER_P_H
+#ifndef NORONSERVERHUB_H
+#define NORONSERVERHUB_H
 
-#include "noronserver.h"
+#include <QtCore/qglobal.h>
+
+#include "noronabstracthub.h"
 
 QT_BEGIN_NAMESPACE
 
-class NoronServerPrivate{
-    NoronServer *q_ptr;
-    Q_DECLARE_PUBLIC(NoronServer)
+class NoronServerHubPrivate;
+class NORON_EXPORT NoronServerHub : public NoronAbstractHub
+{
+    Q_OBJECT
+
+    NoronServerHubPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(NoronServerHub)
 
 public:
-    NoronServerPrivate(NoronServer *parent);
+    NoronServerHub(QObject *parent = 0);
+    NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent = 0);
+    NoronServerHub(QTcpSocket *socket, QObject *parent = 0);
 
-    NoronTcpSocketServer *serverSocket;
-    QSet<NoronPeer*> peers;
-    QSet<NoronAbstractHub*> hubs;
-    QHash<QString, NoronSharedObject*> sharedPeers;
-    int typeId;
-    NoronAbstractSerializer* serializer;
-    NoronServer::ServerType serverType;
+public slots:
+    bool setSocketDescriptor(qintptr socketDescriptor, bool waitForConnect = false);
 };
 
 QT_END_NAMESPACE
 
-#endif // NORONSERVER_P_H
+#endif // NORONSERVERHUB_H

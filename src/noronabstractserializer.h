@@ -18,29 +18,30 @@
 **
 **************************************************************************/
 
-#ifndef NORONSERVER_P_H
-#define NORONSERVER_P_H
+#ifndef NORONABSTRACTSERIALIZER_H
+#define NORONABSTRACTSERIALIZER_H
 
-#include "noronserver.h"
+#include <QtCore/QObject>
+#include "noronglobal.h"
 
 QT_BEGIN_NAMESPACE
 
-class NoronServerPrivate{
-    NoronServer *q_ptr;
-    Q_DECLARE_PUBLIC(NoronServer)
-
+class NoronAbstractSerializer : public QObject
+{
+    Q_OBJECT
 public:
-    NoronServerPrivate(NoronServer *parent);
+    explicit NoronAbstractSerializer(QObject *parent = 0);
 
-    NoronTcpSocketServer *serverSocket;
-    QSet<NoronPeer*> peers;
-    QSet<NoronAbstractHub*> hubs;
-    QHash<QString, NoronSharedObject*> sharedPeers;
-    int typeId;
-    NoronAbstractSerializer* serializer;
-    NoronServer::ServerType serverType;
+    virtual QByteArray serialize(QVariant v) = 0;
+    virtual QByteArray serialize(QVariantList list) = 0;
+    virtual QByteArray serialize(QVariantMap map) = 0;
+
+    virtual QVariant deserialize(QByteArray bytes) = 0;
+signals:
+
+public slots:
 };
 
 QT_END_NAMESPACE
 
-#endif // NORONSERVER_P_H
+#endif // NORONABSTRACTSERIALIZER_H

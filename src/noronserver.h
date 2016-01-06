@@ -1,72 +1,77 @@
-#ifndef PRCSERVER_H
-#define PRCSERVER_H
+/**************************************************************************
+**
+** This file is part of Noron.
+** https://github.com/HamedMasafi/Noron
+**
+** Noron is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** Noron is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with Noron.  If not, see <http://www.gnu.org/licenses/>.
+**
+**************************************************************************/
+
+#ifndef NORONSERVER_H
+#define NORONSERVER_H
 
 #include <QtCore/QObject>
-#include <QtCore/qglobal.h>
-#include <QSet>
-#include <QTcpServer>
-
-#include "norontcpsocketserver_p.h"
-#include "noronhubbase.h"
-#include "noronglobal.h"
+#include "noronabstracthub.h"
 
 QT_BEGIN_NAMESPACE
 
 class NoronPeer;
 class NoronServerPrivate;
-class TOOJ_EXPORT NoronServer : public NoronHubBase
+class NoronAbstractSerializer;
+class NORON_EXPORT NoronServer : public NoronAbstractHub
 {
     Q_OBJECT
+
+//    Q_ENUM(ServerType)
 
     NoronServerPrivate *d_ptr;
     Q_DECLARE_PRIVATE(NoronServer)
 
     Q_PROPERTY(int typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
-    Q_PROPERTY(bool isMultiThread READ isMultiThread WRITE setIsMultiThread NOTIFY isMultiThreadChanged)
+    Q_PROPERTY(ServerType serverType READ serverType WRITE setServerType NOTIFY serverTypeChanged)
 
 public:
-    explicit NoronServer(qint16 port, QObject *parent = 0);
+    explicit NoronServer(qint16 port = 0, QObject *parent = 0);
 
-    QSet<NoronPeer*> peers();
+    enum ServerType{
+        SingleThread,
+        MultiThread
+    };
 
-    int typeId() const;
-    bool isMultiThread() const;
     template <typename T> void registerType(){
         setTypeId(qRegisterMetaType<T>());
     }
 
-    void beginTransaction();
-    void rollback();
-    void commit();
-
-public slots:
-    void setTypeId(int typeId);
-    void setIsMultiThread(bool isMultiThread);
+    QSet<NoronPeer *> peers();
+    int typeId() const;
+    ServerType serverType() const;
 
 signals:
     void peerConnected(NoronPeer *peer);
     void peerDisconnected(NoronPeer *peer);
     void typeIdChanged(int typeId);
-    void isMultiThreadChanged(bool isMultiThread);
+    void serverTypeChanged(ServerType serverType);
 
 private slots:
     void hub_disconnected();
     void server_newIncomingConnection(qintptr socketDescriptor);
-	qlonglong invokeOnPeer(
-            QString sender,
-            QString methodName,
-            QVariant val0 = QVariant(),
-            QVariant val1 = QVariant(),
-            QVariant val2 = QVariant(),
-            QVariant val3 = QVariant(),
-            QVariant val4 = QVariant(),
-            QVariant val5 = QVariant(),
-            QVariant val6 = QVariant(),
-            QVariant val7 = QVariant(),
-            QVariant val8 = QVariant(),
-            QVariant val9 = QVariant());
+
+public slots:
+    void setTypeId(int typeId);
+    void setServerType(ServerType serverType);
 };
 
 QT_END_NAMESPACE
 
-#endif // PRCSERVER_H
+#endif // NORONSERVER_H

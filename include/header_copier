@@ -1,8 +1,8 @@
 #!/bin/bash
 
-exec 3< <(egrep -o "class\sTOOJ_EXPORT\s(\S+)"  ../src -R 2>&1)
+exec 3< <(egrep -o "class\sNORON_EXPORT\s(\S+)"  ../src -R 2>&1)
 
-pattern="\.\.\/src\/([a-z]+)\.h\:class\sTOOJ_EXPORT\s(\w+)"
+pattern="\.\.\/src\/([a-z]+)\.h\:class\sNORON_EXPORT\s(\w+)"
 
 echo "" > "Noron"
 echo "" > "noron.h"

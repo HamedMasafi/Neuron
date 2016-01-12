@@ -5,6 +5,8 @@
 
 #include "defines.h"
 
+#include <NoronClientHub>
+
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -14,18 +16,16 @@ ClientWindow::ClientWindow(QWidget *parent) :
     QMainWindow(parent), _resourceId(0)
 {
 
-    NoronHub *hub = new NoronHub(this);
+    hub = new NoronClientHub(this);
     hub->setObjectName("hub");
     hub->setAutoReconnect(true);
     hub->setValidateToken(NORON_VALIDATE_TOKEN);
 
-    server = new Server(this);
+    server = new Server(hub, this);
     server->setObjectName("server");
-    server->setHub(hub);
 
-    user = new User(this);
+    user = new User(hub, this);
     user->setObjectName("user");
-    user->setHub(hub);
 
     setupUi(this);
 }
@@ -50,8 +50,7 @@ void ClientWindow::keyPressEvent(QKeyEvent *e)
 
 void ClientWindow::on_pushButtonLogin_clicked()
 {
-
-    user->connectToServer(lineEditServer->text(), PORT);
+    hub->connectToHost(lineEditServer->text(), PORT, true);
 
     user->setUsername(lineEditUsername->text());
     labelUsername->setText(user->username());

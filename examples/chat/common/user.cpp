@@ -1,5 +1,6 @@
 #include "user.h"
 
+
 #include <QMetaObject>
 #include <QMetaMethod>
 
@@ -8,6 +9,12 @@ QT_BEGIN_NAMESPACE
 User::User(QObject *parent) : NoronPeer(parent)
 {
 
+}
+
+User::User(NoronAbstractHub *hub, QObject *parent) : NoronPeer(hub, parent)
+{
+    setHub(hub);
+    hub->setPeer(this);
 }
 
 QPixmap User::avator()

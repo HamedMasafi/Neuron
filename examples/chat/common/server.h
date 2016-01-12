@@ -12,15 +12,16 @@
 #   include <QJSValue>
 #endif
 
-#include <NoronPeer>
-#include <QString>
+#include <NoronAbstractHub>
+#include <NoronSharedObject>
 #include <QPixmap>
 #include <QVariantList>
+#include <QString>
 
 
 QT_BEGIN_NAMESPACE
 
-class Server : public NoronPeer
+class Server : public NoronSharedObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList users READ users WRITE setUsers NOTIFY usersChanged USER true)
@@ -30,6 +31,7 @@ class Server : public NoronPeer
 
 public:
     Q_INVOKABLE Server(QObject *parent = 0);
+    Server(NoronAbstractHub *hub, QObject *parent = 0);
     QVariantList users();
 
 public slots:

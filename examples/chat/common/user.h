@@ -12,9 +12,10 @@
 #   include <QJSValue>
 #endif
 
+#include <NoronAbstractHub>
 #include <NoronPeer>
-#include <QString>
 #include <QPixmap>
+#include <QString>
 
 
 QT_BEGIN_NAMESPACE
@@ -31,6 +32,7 @@ class User : public NoronPeer
 
 public:
     Q_INVOKABLE User(QObject *parent = 0);
+    User(NoronAbstractHub *hub, QObject *parent = 0);
     QPixmap avator();
     QString username();
 

@@ -4,6 +4,8 @@
 #include <QtCore/QObject>
 #include <QtCore/qglobal.h>
 
+class Class;
+class Method;
 class ClassParser : public QObject
 {
     Q_OBJECT
@@ -17,6 +19,14 @@ class ClassParser : public QObject
 
 public:
     explicit ClassParser(QObject *parent = 0);
+
+
+    static Class *parse(QString templateCode);
+
+private:
+    static void procLine(Class *cls, QString line);
+    static void procProperty(Class *cls, QString line);
+    static void setMethodCode(Method *m, QString fileName);
 
 signals:
 

@@ -5,9 +5,15 @@
 
 QT_BEGIN_NAMESPACE
 
-Server::Server(QObject *parent) : NoronPeer(parent)
+Server::Server(QObject *parent) : NoronSharedObject(parent)
 {
 
+}
+
+Server::Server(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(hub, parent)
+{
+    setHub(hub);
+    hub->addSharedObject(this);
 }
 
 QVariantList Server::users()

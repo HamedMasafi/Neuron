@@ -27,7 +27,7 @@
 
 QT_BEGIN_NAMESPACE
 
-NoronServerHubPrivate::NoronServerHubPrivate(NoronServerHub *parent) : q_ptr(parent)
+NoronServerHubPrivate::NoronServerHubPrivate(NoronServerHub *parent) : q_ptr(parent), serverThread(0)
 {
 
 }
@@ -50,6 +50,13 @@ NoronServerHub::NoronServerHub(QTcpSocket *socket, QObject *parent) : NoronAbstr
     this->socket = socket;
 }
 
+NoronServerThread *NoronServerHub::serverThread() const
+{
+    Q_D(const NoronServerHub);
+
+    return d->serverThread;
+}
+
 bool NoronServerHub::setSocketDescriptor(qintptr socketDescriptor, bool waitForConnect)
 {
     bool ok = socket->setSocketDescriptor(socketDescriptor);
@@ -58,6 +65,14 @@ bool NoronServerHub::setSocketDescriptor(qintptr socketDescriptor, bool waitForC
         socket->waitForReadyRead();
 
     return ok;
+}
+
+void NoronServerHub::setServerThread(NoronServerThread *serverThread)
+{
+    Q_D(NoronServerHub);
+
+    if(d->serverThread != serverThread)
+        d->serverThread = serverThread;
 }
 
 QT_BEGIN_NAMESPACE

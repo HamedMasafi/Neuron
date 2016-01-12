@@ -16,7 +16,9 @@ SOURCES += main.cpp \
     method.cpp \
     class.cpp \
     classparser.cpp \
-    texthelper.cpp
+    texthelper.cpp \
+    property.cpp \
+    templatecreatot.cpp
 
 RESOURCES += \
     snippets.qrc
@@ -25,4 +27,6 @@ HEADERS += \
     method.h \
     class.h \
     classparser.h \
-    texthelper.h
+    texthelper.h \
+    property.h \
+    templatecreatot.h

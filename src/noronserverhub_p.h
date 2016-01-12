@@ -12,6 +12,7 @@ class NoronServerHubPrivate{
 public:
     NoronServerHubPrivate(NoronServerHub *parent);
 
+    NoronServerThread *serverThread;
 };
 
 QT_END_NAMESPACE

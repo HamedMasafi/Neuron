@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include <NoronPeer>
 #include <NoronServer>
 
 #include "user.h"
@@ -10,13 +11,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     serverManager = new NoronServer(PORT, this);
-    serverManager->setIsMultiThread(true);
-    serverManager->registerType<User*>();
     serverManager->setObjectName("serverManager");
+    serverManager->registerType<User*>();
     serverManager->setValidateToken(NORON_VALIDATE_TOKEN);
+    serverManager->setServerType(NoronServer::MultiThread);
 
-    server = new Server(this);
-    server->setHub(serverManager);
+    server = new Server(serverManager, this);
+    server->setObjectName("server");
 
     setupUi(this);
 

@@ -38,3 +38,5 @@ win32:{
 DESTDIR     = $$PWD/lib/$$PLATFORM$$ARCH/$${BUILD}
 
 include(noron.pri)
+
+DISTFILES +=

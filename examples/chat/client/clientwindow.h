@@ -5,12 +5,14 @@
 
 class User;
 class Server;
+class NoronClientHub;
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
     User *user;
     Server *server;
+    NoronClientHub *hub;
     qint32 _resourceId;
 
 public:

@@ -1,5 +1,5 @@
-#ifndef %3_H
-#define %3_H
+#ifndef <CLASSNAME/>_H
+#define <CLASSNAME/>_H
 
 #include <QtCore/QObject>
 #include <QtCore/qglobal.h>
@@ -12,19 +12,37 @@
 #   include <QJSValue>
 #endif
 
-#include <NoronPeer>
-%4
+#include <NoronAbstractHub>
+<includes>
+#include <<IncludeName/>>
+</includes>
 
 QT_BEGIN_NAMESPACE
 
-class %1 : public NoronPeer
+class <ClassName/> : public <BaseType/>
 {
     Q_OBJECT
 %5
 
 public:
-    Q_INVOKABLE %1(QObject *parent = 0);
-%2
+    Q_INVOKABLE <ClassName/>(QObject *parent = 0);
+    <ClassName/>(NoronAbstractHub *hub, QObject *parent = 0);
+
+<methods>
+<group/>
+<method>
+    <returnType/> <methodName/>();
+    <returnType/> <methodName/>(<signature/><sep/>const QObject *obj, char *callbackSlot);
+    <returnType/> <methodName/>(<signature/><sep/>const QObject *obj, const QMetaMethod *callbackMethod);
+#if __cplusplus >= 201103L
+    <returnType/> <methodName/>(<signature/><sep/>std::function<void(<returnType/>)> callbackFunction);
+#endif
+#ifdef QT_QML_LIB
+    <returnType/> <methodName/>(<signature/><sep/>QJSValue callbackFunction);
+#endif
+</method>
+</methods>
+
 };
 
 QT_END_NAMESPACE

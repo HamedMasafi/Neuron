@@ -35,7 +35,9 @@ public:
     qint16 port;               // port
     QString serverAddress;     // address of server
     bool isAutoReconnect;
+    int reconnectTimerId;
 
+    void sync();
 };
 
 QT_END_NAMESPACE

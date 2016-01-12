@@ -1,6 +1,8 @@
 
+#include "../src/noronjsonbinaryserializer.h"
 #include "../src/noronpeer.h"
-#include "../src/noronhub.h"
-#include "../src/noronhubbase.h"
+#include "../src/noronabstracthub.h"
+#include "../src/noronserverhub.h"
+#include "../src/noronclienthub.h"
+#include "../src/noronsharedobject.h"
 #include "../src/noronserver.h"
-#include "../src/noronjsondataserializer.h"

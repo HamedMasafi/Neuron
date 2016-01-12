@@ -1,4 +1,4 @@
-class User{
+class MAIN User{
 	Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
 	Q_PROPERTY(QPixmap avator READ avator WRITE setAvator NOTIFY avatorChanged)
 	

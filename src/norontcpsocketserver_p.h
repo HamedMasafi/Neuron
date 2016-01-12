@@ -1,13 +1,30 @@
-#ifndef RPCTCPSOCKETSERVER_H
-#define RPCTCPSOCKETSERVER_H
+/**************************************************************************
+**
+** This file is part of Noron.
+** https://github.com/HamedMasafi/Noron
+**
+** Noron is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** Noron is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with Noron.  If not, see <http://www.gnu.org/licenses/>.
+**
+**************************************************************************/
 
-#include <QTcpServer>
+#ifndef NORONTCPSOCKETSERVER_H
+#define NORONTCPSOCKETSERVER_H
+
+#include <QtNetwork/QTcpServer>
 
 QT_BEGIN_NAMESPACE
 
-class NoronPeer;
-class QTcpServer;
-class NoronServer;
 class NoronTcpSocketServer : public QTcpServer
 {
     Q_OBJECT
@@ -19,9 +36,9 @@ protected:
     void incomingConnection(qintptr socketDescriptor);
 
 signals:
-	void newIncomingConnection(qintptr socketDescriptor);
+    void newIncomingConnection(qintptr socketDescriptor);
 };
 
 QT_END_NAMESPACE
 
-#endif // RPCTCPSOCKETSERVER_H
+#endif // NORONTCPSOCKETSERVER_H

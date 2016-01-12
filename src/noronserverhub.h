@@ -27,6 +27,7 @@
 
 QT_BEGIN_NAMESPACE
 
+class NoronServerThread;
 class NoronServerHubPrivate;
 class NORON_EXPORT NoronServerHub : public NoronAbstractHub
 {
@@ -40,8 +41,11 @@ public:
     NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent = 0);
     NoronServerHub(QTcpSocket *socket, QObject *parent = 0);
 
+    NoronServerThread *serverThread() const;
+
 public slots:
     bool setSocketDescriptor(qintptr socketDescriptor, bool waitForConnect = false);
+    void setServerThread(NoronServerThread *serverThread);
 };
 
 QT_END_NAMESPACE

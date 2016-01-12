@@ -70,15 +70,16 @@ void NoronServer::hub_disconnected()
 {
     Q_D(NoronServer);
 
-    NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
+    NoronServerHub *hub = qobject_cast<NoronServerHub*>(sender());
 
     d->peers.remove(hub->peer());
     d->hubs.remove(hub);
     hub->peer()->deleteLater();
     hub->deleteLater();
 
-    if(d->serverType == NoronServer::MultiThread && hub->thread())
-        hub->thread()->exit();
+    if(d->serverType == NoronServer::MultiThread && hub->serverThread()){
+        hub->serverThread()->exit();
+    }
 
     emit peerDisconnected(hub->peer());
 }
@@ -101,13 +102,18 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
     bool hubIsValid;
     if(d->serverType == NoronServer::MultiThread){
         NoronServerThread *thread = new NoronServerThread(socketDescriptor, sender());
+        hub->setServerThread(thread);
+
         connect(thread, &QThread::finished, thread, &QObject::deleteLater);
         thread->start();
 
+        connect(thread, &QThread::finished, thread, &QObject::deleteLater);
+
         while(!thread->isStarted()) ;
 
-        hub->_isMultiThread = true;
         hub = thread->hub();
+
+        hub->_isMultiThread = true;
         hubIsValid = (hub != 0);
     }else{
         hub = new NoronServerHub(this);
@@ -131,7 +137,6 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         return;
     }
 
-
     hub->setPeer(peer);
     peer->setHub(hub);
 
@@ -144,7 +149,7 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 
     d->hubs.insert(hub);
     d->peers.insert(peer);
-    qDebug() << "set....";
+
     emit peerConnected(peer);
 }
 

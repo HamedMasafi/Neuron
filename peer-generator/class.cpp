@@ -1,6 +1,7 @@
 #include "class.h"
 #include "texthelper.h"
 #include "method.h"
+#include "property.h"
 
 #include <QDebug>
 #include <QFile>
@@ -16,6 +17,16 @@
 #define METHOD_SIGNAL           7
 
 #define FILE_NAME(x) #x
+
+#ifdef Q_OS_WIN
+#   define LB "\r\n"
+#endif
+#ifdef Q_OS_LINUX
+#   define LB "\n"
+#endif
+#ifdef Q_OS_MACOSX
+#   define LB "\r"
+#endif
 
 Class::Class(QObject *parent) : QObject(parent)
 {
@@ -46,7 +57,7 @@ QString Class::h()
     QString includeBlock;
     QString privateBlock;
 
-    foreach (QString p, properties)
+    foreach (QString p, propertiesList)
         privateBlock.append(p + "\n");
     privateBlock.append("\n");
     foreach (QString v, variables)
@@ -70,7 +81,8 @@ QString Class::h()
             .arg(ret)
             .arg(name().toUpper())
             .arg(includeBlock)
-            .arg(TextHelper::instance()->indent(privateBlock));
+            .arg(TextHelper::instance()->indent(privateBlock))
+            .arg(baseType());
 
     return ret;
 }
@@ -88,9 +100,58 @@ QString Class::cpp()
             .arg(name())
             .arg(ret)
             .arg(name().toLower())
-            .arg("");
+            .arg("")
+            .arg(baseType());
 
     return ret;
+}
+
+QString Class::headerCode() const
+{
+    QString code = "";
+
+    QString lastDecl = "public";
+    QString ret;
+    QString includeBlock;
+    QString privateBlock;
+
+    foreach (QString p, propertiesList)
+        privateBlock.append(p + LB);
+    privateBlock.append(LB);
+
+    foreach (QString v, variables)
+        privateBlock.append(v + LB);
+
+    foreach (QString t, usedTypes) {
+        if(t.startsWith("Q"))
+            includeBlock.append("#include <" + t + ">" LB);
+    }
+
+    foreach (Method *m, methods) {
+        if(m->declType() != lastDecl){
+            ret.append("\n" + m->declType() + ":" LB);
+            lastDecl = m->declType();
+        }
+        ret.append(TextHelper::instance()->indent(m->declare()) + LB);
+    }
+
+    code = QString("#ifndef %1" LB
+                   "#define %1" LB
+                   "" LB
+                   "class %2 : public NoronHub" LB
+                   "{" LB
+                   "%4" LB
+                   LB
+                   "%3"  LB
+                   "};" LB
+                   "#endif // %1" LB)
+
+            .arg(m_name.toUpper())
+            .arg(name())
+            .arg(ret)
+            .arg(privateBlock);
+
+    return code;
 }
 
 bool methodLessThan(const Method *v1, const Method *v2)
@@ -103,23 +164,64 @@ bool methodLessThan(const Method *v1, const Method *v2)
 
 void Class::save(QString dir)
 {
-    QFile hFile(dir + "/" + name().toLower() + ".h");
-    QFile cppFile(dir + "/" + name().toLower() + ".cpp");
+    QFile hFile(dir + "/" + headerFileName());
+    QFile cppFile(dir + "/" + sourceFileName());
 
     hFile.open(QIODevice::WriteOnly);
     cppFile.open(QIODevice::WriteOnly);
 
     qSort(methods.begin(), methods.end(), methodLessThan);
-    hFile.write(h().toUtf8());
+    hFile.write(headerCode().toUtf8());
     cppFile.write(cpp().toUtf8());
 
     hFile.close();
     cppFile.close();
 }
 
+void Class::addProperty(QString type, QString name)
+{
+    properties.append(new Property(type, name, this));
+}
+
+void Class::addProperty(QString type, QString name, QString readMethod, QString writeMethod, QString notifySignal, QString fieldName)
+{
+    properties.append(new Property(type, name, readMethod, writeMethod, notifySignal, fieldName));
+}
+
+void Class::addProperty(Property *prop)
+{
+    properties.append(prop);
+}
+
+void Class::addMethod(Method *m)
+{
+    methods.append(m);
+}
+
 QString Class::name() const
 {
     return m_name;
+}
+
+QString Class::baseType() const
+{
+    return m_baseType;
+}
+
+QString Class::sourceFileName() const
+{
+    if(m_sourceFileName.isNull())
+        return m_name.toLower() = ".cpp";
+
+    return m_sourceFileName;
+}
+
+QString Class::headerFileName() const
+{
+    if(m_headerFileName.isNull())
+        return m_name.toLower() = ".h";
+
+    return m_headerFileName;
 }
 
 void Class::setName(QString name)
@@ -129,6 +231,33 @@ void Class::setName(QString name)
 
     m_name = name;
     emit nameChanged(name);
+}
+
+void Class::setBaseType(QString baseType)
+{
+    if (m_baseType == baseType)
+        return;
+
+    m_baseType = baseType;
+    emit baseTypeChanged(baseType);
+}
+
+void Class::setSourceFileName(QString sourceFileName)
+{
+    if (m_sourceFileName == sourceFileName)
+        return;
+
+    m_sourceFileName = sourceFileName;
+    emit sourceFileNameChanged(sourceFileName);
+}
+
+void Class::setHeaderFileName(QString headerFileName)
+{
+    if (m_headerFileName == headerFileName)
+        return;
+
+    m_headerFileName = headerFileName;
+    emit headerFileNameChanged(headerFileName);
 }
 
 void Class::procLine(QString line)
@@ -210,7 +339,7 @@ void Class::procProperty(QString line)
     if(!match.hasMatch())
         return;
 
-    properties.append(line);
+    propertiesList.append(line);
 
     QString type = match.captured(1);
     QString name = match.captured(2);

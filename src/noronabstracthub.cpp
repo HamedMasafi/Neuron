@@ -310,9 +310,9 @@ void NoronAbstractHub::socket_disconnected()
 //        connectToServer();
 //        d->reconnectTimerId = startTimer(500);
 //    }else
-    {
-        this->deleteLater();
-    }
+//    {
+//        this->deleteLater();
+//    }
 }
 
 void NoronAbstractHub::socket_onReadyRead()
@@ -366,7 +366,7 @@ void NoronAbstractHub::commit()
     if(!d->isTransaction)
         return;
 
-    socket->write(QJsonDocument::fromVariant(d->buffer).toJson());
+    socket->write(serializer()->serialize(d->buffer));
     socket->flush();
     d->buffer.clear();
     d->isTransaction = false;
@@ -383,9 +383,9 @@ qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName, QVa
         d->requestId = 0;
 
     QVariantMap map;
+    map[ID] = QVariant(d->requestId);
     map[METHOD_NAME] = methodName;
     map[MAP_TYPE] = MAP_TYPE_REQUEST;
-    map[ID] = QVariant(d->requestId);
     map[CLASS_NAME] = sender;
 
     d->addToMap(&map, val0, 0);

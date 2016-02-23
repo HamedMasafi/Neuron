@@ -22,6 +22,7 @@
 #define NORONREMOTECALL_H
 
 #include <QtCore/qglobal.h>
+#include <QtCore/QDebug>
 #include <QtCore/QVariant>
 #include <QtCore/QEventLoop>
 #include <QtCore/QMetaMethod>
@@ -89,9 +90,9 @@ class NoronRemoteCall : public NoronRemoteCallBase{
 
 public:
 #if __cplusplus >= 201103L
-    std::function<void(T)> func;
+    std::function<void(T)> _func;
 
-    NoronRemoteCall(std::function<void(T)> func){}
+    NoronRemoteCall(std::function<void(T)> func) : NoronRemoteCallBase(), _func(func){}
 #endif
 #ifdef QT_QML_LIB
     NoronRemoteCall(QJSValue jsvalue) : NoronRemoteCallBase(jsvalue) {}
@@ -103,8 +104,9 @@ public:
 
     void returnToCaller(){
 #if __cplusplus >= 201103L
+        qDebug()<<"Calling................"<<type;
         if(type == Function)
-            func(returnData.value<T>());
+            _func(returnData.value<T>());
 #endif
 #ifdef QT_QML_LIB
         if(type == JSValue){

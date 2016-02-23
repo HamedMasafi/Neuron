@@ -33,8 +33,6 @@ class NORON_EXPORT NoronServer : public NoronAbstractHub
 {
     Q_OBJECT
 
-//    Q_ENUM(ServerType)
-
     NoronServerPrivate *d_ptr;
     Q_DECLARE_PRIVATE(NoronServer)
 
@@ -42,12 +40,14 @@ class NORON_EXPORT NoronServer : public NoronAbstractHub
     Q_PROPERTY(ServerType serverType READ serverType WRITE setServerType NOTIFY serverTypeChanged)
 
 public:
-    explicit NoronServer(qint16 port = 0, QObject *parent = 0);
+    explicit NoronServer(QObject *parent = 0);
+    explicit NoronServer(qint16 port, QObject *parent = 0);
 
     enum ServerType{
         SingleThread,
         MultiThread
     };
+    Q_ENUM(ServerType);
 
     template <typename T> void registerType(){
         setTypeId(qRegisterMetaType<T>());
@@ -56,6 +56,8 @@ public:
     QSet<NoronPeer *> peers();
     int typeId() const;
     ServerType serverType() const;
+
+    void startServer(qint16 port);
 
 signals:
     void peerConnected(NoronPeer *peer);

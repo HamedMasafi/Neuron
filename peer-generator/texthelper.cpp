@@ -1,5 +1,7 @@
 #include "texthelper.h"
 
+#include "defines.h"
+
 #include <QDir>
 #include <QFile>
 #include <QDebug>
@@ -42,7 +44,49 @@ QString TextHelper::getFileContent(QString fileName)
 
 QString TextHelper::indent(QString text)
 {
-    return "    " + text.replace("\n", "\n    ");
+//    return "    " + text.replace("\n", "\n    ");
+    QStringList lines = text.split(LB);
+    QString code = "";
+
+    int indentLevel = 0;
+    int oldIndentLevel = 0;
+    bool deindentInNextLine = false;
+    foreach (QString line, lines) {
+        line = line.trimmed();
+
+        if(line.startsWith("}"))
+            indentLevel--;
+
+        if(line.endsWith(":") || line.startsWith("#")){
+            oldIndentLevel = indentLevel;
+            indentLevel = 0;
+        }
+
+        QString indent = "";
+        for(int i = 0; i < indentLevel; i++)
+            indent.append("    ");
+
+        if(line.endsWith(":") || line.startsWith("#"))
+            indentLevel = oldIndentLevel;
+
+        if(deindentInNextLine){
+            indentLevel--;
+            deindentInNextLine = false;
+        }
+
+        if(line.endsWith("{"))
+            indentLevel++;
+
+        if(!line.startsWith("Q_") && !line.startsWith("#") && !line.endsWith(":")
+                && !line.isEmpty() && indentLevel && !line.endsWith(";") && line != "{" && line != "}" && !line.endsWith("{")){
+            indentLevel++;
+            deindentInNextLine = true;
+        }
+
+        code.append(indent + line + LB);
+    }
+
+    return code;
 }
 
 bool TextHelper::hasOperatorEqual(QString type)
@@ -113,5 +157,18 @@ bool TextHelper::hasOperatorEqual(QString type)
             "_vector4d_";
 
     return types.contains("_" + type + "_");
+}
+
+QString TextHelper::joinSet(QSet<QString> set, QString seprator) const
+{
+    QString ret = "";
+
+    foreach (QString s, set) {
+        if(!ret.isEmpty())
+            ret.append(seprator);
+        ret.append(s);
+    }
+
+    return ret;
 }
 

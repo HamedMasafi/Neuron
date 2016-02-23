@@ -2,31 +2,38 @@
 
 Property::Property(QString type, QString name, QObject *parent) : QObject(parent)
 {
-    QString writeMethod = name;
-    writeMethod[0] = writeMethod[0].toUpper();
+    QString writeMethodName = name;
+    writeMethodName[0] = writeMethodName[0].toUpper();
 
     setType(type);
     setName(name);
-    setReadMethod(name);
-    setWriteMethod(writeMethod);
-    setNotifySignal(name + "Changed");
+    setReadMethodName(name);
+    setWriteMethodName("set" + writeMethodName);
+    setNotifySignalName(name + "Changed");
     setFieldName("m_" + name);
 }
 
-Property::Property(QString type, QString name, QString readMethod, QString writeMethod, QString notifySignal, QString fieldName, QObject *parent) : QObject(parent),
-    m_type(type), m_name(name), m_readMethod(readMethod), m_writeMethod(writeMethod), m_notifySignal(notifySignal), m_fieldName(fieldName)
+Property::Property(QString type, QString name, QString readMethodName, QString writeMethodName, QString notifySignal, QString fieldName, QObject *parent) : QObject(parent),
+    m_type(type), m_name(name), m_readMethodName(readMethodName), m_writeMethodName(writeMethodName), m_notifySignalName(notifySignal), m_fieldName(fieldName)
 {
 
 }
 
 QString Property::declareLine() const
 {
-    return QString("Q_PROPERTY(%1 %2 READ %3 WRITE %4 NOTIFY %5 USER true)")
-            .arg(type())
-            .arg(name())
-            .arg(readMethod())
-            .arg(writeMethod())
-            .arg(notifySignal());
+    if(notifySignalName().isEmpty() || notifySignalName().isNull())
+        return QString("Q_PROPERTY(%1 %2 READ %3 WRITE %4 USER true)")
+                .arg(type())
+                .arg(name())
+                .arg(readMethodName())
+                .arg(writeMethodName());
+    else
+        return QString("Q_PROPERTY(%1 %2 READ %3 WRITE %4 NOTIFY %5 USER true)")
+                .arg(type())
+                .arg(name())
+                .arg(readMethodName())
+                .arg(writeMethodName())
+                .arg(notifySignalName());
 }
 
 QString Property::type() const
@@ -39,19 +46,19 @@ QString Property::name() const
     return m_name;
 }
 
-QString Property::readMethod() const
+QString Property::readMethodName() const
 {
-    return m_readMethod;
+    return m_readMethodName;
 }
 
-QString Property::writeMethod() const
+QString Property::writeMethodName() const
 {
-    return m_writeMethod;
+    return m_writeMethodName;
 }
 
-QString Property::notifySignal() const
+QString Property::notifySignalName() const
 {
-    return m_notifySignal;
+    return m_notifySignalName;
 }
 
 QString Property::fieldName() const
@@ -77,31 +84,31 @@ void Property::setName(QString name)
     emit nameChanged(name);
 }
 
-void Property::setReadMethod(QString readMethod)
+void Property::setReadMethodName(QString readMethodName)
 {
-    if (m_readMethod == readMethod)
+    if (m_readMethodName == readMethodName)
         return;
 
-    m_readMethod = readMethod;
-    emit readMethodChanged(readMethod);
+    m_readMethodName = readMethodName;
+    emit readMethodNameChanged(readMethodName);
 }
 
-void Property::setWriteMethod(QString writeMethod)
+void Property::setWriteMethodName(QString writeMethodName)
 {
-    if (m_writeMethod == writeMethod)
+    if (m_writeMethodName == writeMethodName)
         return;
 
-    m_writeMethod = writeMethod;
-    emit writeMethodChanged(writeMethod);
+    m_writeMethodName = writeMethodName;
+    emit writeMethodNameChanged(writeMethodName);
 }
 
-void Property::setNotifySignal(QString notifySignal)
+void Property::setNotifySignalName(QString notifySignalName)
 {
-    if (m_notifySignal == notifySignal)
+    if (m_notifySignalName == notifySignalName)
         return;
 
-    m_notifySignal = notifySignal;
-    emit notifySignalChanged(notifySignal);
+    m_notifySignalName = notifySignalName;
+    emit notifySignalNameChanged(notifySignalName);
 }
 
 void Property::setFieldName(QString fieldName)

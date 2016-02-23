@@ -2,5 +2,5 @@ if (m_%1 == %1)
     return;
 
 m_%1 = %1;
-invokeOnPeer("%2", %1);
+invokeOnPeer("%2", %3);
 emit %1Changed(%1);

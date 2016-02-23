@@ -32,7 +32,6 @@
 
 #define VARIANT_TYPE "_type"
 #define VARIANT_VALUE "_value"
-#define IMAGE_FORMAT "PNG"
 #define CLASS_NAME(x) QString(#x)
 
 QT_BEGIN_NAMESPACE

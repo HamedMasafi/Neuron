@@ -35,6 +35,17 @@ NoronServerPrivate::NoronServerPrivate(NoronServer *parent) : q_ptr(parent),
 {
 }
 
+NoronServer::NoronServer(QObject *parent) : NoronAbstractHub(parent)
+{
+    Q_D(NoronServer);
+
+    d->serverSocket = new NoronTcpSocketServer;
+    d->serverSocket->setObjectName("serverSocket");
+
+    connect(d->serverSocket, &NoronTcpSocketServer::newIncomingConnection,
+            this, &NoronServer::server_newIncomingConnection);
+}
+
 NoronServer::NoronServer(qint16 port, QObject *parent) : NoronAbstractHub(parent),
      d_ptr(new NoronServerPrivate(this))
 {
@@ -52,6 +63,13 @@ QSet<NoronPeer *> NoronServer::peers()
 {
     Q_D(NoronServer);
     return d->peers;
+}
+
+void NoronServer::startServer(qint16 port)
+{
+    Q_D(NoronServer);
+
+    d->serverSocket->listen(QHostAddress::Any, port);
 }
 
 int NoronServer::typeId() const
@@ -102,16 +120,14 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
     bool hubIsValid;
     if(d->serverType == NoronServer::MultiThread){
         NoronServerThread *thread = new NoronServerThread(socketDescriptor, sender());
-        hub->setServerThread(thread);
 
         connect(thread, &QThread::finished, thread, &QObject::deleteLater);
         thread->start();
 
-        connect(thread, &QThread::finished, thread, &QObject::deleteLater);
-
         while(!thread->isStarted()) ;
 
         hub = thread->hub();
+        hub->setServerThread(thread);
 
         hub->_isMultiThread = true;
         hubIsValid = (hub != 0);

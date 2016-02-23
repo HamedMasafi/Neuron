@@ -53,48 +53,48 @@ int main(int argc, char *argv[])
     QString fileContent = f.readAll();
     f.close();
 
-    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*\\{(?<content>[^}]*)\\}", QRegularExpression::DotMatchesEverythingOption);
+    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*(:\\s*(?<base_type>\\S+))?\\s*\\{(?<content>[^}]*)\\}", QRegularExpression::DotMatchesEverythingOption);
     QRegularExpressionMatchIterator i = classRegex.globalMatch(fileContent);
     QString savePath = parser.value(targetOption);
 
     int peersCount = 0;
     int sharedObjectsCount = 0;
 
-    QList<Class*> classes;
+    QHash<QString, QString> classesCode;
+//    QList<Class*> classes;
 
+    ClassParser classParser;
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
 
-        Class *cls = ClassParser::parse(match.captured("content"));
-        cls->setName(match.captured("name"));
-        classes.append(cls);
+        QString baseType = match.captured("base_type");
+        if(baseType.isEmpty())
+            baseType = "NoronSharedObject";
 
-        /*Class *cls = new Class;
-        cls->setName(match.captured("name"));
 
-        if(match.captured("type").trimmed() == "MAIN"){
-            cls->setBaseType("NoronPeer");
+        if(baseType == "NoronPeer")
             peersCount++;
-        } else {
-            cls->setBaseType("NoronSharedObject");
-            sharedObjectsCount++;
-        }
 
-        cls->parse(match.captured("content"));
-        classes.append(cls);*/
+        classesCode.insert(match.captured("name"), match.captured("content"));
+
+        classParser.addClass(baseType,
+                             match.captured("name"),
+                             match.captured("content"));
+
     }
+    classParser.parseAll();
 
-    if(peersCount == 0 && classes.count() != 0){
-        classes[0]->setBaseType("NoronPeer");
-        peersCount++;
-    }
+//    if(peersCount == 0 && classes.count() != 0){
+//        classes[0]->setBaseType("NoronPeer");
+//        peersCount++;
+//    }
 
-    foreach (Class *cls, classes) {
+    foreach (Class *cls, classParser.classes()) {
         cls->save(savePath);
 
         qStdOut() << "The class " << cls->name() << " created in two files:\n";
-        qStdOut() << "\t -" << (savePath + "/" + cls->name().toLower() + ".h\n");
-        qStdOut() << "\t -" << (savePath + "/" + cls->name().toLower() + ".cpp\n\n");
+        qStdOut() << "\t -" << (savePath + "/" + cls->headerFileName() + "\n");
+        qStdOut() << "\t -" << (savePath + "/" + cls->sourceFileName() + "\n\n");
     }
 
     qStdOut() << "Job end. " << peersCount << " peer(s) and " << sharedObjectsCount << " shared object(s) are created.\n\n";

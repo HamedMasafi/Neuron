@@ -2,6 +2,7 @@
 #include "texthelper.h"
 #include "method.h"
 #include "property.h"
+#include "defines.h"
 
 #include <QDebug>
 #include <QFile>
@@ -18,140 +19,123 @@
 
 #define FILE_NAME(x) #x
 
-#ifdef Q_OS_WIN
-#   define LB "\r\n"
-#endif
-#ifdef Q_OS_LINUX
-#   define LB "\n"
-#endif
-#ifdef Q_OS_MACOSX
-#   define LB "\r"
-#endif
 
-Class::Class(QObject *parent) : QObject(parent)
+Class::Class(QObject *parent) : QObject(parent), m_headerFileName(QString::null), m_sourceFileName(QString::null),
+    afterClass(QString::null), beginOfClass(QString::null), m_wrapQtNamespace(true)
 {
 
-}
-
-void Class::parse(QString templateCode)
-{
-    QStringList lines = templateCode.split("\n");
-
-    foreach (QString line, lines) {
-        line = line.trimmed();
-
-        if(line.startsWith("//"))
-            continue;
-
-        if(line.startsWith("Q_PROPERTY"))
-            procProperty(line);
-        else
-            procLine(line);
-    }
-}
-
-QString Class::h()
-{
-    QString lastDecl = "public";
-    QString ret;
-    QString includeBlock;
-    QString privateBlock;
-
-    foreach (QString p, propertiesList)
-        privateBlock.append(p + "\n");
-    privateBlock.append("\n");
-    foreach (QString v, variables)
-        privateBlock.append(v + "\n");
-
-    foreach (QString t, usedTypes) {
-        if(t.startsWith("Q"))
-            includeBlock.append("#include <" + t + ">\n");
-    }
-
-    foreach (Method *m, methods) {
-        if(m->declType() != lastDecl){
-            ret.append("\n" + m->declType() + ":\n");
-            lastDecl = m->declType();
-        }
-        ret.append(TextHelper::instance()->indent(m->declare()) + "\n");
-    }
-
-    ret = QString(TextHelper::instance()->getFileContent("template.h"))
-            .arg(name())
-            .arg(ret)
-            .arg(name().toUpper())
-            .arg(includeBlock)
-            .arg(TextHelper::instance()->indent(privateBlock))
-            .arg(baseType());
-
-    return ret;
-}
-
-QString Class::cpp()
-{
-    QString ret;
-
-    foreach (Method *m, methods) {
-        if(!m->implement().isNull())
-            ret.append(m->implement() + "\n\n");
-    }
-
-    ret = QString(TextHelper::instance()->getFileContent("template.cpp"))
-            .arg(name())
-            .arg(ret)
-            .arg(name().toLower())
-            .arg("")
-            .arg(baseType());
-
-    return ret;
 }
 
 QString Class::headerCode() const
 {
     QString code = "";
 
-    QString lastDecl = "public";
-    QString ret;
-    QString includeBlock;
-    QString privateBlock;
+    QString lastDecl = "";
+    QString methodsBlock;
+    QString includeBlock = headerIncludeBlockCode() + LB;
+    QString privateBlock = "";
 
-    foreach (QString p, propertiesList)
-        privateBlock.append(p + LB);
+    foreach (Property *p, properties)
+        privateBlock.append(p->declareLine() + LB);
     privateBlock.append(LB);
 
     foreach (QString v, variables)
         privateBlock.append(v + LB);
 
-    foreach (QString t, usedTypes) {
+    /*foreach (QString t, usedTypes) {
         if(t.startsWith("Q"))
             includeBlock.append("#include <" + t + ">" LB);
-    }
+        else if(!TextHelper::instance()->hasOperatorEqual(t) && t != "void" && !t.startsWith("Noron"))
+            includeBlock.append("#include \"" + t + "\"" LB);
+    }*/
 
     foreach (Method *m, methods) {
+        if(m->isExtern())
+            continue;
+
         if(m->declType() != lastDecl){
-            ret.append("\n" + m->declType() + ":" LB);
+            methodsBlock.append("\n" + m->declType() + ":" LB);
             lastDecl = m->declType();
         }
-        ret.append(TextHelper::instance()->indent(m->declare()) + LB);
+        methodsBlock.append(m->declare() + LB);
+    }
+    foreach (Method *m, constructors) {
+        if(m->declType() != lastDecl){
+            methodsBlock.append("\n" + m->declType() + ":" LB);
+            lastDecl = m->declType();
+        }
+        methodsBlock.append(m->declare() + LB);
     }
 
-    code = QString("#ifndef %1" LB
-                   "#define %1" LB
-                   "" LB
-                   "class %2 : public NoronHub" LB
-                   "{" LB
-                   "%4" LB
-                   LB
-                   "%3"  LB
-                   "};" LB
-                   "#endif // %1" LB)
+    code.append("#ifndef " + m_name.toUpper() + "_H" LB);
+    code.append("#define " + m_name.toUpper() + "_H" LB LB);
 
-            .arg(m_name.toUpper())
-            .arg(name())
-            .arg(ret)
-            .arg(privateBlock);
+    code.append(includeBlock + LB);
 
-    return code;
+    if(wrapQtNamespace())
+        code.append("QT_BEGIN_NAMESPACE" LB LB LB);
+
+    foreach (QString className, declaredClasses)
+        code.append("class " + className + ";" LB);
+
+    code.append("class " + m_name + " : public " + m_baseType + LB);
+    code.append("{" LB);
+
+    if(!beginOfClass.isNull())
+        code.append(beginOfClass);
+
+    if(!privateBlock.isEmpty())
+        code.append(privateBlock + LB LB);
+
+    code.append(methodsBlock + LB);
+
+    code.append("};" LB);
+
+    if(!afterClass.isNull())
+        code.append(LB + afterClass + LB);
+
+    if(wrapQtNamespace())
+        code.append(LB "QT_END_NAMESPACE" LB LB);
+
+    code.append(TextHelper::instance()->joinSet(afterNameSpace, LB));
+    code.append(LB LB);
+
+    code.append("#endif // " + m_name.toUpper() + "_H" LB);
+
+    return TextHelper::instance()->indent(code);
+}
+
+QString Class::sourceCode() const
+{
+    QString code = "#include \"" + headerFileName() + "\"" LB;
+
+    code.append("#include <QMetaObject>" LB);
+    code.append("#include <QMetaMethod>" LB LB);
+
+    code.append(sourceIncludeBlockCode() + LB);
+
+    if(wrapQtNamespace())
+        code.append("QT_BEGIN_NAMESPACE" LB LB LB);
+
+    foreach (Method *m, methods){
+        if(!m->isExtern())
+            continue;
+        code.append(m->implement() + LB LB);
+    }
+
+    foreach (Method *m, constructors)
+        code.append(m->implement() + LB LB);
+
+    foreach (Method *m, methods){
+        if(m->isExtern())
+            continue;
+        code.append(m->implement() + LB LB);
+    }
+
+    if(wrapQtNamespace())
+        code.append("QT_END_NAMESPACE" LB);
+
+    return TextHelper::instance()->indent(code);
 }
 
 bool methodLessThan(const Method *v1, const Method *v2)
@@ -172,7 +156,7 @@ void Class::save(QString dir)
 
     qSort(methods.begin(), methods.end(), methodLessThan);
     hFile.write(headerCode().toUtf8());
-    cppFile.write(cpp().toUtf8());
+    cppFile.write(sourceCode().toUtf8());
 
     hFile.close();
     cppFile.close();
@@ -180,22 +164,113 @@ void Class::save(QString dir)
 
 void Class::addProperty(QString type, QString name)
 {
-    properties.append(new Property(type, name, this));
+    addProperty(new Property(type, name, this));
 }
 
 void Class::addProperty(QString type, QString name, QString readMethod, QString writeMethod, QString notifySignal, QString fieldName)
 {
-    properties.append(new Property(type, name, readMethod, writeMethod, notifySignal, fieldName));
+    addProperty(new Property(type, name, readMethod, writeMethod, notifySignal, fieldName));
 }
 
 void Class::addProperty(Property *prop)
 {
     properties.append(prop);
+
+    variables.append(prop->type() + " m_" + prop->name() + ";");
+
+    Method *readMethod = new Method(this);
+    Method *writeMethod = new Method(this);
+    Method *notifySignal = new Method(this);
+
+    readMethod->setReturnType(prop->type());
+    writeMethod->setReturnType("void");
+    notifySignal->setReturnType("void");
+
+    writeMethod->setSignature(prop->type() + " " + prop->name());
+    notifySignal->setSignature(prop->type() + " " + prop->name());
+
+    readMethod->setDeclType("public");
+    writeMethod->setDeclType("public slots");
+    notifySignal->setDeclType("signals");
+
+    readMethod->setName(prop->readMethodName());
+    writeMethod->setName(prop->writeMethodName());
+    notifySignal->setName(prop->notifySignalName());
+
+    QString writeFileName = TextHelper::instance()->hasOperatorEqual(prop->type()) ? "property_write" : "property_write_nocheck";
+    readMethod->setCode(TextHelper::instance()->getFileContent("property_read").arg(prop->name()));
+    writeMethod->setCode(TextHelper::instance()->getFileContent(writeFileName).arg(prop->name()).arg(prop->writeMethodName()));
+
+    addMethod(readMethod);
+    addMethod(writeMethod);
+    addMethod(notifySignal);
+
+    usedTypes.insert(prop->type());
 }
 
 void Class::addMethod(Method *m)
 {
+    QStringList types = m->getParametereTypes().split(",");
+    foreach (QString t, types)
+        if(!t.contains(QRegularExpression("[^a-zA-Z0-9_]")))
+            usedTypes.insert(t.trimmed().replace("*", ""));
+    usedTypes.insert(m->returnType().replace("*", ""));
+
     methods.append(m);
+}
+
+void Class::addConstructor(Method *m)
+{
+    constructors.append(m);
+}
+
+void Class::addVariable(QString declareLine)
+{
+    variables.append(declareLine);
+}
+
+void Class::addInclude(QString fileName, bool putInHeader, bool isGlobal, QString wrapperMacro, bool isClass)
+{
+    QString line = "";
+
+    if(isGlobal)
+        line = QString("#include <%1>").arg(fileName);
+    else
+        line = QString("#include \"%1\"").arg(fileName);
+
+    if(!wrapperMacro.isNull())
+        line = QString("#%1%3%2%3#endif")
+                .arg(wrapperMacro)
+                .arg(line.replace("#", "#    "))
+                .arg(LB);
+
+    if(putInHeader){
+        m_headerIncludeBlockCode.insert(line);
+    }else{
+        m_sourceIncludeBlockCode.insert(line);
+        if(fileName.startsWith("Q") && isClass)
+            declaredClasses.append(fileName);
+    }
+}
+
+void Class::addBeginOfClass(QString line)
+{
+    beginOfClass.append(line + LB);
+}
+
+void Class::addAfterClass(QString line)
+{
+    afterClass.append(line + LB);
+}
+
+void Class::addAfterNamespace(QString line)
+{
+    afterNameSpace.insert(line);
+}
+
+void Class::addPrivateVariable(QString type, QString name)
+{
+    variables.append(type + " " + name + ";");
 }
 
 QString Class::name() const
@@ -211,7 +286,7 @@ QString Class::baseType() const
 QString Class::sourceFileName() const
 {
     if(m_sourceFileName.isNull())
-        return m_name.toLower() = ".cpp";
+        return m_name.toLower() + ".cpp";
 
     return m_sourceFileName;
 }
@@ -219,9 +294,24 @@ QString Class::sourceFileName() const
 QString Class::headerFileName() const
 {
     if(m_headerFileName.isNull())
-        return m_name.toLower() = ".h";
+        return m_name.toLower() + ".h";
 
     return m_headerFileName;
+}
+
+QString Class::headerIncludeBlockCode() const
+{
+    return TextHelper::instance()->joinSet(m_headerIncludeBlockCode, LB);
+}
+
+bool Class::wrapQtNamespace() const
+{
+    return m_wrapQtNamespace;
+}
+
+QString Class::sourceIncludeBlockCode() const
+{
+    return TextHelper::instance()->joinSet(m_sourceIncludeBlockCode, LB);
 }
 
 void Class::setName(QString name)
@@ -260,144 +350,14 @@ void Class::setHeaderFileName(QString headerFileName)
     emit headerFileNameChanged(headerFileName);
 }
 
-void Class::procLine(QString line)
+
+void Class::setWrapQtNamespace(bool wrapQtNamespace)
 {
-    QList<Method*> methodsList;
-    for(int i = 0; i < 8; i++)
-        methodsList.append(new Method(this));
-
-    QRegularExpression regex("(\\S+)\\s+(\\S+)\\((.*)\\);");
-    QRegularExpressionMatch match = regex.match(line);
-
-    if(!match.hasMatch())
+    if (m_wrapQtNamespace == wrapQtNamespace)
         return;
 
-    QString returnType = match.captured(1);
-    QString name = match.captured(2);
-    QString params = match.captured(3);
-
-    QString sep = "";
-    if(params.trimmed() != "")
-        sep.append(", ");
-
-    foreach (Method *m, methodsList) {
-        m->setName(name);
-        m->setReturnType(returnType);
-        m->setSeprator(sep);
-        m->setSignature(params);
-        m->setDeclType("public slots");
-    }
-
-    QStringList types = methodsList[0]->getParametereTypes().split(",");
-    foreach (QString t, types)
-        usedTypes.insert(t.trimmed());
-
-    methodsList[METHOD_BYJSVALUE]->setWrapperMacro("QT_QML_LIB");
-    methodsList[METHOD_BYFUNC]->setWrapperMacro("__cplusplus >= 201103L");
-
-    setMethodCode(methodsList[METHOD_ASYNC],        "method_async");
-    setMethodCode(methodsList[METHOD_BYFUNC],       "method_byfunc");
-    setMethodCode(methodsList[METHOD_BYJSVALUE],    "method_byjsvalue");
-    setMethodCode(methodsList[METHOD_BYMETAMETHOD], "method_bymetamethod");
-    setMethodCode(methodsList[METHOD_BYSIGNAL],     "method_bysignal");
-    setMethodCode(methodsList[METHOD_FRESH],        "method_fresh");
-    setMethodCode(methodsList[METHOD_SLOT],         "method_slot");
-
-    methodsList[METHOD_ASYNC]->setName(name + "Async");
-    methodsList[METHOD_SLOT]->setName(name + "Slot");
-
-    methodsList[METHOD_BYSIGNAL]->setSignature(params + sep + "const QObject *obj, char *callbackSlot");
-    methodsList[METHOD_BYMETAMETHOD]->setSignature(params + sep + "const QObject *obj, const QMetaMethod *callbackMethod");
-    methodsList[METHOD_BYFUNC]->setSignature(params + sep + "std::function<void(" + returnType + ")> callbackFunction");
-    methodsList[METHOD_BYJSVALUE]->setSignature(params + sep + "QJSValue callbackFunction");
-
-//    methodsList[METHOD_FRESH]->setIsInvokable(true);
-//    methodsList[METHOD_ASYNC]->setIsInvokable(true);
-//    methodsList[METHOD_BYJSVALUE]->setIsInvokable(true);
-
-    methodsList[METHOD_SIGNAL]->setDeclType("signals");
-    methodsList[METHOD_SIGNAL]->setName(name + "Signal");
-
-    if(returnType != "void"){
-        methodsList[METHOD_SIGNAL]->setSignature(params + sep + ", " + returnType + " returnValue");
-    }
-
-    usedTypes.insert(returnType);
-
-    foreach (Method *m, methodsList)
-        this->methods.append(m);
+    m_wrapQtNamespace = wrapQtNamespace;
+    emit wrapQtNamespaceChanged(wrapQtNamespace);
 }
 
-void Class::procProperty(QString line)
-{
-    line = line.trimmed();
-    QRegularExpression regex("Q_PROPERTY\\((\\S+) (\\S+) READ (\\S+) WRITE (\\S+) NOTIFY (\\S+)\\)");
-    QRegularExpressionMatch match = regex.match(line);
-
-    line = line.replace(")", " USER true)");
-
-    if(!match.hasMatch())
-        return;
-
-    propertiesList.append(line);
-
-    QString type = match.captured(1);
-    QString name = match.captured(2);
-    QString read = match.captured(3);
-    QString write = match.captured(4);
-    QString notify = match.captured(5);
-
-    variables.append(type + " m_" + name + ";");
-
-    Method *readMethod = new Method(this);
-    Method *writeMethod = new Method(this);
-    Method *notifySignal = new Method(this);
-
-
-    readMethod->setReturnType(type);
-    writeMethod->setReturnType("void");
-    notifySignal->setReturnType("void");
-
-    writeMethod->setSignature(type + " " + name);
-    notifySignal->setSignature(type + " " + name);
-
-    readMethod->setDeclType("public");
-    writeMethod->setDeclType("public slots");
-    notifySignal->setDeclType("signals");
-
-    readMethod->setName(read);
-    writeMethod->setName(write);
-    notifySignal->setName(notify);
-
-
-    QString writeFileName = TextHelper::instance()->hasOperatorEqual(type) ? "property_write" : "property_write_nocheck";
-    readMethod->setCode(TextHelper::instance()->getFileContent("property_read").arg(name));
-    writeMethod->setCode(TextHelper::instance()->getFileContent(writeFileName).arg(name).arg(write));
-
-    methods.append(readMethod);
-    methods.append(writeMethod);
-    methods.append(notifySignal);
-
-    usedTypes.insert(type);
-}
-
-void Class::setMethodCode(Method *m, QString fileName)
-{
-    if(m->returnType() == "void")
-        fileName.append("_void");
-
-    QString code = TextHelper::instance()->getFileContent(fileName);
-
-
-    if(code.isEmpty() || code.isNull()){
-        m->setCode("//Error loading " + fileName);
-    }else{
-        code = code
-                .replace("%1", m->name())
-                .replace("%2", m->seprator())
-                .replace("%3", m->getParametereNames())
-                .replace("%4", m->returnType());
-        m->setCode(code);
-    }
-}
 

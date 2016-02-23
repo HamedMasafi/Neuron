@@ -26,6 +26,10 @@
 #include "noronabstractserializer.h"
 #include "noronpeer.h"
 
+#ifdef QT_QML_LIB
+#   include <QtQml>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 NoronClientHubPrivate::NoronClientHubPrivate(NoronClientHub *parent) : q_ptr(parent),
@@ -74,7 +78,7 @@ QString NoronClientHub::serverAddress() const
     return d->serverAddress;
 }
 
-qint16 NoronClientHub::port() const
+int NoronClientHub::port() const
 {
     Q_D(const NoronClientHub);
     return d->port;
@@ -85,6 +89,27 @@ bool NoronClientHub::isAutoReconnect() const
     Q_D(const NoronClientHub);
     return d->isAutoReconnect;
 }
+
+#ifdef QT_QML_LIB
+static QObject* create_singelton_object_client_hub(QQmlEngine *, QJSEngine *)
+{
+    return new NoronClientHub();
+}
+
+void NoronClientHub::registerQml(const char *uri, int versionMajor, int versionMinor)
+{
+    qmlRegisterType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub");
+    qmlRegisterUncreatableType<NoronAbstractHub>(uri, versionMajor, versionMinor, "AbstractHub", "Abstract class for ClientHub base");
+    qmlRegisterUncreatableType<NoronPeer>(uri, versionMajor, versionMinor, "NoronPeer", "Abstract type used by custom generated peer");
+}
+
+void NoronClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versionMinor)
+{
+    qmlRegisterSingletonType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub", create_singelton_object_client_hub);
+    qmlRegisterUncreatableType<NoronAbstractHub>(uri, versionMajor, versionMinor, "AbstractHub", "Abstract class for ClientHub base");
+    qmlRegisterUncreatableType<NoronPeer>(uri, versionMajor, versionMinor, "NoronPeer", "Abstract type used by custom generated peer");
+}
+#endif
 
 void NoronClientHub::timerEvent(QTimerEvent *)
 {
@@ -103,7 +128,7 @@ void NoronClientHub::connectToHost(bool waitForConnected)
     connectToHost(QString::null, 0, waitForConnected);
 }
 
-void NoronClientHub::connectToHost(QString address, qint16 port, bool waitForConnected)
+void NoronClientHub::connectToHost(QString address, int port, bool waitForConnected)
 {
     if(!address.isNull())
         setServerAddress(address);
@@ -133,7 +158,7 @@ void NoronClientHub::setServerAddress(QString serverAddress)
     emit serverAddressChanged(serverAddress);
 }
 
-void NoronClientHub::setPort(qint16 port)
+void NoronClientHub::setPort(int port)
 {
     Q_D(NoronClientHub);
 

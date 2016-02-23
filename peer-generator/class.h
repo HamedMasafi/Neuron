@@ -16,21 +16,29 @@ class Class : public QObject
     Q_PROPERTY(QString baseType READ baseType WRITE setBaseType NOTIFY baseTypeChanged)
     Q_PROPERTY(QString sourceFileName READ sourceFileName WRITE setSourceFileName NOTIFY sourceFileNameChanged)
     Q_PROPERTY(QString headerFileName READ headerFileName WRITE setHeaderFileName NOTIFY headerFileNameChanged)
+    Q_PROPERTY(QString headerIncludeBlockCode READ headerIncludeBlockCode)
+    Q_PROPERTY(QString sourceIncludeBlockCode READ sourceIncludeBlockCode)
+    Q_PROPERTY(bool wrapQtNamespace READ wrapQtNamespace WRITE setWrapQtNamespace NOTIFY wrapQtNamespaceChanged)
 
     QStringList propertiesList;
     QStringList variables;
+    QStringList declaredClasses;
     QSet<QString> usedTypes;
     QList<Method*> methods;
+    QList<Method*> constructors;
     QList<Property*> properties;
 
+    QSet<QString> m_headerIncludeBlockCode;
+    QSet<QString> m_sourceIncludeBlockCode;
+
+    QSet<QString> afterNameSpace;
+    QString afterClass;
+    QString beginOfClass;
 public:
     explicit Class(QObject *parent = 0);
 
-    void parse(QString templateCode);
-    QString h();
-    QString cpp();
-
     QString headerCode() const;
+    QString sourceCode() const;
 
     void save(QString dir);
 
@@ -38,34 +46,52 @@ public:
     void addProperty(QString type, QString name, QString readMethod, QString writeMethod, QString notifySignal, QString fieldName);
     void addProperty(Property *prop);
     void addMethod(Method *m);
+    void addConstructor(Method *m);
+    void addVariable(QString declareLine);
+
+    void addInclude(QString fileName, bool putInHeader = true, bool isGlobal = true, QString wrapperMacro = QString::null, bool isClass = true);
+
+    void addBeginOfClass(QString line);
+    void addAfterClass(QString line);
+    void addAfterNamespace(QString line);
+
+    void addPrivateVariable(QString type, QString name);
 
     QString name() const;
     QString baseType() const;
     QString sourceFileName() const;
     QString headerFileName() const;
+    QString headerIncludeBlockCode() const;
+    bool wrapQtNamespace() const;
+    QString sourceIncludeBlockCode() const;
+
 
 public slots:
     void setName(QString name);    
     void setBaseType(QString baseType);
     void setSourceFileName(QString sourceFileName);
     void setHeaderFileName(QString headerFileName);
+    void setWrapQtNamespace(bool wrapQtNamespace);
 
 signals:
     void nameChanged(QString name);    
     void baseTypeChanged(QString baseType);
-
     void sourceFileNameChanged(QString sourceFileName);
-
     void headerFileNameChanged(QString headerFileName);
+    void headerIncludeBlockCodeChanged(QString headerIncludeBlockCode);
+    void wrapQtNamespaceChanged(bool wrapQtNamespace);
+    void sourceIncludeBlockCodeChanged(QString sourceIncludeBlockCode);
 
 private:
-    void procLine(QString line);
-    void procProperty(QString line);
-    QString m_name;
     void setMethodCode(Method *m, QString fileName);
+
+    QString m_name;
     QString m_baseType;
     QString m_sourceFileName;
     QString m_headerFileName;
+//    QString m_headerIncludeBlockCode;
+//    QString m_sourceIncludeBlockCode;
+    bool m_wrapQtNamespace;
 };
 
 #endif // CLASS_H

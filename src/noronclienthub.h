@@ -36,24 +36,29 @@ class NORON_EXPORT NoronClientHub : public NoronAbstractHub
     Q_DECLARE_PRIVATE(NoronClientHub)
 
     Q_PROPERTY(QString serverAddress READ serverAddress WRITE setServerAddress NOTIFY serverAddressChanged)
-    Q_PROPERTY(qint16 port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(bool isAutoReconnect READ isAutoReconnect WRITE setAutoReconnect NOTIFY isAutoReconnectChanged)
 
 public:
     NoronClientHub(QObject *parent = 0);
     QString serverAddress() const;
-    qint16 port() const;
+    int port() const;
     bool isAutoReconnect() const;
+
+#ifdef QT_QML_LIB
+    static void registerQml(const char *uri, int versionMajor, int versionMinor);
+    static void registerQmlSingleton(const char *uri, int versionMajor, int versionMinor);
+#endif
 
 protected:
     void timerEvent(QTimerEvent *);
 
 public slots:
     void connectToHost(bool waitForConnected);
-    void connectToHost(QString address = QString::null, qint16 port = 0, bool waitForConnected = false);
+    void connectToHost(QString address = QString::null, int port = 0, bool waitForConnected = false);
     void disconnectFromHost();
     void setServerAddress(QString serverAddress);
-    void setPort(qint16 port);
+    void setPort(int port);
     void setAutoReconnect(bool isAutoReconnect);
 
 private slots:
@@ -61,7 +66,7 @@ private slots:
 
 signals:
     void serverAddressChanged(QString serverAddress);
-    void portChanged(qint16 port);
+    void portChanged(int port);
     void isAutoReconnectChanged(bool isAutoReconnect);
 };
 

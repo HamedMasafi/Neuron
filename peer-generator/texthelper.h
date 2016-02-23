@@ -19,6 +19,9 @@ public:
     QString indent(QString text);
 
     bool hasOperatorEqual(QString type);
+
+    QString joinSet(QSet<QString> set, QString seprator) const;
+
 signals:
 
 public slots:

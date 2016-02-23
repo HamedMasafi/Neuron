@@ -1,23 +1,27 @@
 #include "method.h"
 #include "class.h"
 
+#include "defines.h"
+
 #include <QDebug>
 #include <QRegularExpression>
 #include "texthelper.h"
 
 Method::Method(QObject *parent) : QObject(parent), parentClass((Class*)parent),
-    m_code(QString::null), m_isInvokable(false)
+    m_code(QString::null), m_isInvokable(false), m_inheristanceDeclare(QString::null), m_returnType(QString::null),
+    m_isStatic(false), m_isExtern(false)
 {
     parentClass = qobject_cast<Class*>(parent);
 }
 
 QString Method::declare()
 {
-    QString ret = QString("%4%1 %2(%3);")
+    QString ret = QString("%5%4%1 %2(%3);")
             .arg(returnType())
             .arg(name())
             .arg(signature())
-            .arg(isInvokable() ? "Q_INVOKABLE " : "");
+            .arg(isInvokable() ? "Q_INVOKABLE " : "")
+            .arg(isStatic() ? "static " : "");
 
     if(!wrapperMacro().isNull()){
         if(wrapperMacro().contains("<") || wrapperMacro().contains(">") || wrapperMacro().contains("=") )
@@ -31,20 +35,35 @@ QString Method::declare()
 
 QString Method::implement()
 {
-    if(code().isNull())
+    if(declType() == "signals")
         return QString::null;
 
-    QString ret = QString("%1 %5::%2(%3)\n{\n%4\n}")
-            .arg(returnType())
-            .arg(name())
-            .arg(signature())
-            .arg(TextHelper::instance()->indent(code()))
-            .arg(parentClass->name());
+    QString ret = "";
+    QString normalizedCode = code();
+    if(!normalizedCode.endsWith(LB))
+        normalizedCode.append(LB);
+
+    if(isExtern())
+        ret = QString("static %1 %2(%3)" LB "{" LB "%4}")
+                .arg(returnType())
+                .arg(name())
+                .arg(signature().replace(QRegularExpression("\\s*=\\s*\\S*"), ""))
+                .arg(normalizedCode);
+    else
+        ret = QString("%1 %5::%2(%3)%6" LB "{" LB "%4}")
+                .arg(returnType())
+                .arg(name())
+                .arg(signature().replace(QRegularExpression("\\s*=\\s*\\S*"), ""))
+                .arg(normalizedCode)
+                .arg(parentClass->name())
+                .arg(inheristanceDeclare().isNull() ? "" : " : " +inheristanceDeclare());
+
+
     if(!wrapperMacro().isNull()){
         if(wrapperMacro().contains("<") || wrapperMacro().contains(">") || wrapperMacro().contains("=") )
-            ret.prepend("#if " + wrapperMacro() + "\n");
+            ret.prepend("#if " + wrapperMacro() + LB);
         else
-            ret.prepend("#ifdef " + wrapperMacro() + "\n");
+            ret.prepend("#ifdef " + wrapperMacro() + LB);
         ret.append("\n#endif");
     }
     return ret;
@@ -88,6 +107,21 @@ QString Method::code() const
 bool Method::isInvokable() const
 {
     return m_isInvokable;
+}
+
+QString Method::inheristanceDeclare() const
+{
+    return m_inheristanceDeclare;
+}
+
+bool Method::isStatic() const
+{
+    return m_isStatic;
+}
+
+bool Method::isExtern() const
+{
+    return m_isExtern;
 }
 
 void Method::setDeclType(QString declType)
@@ -162,16 +196,63 @@ void Method::setIsInvokable(bool isInvokable)
     emit isInvokableChanged(isInvokable);
 }
 
+void Method::setInheristanceDeclare(QString inheristanceDeclare)
+{
+    if (m_inheristanceDeclare == inheristanceDeclare)
+        return;
+
+    m_inheristanceDeclare = inheristanceDeclare;
+    emit inheristanceDeclareChanged(inheristanceDeclare);
+}
+
+void Method::setIsStatic(bool isStatic)
+{
+    if (m_isStatic == isStatic)
+        return;
+
+    m_isStatic = isStatic;
+    emit isStaticChanged(isStatic);
+}
+
+void Method::setIsExtern(bool isExtern)
+{
+    if (m_isExtern == isExtern)
+        return;
+
+    m_isExtern = isExtern;
+    emit isExternChanged(isExtern);
+}
+
 QString Method::getParametereNames(){
-    QString s = signature();
-    s.replace(QRegularExpression("(,|^)\\s*(const\\s+)?\\S+\\s*\\*?"), "\\1");
-    return s;
+    QString ret = "";
+    QRegularExpression r("(const\\s+)?(?<type>\\S+)\\s*(?<star>\\*?)\\s*(\\&?)(?<name>\\S+)(\\s*=\\s*\\S)?\\s*,");
+    QRegularExpressionMatchIterator i = r.globalMatch(signature() + ",", 0, QRegularExpression::PartialPreferCompleteMatch);
+
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        if(!ret.isEmpty())
+            ret.append(", ");
+        ret.append(match.captured("name"));
+    }
+    return ret;
 }
 
 QString Method::getParametereTypes(){
-    QString s = signature();
-    s.replace(QRegularExpression("(\\*)?(\\S*)\\s*(,|$)"), "\\1\\3");
-    return s;
+    QString ret = "";
+    QRegularExpression r("(const\\s+)?(?<type>\\S+)\\s*(?<star>\\*?)\\s*(\\&?)(?<name>\\S+)(\\s*=\\s*\\S)?\\s*,");
+    QRegularExpressionMatchIterator i = r.globalMatch(signature() + ",", 0, QRegularExpression::PartialPreferCompleteMatch);
+
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        if(!ret.isEmpty())
+            ret.append(", ");
+        ret.append(match.captured("type"));
+
+        if(!match.captured("star").isNull())
+            ret.append("*");
+    }
+
+    return ret;
 }
 
 QString Method::replaceParams(QString text)

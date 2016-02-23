@@ -71,7 +71,7 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
                         val5, val6, val7, val8, val9);
     }
 
-    return 0;
+    return 1;
 }
 
 QT_END_NAMESPACE

@@ -163,8 +163,16 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     if(!ok)
         qWarning("Invoke " + method.name() + " on " + map[CLASS_NAME].toString().toLatin1() + " faild");
     else
-        response(id, map[CLASS_NAME].toString(),
-                 returnData.type() == QVariant::Invalid ? QVariant() : returnData);
+        response(id,
+                 map[CLASS_NAME].toString(),
+                 returnData.type() == QVariant::Invalid
+                    ? QVariant()
+                    : returnData);
+
+    QObject *returnDataPointer = returnData.value<QObject*>();
+
+    if(returnDataPointer)
+        returnDataPointer->deleteLater();
 
     locks.remove(lockName);
 }

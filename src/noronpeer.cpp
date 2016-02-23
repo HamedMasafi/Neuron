@@ -55,6 +55,7 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
                                           Q_ARG(QVariant, val7)/*,
                                                                         QGenericArgument(val8.typeName(), val8.data()),
                                                                         QGenericArgument(val9.typeName(), val9.data())*/);
+    //return a value in this case
     else
         return hub()->invokeOnPeer(
                     metaObject()->className(),
@@ -65,7 +66,7 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
 
 void NoronPeer::addCall(long id, NoronRemoteCallBase *call)
 {
-    hub()->_calls[id] = call;
+    hub()->_calls.insert(id, call);
 }
 
 void NoronPeer::removeCall(long id)

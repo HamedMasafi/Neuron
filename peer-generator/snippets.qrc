@@ -19,5 +19,9 @@
         <file>snippets/method_byjsvalue_void</file>
         <file>snippets/method_byjsvalue</file>
         <file>snippets/property_write_nocheck</file>
+        <file>snippets/property_write_noinvoke</file>
+        <file>snippets/property_write_noinvoke_nocheck</file>
+        <file>snippets/method_slot_shared</file>
+        <file>snippets/method_slot_shared_void</file>
     </qresource>
 </RCC>

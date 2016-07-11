@@ -28,6 +28,10 @@
 QT_BEGIN_NAMESPACE
 
 class NoronClientHubPrivate;
+#ifdef QT_QML_LIB
+class QJSEngine;
+class QQmlEngine;
+#endif
 class NORON_EXPORT NoronClientHub : public NoronAbstractHub
 {
     Q_OBJECT
@@ -41,13 +45,19 @@ class NORON_EXPORT NoronClientHub : public NoronAbstractHub
 
 public:
     NoronClientHub(QObject *parent = 0);
+#ifdef QT_QML_LIB
+    NoronClientHub(QQmlEngine *qmlEngine, QJSEngine *jsEngine, QObject *parent = 0);
+#endif
+
+    ~NoronClientHub();
+
     QString serverAddress() const;
     int port() const;
     bool isAutoReconnect() const;
 
 #ifdef QT_QML_LIB
-    static void registerQml(const char *uri, int versionMajor, int versionMinor);
-    static void registerQmlSingleton(const char *uri, int versionMajor, int versionMinor);
+    static int registerQml(const char *uri, int versionMajor, int versionMinor);
+    static int registerQmlSingleton(const char *uri, int versionMajor, int versionMinor);
 #endif
 
 protected:

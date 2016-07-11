@@ -26,8 +26,17 @@
 
 #include "noronglobal.h"
 #include "noronremotecall_p.h"
+#include "syntax_p.h"
 
 QT_BEGIN_NAMESPACE
+
+#define NORON_PEER_CTOR_DECL(c) c(NoronAbstractHub *hub, QObject *parent = 0); \
+                          Q_INVOKABLE c(QObject *parent = 0);
+
+#define NORON_PEER_CTOR_IMPL(c) c::c(NoronAbstractHub *hub, QObject *parent) : Peer(hub, parent)  \
+{}  \
+c::c(QObject *parent) : Peer(parent)  \
+{}
 
 class NoronAbstractHub;
 class NoronRemoteCallBase;
@@ -36,7 +45,6 @@ class NORON_EXPORT NoronPeer : public QObject
     Q_OBJECT
     Q_PROPERTY(NoronAbstractHub* hub READ hub WRITE setHub NOTIFY hubChanged)
 
-    NoronAbstractHub* m_hub;
 
 public:
     explicit NoronPeer(QObject *parent = 0);
@@ -56,7 +64,10 @@ public:
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
 
+    virtual const QString peerName();// = 0;
+
 protected:
+    NoronAbstractHub* m_hub;
     void addCall(long id, NoronRemoteCallBase *call);
     void removeCall(long id);
 
@@ -64,7 +75,7 @@ signals:
     void hubChanged(NoronAbstractHub* hub);
 
 public slots:
-    void setHub(NoronAbstractHub* hub);
+    virtual void setHub(NoronAbstractHub* hub);
 };
 
 QT_END_NAMESPACE

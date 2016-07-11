@@ -9,19 +9,20 @@
 
 Method::Method(QObject *parent) : QObject(parent), parentClass((Class*)parent),
     m_code(QString::null), m_isInvokable(false), m_inheristanceDeclare(QString::null), m_returnType(QString::null),
-    m_isStatic(false), m_isExtern(false)
+    m_isStatic(false), m_isExtern(false), m_isVirtual(false)
 {
     parentClass = qobject_cast<Class*>(parent);
 }
 
 QString Method::declare()
 {
-    QString ret = QString("%5%4%1 %2(%3);")
+    QString ret = QString("%6%5%4%1 %2(%3);")
             .arg(returnType())
             .arg(name())
             .arg(signature())
             .arg(isInvokable() ? "Q_INVOKABLE " : "")
-            .arg(isStatic() ? "static " : "");
+            .arg(isStatic() ? "static " : "")
+            .arg(isVirtual() ? "virtual " : "");
 
     if(!wrapperMacro().isNull()){
         if(wrapperMacro().contains("<") || wrapperMacro().contains(">") || wrapperMacro().contains("=") )
@@ -124,6 +125,11 @@ bool Method::isExtern() const
     return m_isExtern;
 }
 
+bool Method::isVirtual() const
+{
+    return m_isVirtual;
+}
+
 void Method::setDeclType(QString declType)
 {
     if (m_declType == declType)
@@ -221,6 +227,15 @@ void Method::setIsExtern(bool isExtern)
 
     m_isExtern = isExtern;
     emit isExternChanged(isExtern);
+}
+
+void Method::setIsVirtual(bool isVirtual)
+{
+    if (m_isVirtual == isVirtual)
+        return;
+
+    m_isVirtual = isVirtual;
+    emit isVirtualChanged(isVirtual);
 }
 
 QString Method::getParametereNames(){

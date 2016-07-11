@@ -18,6 +18,8 @@
 #define METHOD_BYJSVALUE        6
 #define METHOD_SIGNAL           7
 
+#define NORON_PEER "NoronPeer"
+
 ClassParser::ClassParser(QObject *parent) : QObject(parent)
 {
     QFile cppFile(":/template.cpp");
@@ -93,7 +95,6 @@ void ClassParser::procLine(Class *cls, QString line)
         m->setDeclType("public slots");
     }
 
-    QStringList types = methodsList[0]->getParametereTypes().split(",");
     /*foreach (QString t, types)
         usedTypes.insert(t.trimmed());
 */
@@ -106,17 +107,24 @@ void ClassParser::procLine(Class *cls, QString line)
     setMethodCode(methodsList[METHOD_BYMETAMETHOD], "method_bymetamethod");
     setMethodCode(methodsList[METHOD_BYSIGNAL],     "method_bysignal");
     setMethodCode(methodsList[METHOD_FRESH],        "method_fresh");
-    setMethodCode(methodsList[METHOD_SLOT],         "method_slot");
+    if(cls->baseType() != NORON_PEER){
+        methodsList[METHOD_SLOT]->setSignature("NoronPeer *senderPeer" + sep + params);
+        setMethodCode(methodsList[METHOD_SLOT],         "method_slot_shared");
+    }else{
+        setMethodCode(methodsList[METHOD_SLOT],         "method_slot");
+    }
 
     methodsList[METHOD_ASYNC]->setName(name + "Async");
     methodsList[METHOD_SLOT]->setName(name + "Slot");
 
+    methodsList[METHOD_SLOT]->setIsVirtual(true);
     methodsList[METHOD_BYSIGNAL]->setIsInvokable(true);
 
     methodsList[METHOD_BYSIGNAL]->setSignature(params + sep + "const QObject *obj, char *callbackSlot");
     methodsList[METHOD_BYMETAMETHOD]->setSignature(params + sep + "const QObject *obj, const QMetaMethod *callbackMethod");
     methodsList[METHOD_BYFUNC]->setSignature(params + sep + "std::function<void(" + returnType + ")> callbackFunction");
     methodsList[METHOD_BYJSVALUE]->setSignature(params + sep + "QJSValue callbackFunction");
+
 
     //    methodsList[METHOD_FRESH]->setIsInvokable(true);
     //    methodsList[METHOD_ASYNC]->setIsInvokable(true);
@@ -125,8 +133,27 @@ void ClassParser::procLine(Class *cls, QString line)
     methodsList[METHOD_SIGNAL]->setDeclType("signals");
     methodsList[METHOD_SIGNAL]->setName(name + "Signal");
 
-    if(returnType != "void"){
+    if(returnType == "void"){
+        methodsList[METHOD_SIGNAL]->setSignature(params);
+    }else{
         methodsList[METHOD_SIGNAL]->setSignature(params + sep + returnType + " *returnValue");
+        if(returnType.endsWith("*")){
+//            methodsList[METHOD_SIGNAL]->setSignature(params + sep + returnType + " returnValue");
+            methodsList[METHOD_SLOT]->setCode(methodsList[METHOD_SLOT]->code().replace("&ret", "ret")
+                                              .arg(" = new " + returnType.replace("*", "")));
+        }else{
+//            methodsList[METHOD_SIGNAL]->setSignature(params);
+//            if(cls->baseType() != NORON_PEER)
+//                methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer " + sep + params + ", " + returnType + " *returnValue");
+//            else
+        }
+    }
+
+    if(cls->baseType() != NORON_PEER){
+        if(methodsList[METHOD_SIGNAL]->signature().isEmpty())
+            methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer");
+        else
+            methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer, " + methodsList[METHOD_SIGNAL]->signature());
     }
 
     //usedTypes.insert(returnType);
@@ -138,12 +165,26 @@ void ClassParser::procLine(Class *cls, QString line)
     }
 
     includeUsedType(cls, returnType);
+
+    QStringList types = methodsList[0]->getParametereTypes().split(",");
+    qDebug() << "types"<<types;
+    foreach(QString t, types)
+        includeUsedType(cls, t.trimmed().replace("*", ""));
 }
 
 bool ClassParser::includeUsedType(Class *cls, QString propType)
 {
+    propType = propType.replace("*", "");
     if(propType.startsWith("Q")){
-        cls->addInclude(propType);
+        QRegularExpression r("(\\w+)\\<(\\w+)\\>");
+        QRegularExpressionMatch m = r.match(propType);
+
+        if(m.hasMatch()){
+            includeUsedType(cls, m.captured(1));
+            includeUsedType(cls, m.captured(2));
+        }else{
+            cls->addInclude(propType);
+        }
         return true;
     }
 
@@ -151,8 +192,9 @@ bool ClassParser::includeUsedType(Class *cls, QString propType)
         propType =  propType.left(propType.length() - 4);
 
     foreach (ClassData *data, classDataList){
-
+qDebug() << "check" <<data->name << propType;
         if(data->name == propType){
+            qDebug() << " " << propType << " found;";
             cls->addInclude(data->name.toLower() + ".h", true, false);
             return true;
         }
@@ -161,7 +203,7 @@ bool ClassParser::includeUsedType(Class *cls, QString propType)
     return false;
 }
 
-void ClassParser::procPropertyPeer(Class *cls, QString line)
+void ClassParser::procPropertyPeer(Class *cls, QString line, QString baseType)
 {
 
     line = line.trimmed();
@@ -213,9 +255,16 @@ void ClassParser::procPropertyPeer(Class *cls, QString line)
     notifySignal->setName(prop->notifySignalName());
 
 
-    QString writeFileName = TextHelper::instance()->hasOperatorEqual(prop->type()) ? "property_write" : "property_write_nocheck";
+    QString writeFileName = "property_write";
+    if(baseType == QT_STRINGIFY(QObject))
+        writeFileName.append("_noinvoke");
+    if(!TextHelper::instance()->hasOperatorEqual(prop->type()))
+        writeFileName.append("_nocheck");
+
+    //QString writeFileName = TextHelper::instance()->hasOperatorEqual(prop->type()) ? "property_write" : "property_write_nocheck";
     readMethod->setCode(TextHelper::instance()->getFileContent("property_read")
                         .arg(prop->name()));
+
     writeMethod->setCode(TextHelper::instance()->getFileContent(writeFileName)
                          .arg(prop->name())
                          .arg(prop->writeMethodName())
@@ -301,7 +350,10 @@ void ClassParser::setMethodCode(Method *m, QString fileName)
         fileName.append("_void");
 
     QString code = TextHelper::instance()->getFileContent(fileName);
+    QString params = m->getParametereNames();
 
+    if(!fileName.contains("_slot") && !params.trimmed().isEmpty())
+        params = "QVariant::fromValue(" + params.replace(" ", "").replace(",", "), QVariant::fromValue(") + ")";
 
     if(code.isEmpty() || code.isNull()){
         m->setCode("//Error loading " + fileName);
@@ -309,7 +361,7 @@ void ClassParser::setMethodCode(Method *m, QString fileName)
         code = code
                 .replace("%1", m->name())
                 .replace("%2", m->seprator())
-                .replace("%3", m->getParametereNames())
+                .replace("%3", params)
                 .replace("%4", m->returnType());
         m->setCode(code);
     }
@@ -320,14 +372,54 @@ void ClassParser::addPropertyToClass(Class *cls, Property *prop)
 
 }
 
+void ClassParser::addQmlRegisterMethods(Class *cls)
+{
+    Method *createSingleton = new Method(cls);
+    createSingleton->setIsExtern(true);
+    createSingleton->setReturnType("QObject*");
+    createSingleton->setSignature("QQmlEngine *, QJSEngine *");
+    createSingleton->setName("create_singelton_object");
+    createSingleton->setCode("return new " + cls->name() + "();");
+    createSingleton->setWrapperMacro("QT_QML_LIB");
+    cls->addMethod(createSingleton);
+
+    Method *registerSingleton = new Method(cls);
+//    QString classJsName = cls->name();
+//    classJsName[0] = classJsName[0].toLower();
+    registerSingleton->setName("registerQmlSingleton");
+    registerSingleton->setReturnType("int");
+    registerSingleton->setIsStatic(true);
+    registerSingleton->setDeclType("public");
+    registerSingleton->setSignature("const char *uri, int versionMajor, int versionMinor");
+    registerSingleton->setCode(QString("return qmlRegisterSingletonType<%1>(uri, versionMajor, versionMinor, \"%1\", create_singelton_object);")
+                               .arg(cls->name()));//.arg(classJsName));
+    registerSingleton->setWrapperMacro("QT_QML_LIB");
+    cls->addMethod(registerSingleton);
+
+    Method *registerQml = new Method(cls);
+    registerQml->setName("registerQml");
+    registerQml->setReturnType("int");
+    registerQml->setIsStatic(true);
+    registerQml->setDeclType("public");
+    registerQml->setSignature("const char *uri, int versionMajor, int versionMinor");
+    registerQml->setCode(QString("return qmlRegisterType<%1>(uri, versionMajor, versionMinor, \"%1\");")
+                         .arg(cls->name()));
+    registerQml->setWrapperMacro("QT_QML_LIB");
+    cls->addMethod(registerQml);
+
+    //    cls->addInclude("QQmlEngine", false, true, "ifdef QT_QML_LIB");
+    //    cls->addInclude("QJSEngine", false, true, "ifdef QT_QML_LIB");
+    cls->addInclude("QtQml", false, true, "ifdef QT_QML_LIB", false);
+}
+
 Class *ClassParser::parsePeer(QString baseType, QString className, QString templateCode)
 {
     Class *cls = new Class;
     cls->setName(className);
 
-    if(baseType == "NoronData")
-        cls->setBaseType(QT_STRINGIFY(QObject));
-    else
+//    if(baseType == "QObject")
+//        cls->setBaseType(QT_STRINGIFY(QObject));
+//    else
         cls->setBaseType(baseType);
 
     cls->addBeginOfClass("Q_OBJECT");
@@ -335,17 +427,6 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
     cls->addInclude("functional", true, true, "if __cplusplus >= 201103L");
     cls->addInclude("QJSValue", true, true, "ifdef QT_QML_LIB");
     cls->addInclude("NoronAbstractHub");
-
-    //    cls->setHeaderIncludeBlockCode("#if __cplusplus >= 201103L" LB
-    //                         "#   include <functional>" LB
-    //                         "#endif" LB LB
-
-    //                         "#ifdef QT_QML_LIB" LB
-    //                         "#   include <QJSValue>" LB
-    //                         "#endif" LB
-
-    //                         "#include <NoronAbstractHub>" LB
-    //                         "#include <" + baseType + ">" LB);
 
     QStringList lines = templateCode.split("\n");
 
@@ -358,11 +439,15 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
     constructor->setInheristanceDeclare(cls->baseType() + "(parent)");
     cls->addMethod(constructor);
 
-    if(baseType == "NoronData"){
-        cls->addAfterClass(QString("typedef QList<%1> %1List;").arg(className));
+    Method *peerNameMethod = new Method(cls);
+    peerNameMethod->setName("peerName");
+    peerNameMethod->setReturnType(QT_STRINGIFY(const QString));
+    peerNameMethod->setCode(QString("return QString(\"%1\");").arg(cls->name()));
+    peerNameMethod->setDeclType("public");
+    cls->addMethod(peerNameMethod);
 
-//        cls->addAfterNamespace(QString("Q_DECLARE_METATYPE(%1)").arg(className));
-//        cls->addAfterNamespace(QString("Q_DECLARE_METATYPE(%1List)").arg(className));
+    if(baseType == "QObject"){
+        cls->addAfterClass(QString("typedef QList<%1*> %1List;").arg(className));
     }else{
         cls->addInclude(baseType);
 
@@ -371,46 +456,21 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
         constructor2->setSignature("NoronAbstractHub *hub, QObject *parent = 0");
         constructor2->setReturnType("");
         constructor2->setDeclType("public");
-        constructor2->setCode("if(hub)" LB
-                              "setHub(hub);" LB);
+
+        if(baseType == NORON_PEER)
+            constructor2->setCode("if(hub)" LB
+                                  "setHub(hub);");
+        else
+            constructor2->setCode("if(hub){" LB
+                                  "setHub(hub);" LB
+                                  "hub->addSharedObject(this);" LB
+                                  "}");
+
         constructor2->setInheristanceDeclare(cls->baseType() + "(parent)");
         cls->addMethod(constructor2);
 
-        Method *createSingleton = new Method(cls);
-        createSingleton->setIsExtern(true);
-        createSingleton->setReturnType("QObject*");
-        createSingleton->setSignature("QQmlEngine *, QJSEngine *");
-        createSingleton->setName("create_singelton_object");
-        createSingleton->setCode("return new " + cls->name() + "();");
-        createSingleton->setWrapperMacro("QT_QML_LIB");
-        cls->addMethod(createSingleton);
-
-        Method *registerSingleton = new Method(cls);
-        registerSingleton->setName("registerQmlSingleton");
-        registerSingleton->setReturnType("void");
-        registerSingleton->setIsStatic(true);
-        registerSingleton->setDeclType("public");
-        registerSingleton->setSignature("const char *uri, int versionMajor, int versionMinor");
-        registerSingleton->setCode(QString("qmlRegisterSingletonType<%1>(uri, versionMajor, versionMinor, \"%1\", create_singelton_object);")
-                                   .arg(cls->name()));
-        registerSingleton->setWrapperMacro("QT_QML_LIB");
-        cls->addMethod(registerSingleton);
-
-        Method *registerQml = new Method(cls);
-        registerQml->setName("registerQml");
-        registerQml->setReturnType("void");
-        registerQml->setIsStatic(true);
-        registerQml->setDeclType("public");
-        registerQml->setSignature("const char *uri, int versionMajor, int versionMinor");
-        registerQml->setCode(QString("qmlRegisterType<%1>(uri, versionMajor, versionMinor, \"%1\");")
-                             .arg(cls->name()));
-        registerQml->setWrapperMacro("QT_QML_LIB");
-        cls->addMethod(registerQml);
-
-        //    cls->addInclude("QQmlEngine", false, true, "ifdef QT_QML_LIB");
-        //    cls->addInclude("QJSEngine", false, true, "ifdef QT_QML_LIB");
-        cls->addInclude("QtQml", false, true, "ifdef QT_QML_LIB", false);
     }
+    addQmlRegisterMethods(cls);
 
     foreach (QString line, lines) {
         line = line.trimmed();
@@ -419,7 +479,7 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
             continue;
 
         if(line.startsWith("Q_PROPERTY"))
-            procPropertyPeer(cls, line);
+            procPropertyPeer(cls, line, baseType);
         else
             procLine(cls, line);
     }
@@ -454,6 +514,8 @@ Class *ClassParser::parseData(QString className, QString templateCode)
     //    constructor->setInheristanceDeclare();
 
     cls->addMethod(constructor);
+
+    addQmlRegisterMethods(cls);
 
     foreach (QString line, lines) {
         line = line.trimmed();

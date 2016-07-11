@@ -41,6 +41,8 @@ public:
     NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent = 0);
     NoronServerHub(QTcpSocket *socket, QObject *parent = 0);
 
+    ~NoronServerHub();
+
     NoronServerThread *serverThread() const;
 
 public slots:

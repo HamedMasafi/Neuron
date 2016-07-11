@@ -33,8 +33,8 @@ NoronServerThread::NoronServerThread(qintptr socketDescriptor, QObject *parent) 
 
 NoronServerThread::~NoronServerThread()
 {
-    if(_hub)
-        _hub->deleteLater();
+//    if(_hub)
+//        _hub->deleteLater();
 }
 
 bool NoronServerThread::isStarted() const

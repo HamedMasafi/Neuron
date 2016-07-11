@@ -18,17 +18,23 @@
 **
 **************************************************************************/
 
+#include <QtCore/QMetaObject>
 #include "noronpeer.h"
 #include "noronabstracthub.h"
 
 QT_BEGIN_NAMESPACE
 
-NoronPeer::NoronPeer(QObject *parent) : QObject(parent)
+/*!
+ * \brief NoronPeer
+ * This is base class of all peers.
+ */
+
+NoronPeer::NoronPeer(QObject *parent) : QObject(parent), m_hub(0)
 {
 
 }
 
-NoronPeer::NoronPeer(NoronAbstractHub *hub, QObject *parent) : QObject(parent)
+NoronPeer::NoronPeer(NoronAbstractHub *hub, QObject *parent) : QObject(parent), m_hub(0)
 {
     setHub(hub);
 }
@@ -40,10 +46,17 @@ NoronAbstractHub *NoronPeer::hub() const
 
 qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
-    if(hub()->isMultiThread())
+    //Object is transfered!!!
+    if(!hub())
+        return 0;
+
+    if(hub()->isMultiThread()){
+//        qlonglong ret;
         hub()->metaObject()->invokeMethod(hub(),
                                           QT_STRINGIFY(invokeOnPeer),
-                                          Q_ARG(QString, metaObject()->className()),
+//                                          Qt::DirectConnection,
+//                                          Q_RETURN_ARG(qlonglong, ret),
+                                          Q_ARG(QString, peerName()),
                                           Q_ARG(QString, methodName),
                                           Q_ARG(QVariant, val0),
                                           Q_ARG(QVariant, val1),
@@ -55,13 +68,20 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
                                           Q_ARG(QVariant, val7)/*,
                                                                         QGenericArgument(val8.typeName(), val8.data()),
                                                                         QGenericArgument(val9.typeName(), val9.data())*/);
-    //return a value in this case
-    else
+//        return ret;
+        return 0;
+    }else{
         return hub()->invokeOnPeer(
                     metaObject()->className(),
                     methodName,
                     val0, val1, val2, val3, val4,
                     val5, val6, val7, val8, val9);
+    }
+}
+
+const QString NoronPeer::peerName()
+{
+    return QString("");
 }
 
 void NoronPeer::addCall(long id, NoronRemoteCallBase *call)
@@ -80,6 +100,7 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
         return;
 
     m_hub = hub;
+    hub->setPeer(this);
     emit hubChanged(hub);
 }
 

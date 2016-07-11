@@ -29,14 +29,24 @@ QT_BEGIN_NAMESPACE
 
 class NORON_EXPORT NoronSharedObject : public NoronPeer
 {
+    Q_OBJECT
+    NoronAbstractHub *_activeHub;
+
 public:
     NoronSharedObject(QObject *parent = 0);
     NoronSharedObject(NoronAbstractHub *hub, QObject *parent = 0);
 
     void addHub(NoronAbstractHub *hub);
     void removeHub(NoronAbstractHub *hub);
+    bool setActiveHub(NoronAbstractHub *hub);
 
     QSet<NoronAbstractHub*> hubs;
+
+    void setHub(NoronAbstractHub* hub) /*Q_DECL_OVERRIDE*/;
+
+    virtual const QString peerName() /*Q_DECL_OVERRIDE*/;
+    virtual void hubAdded(NoronAbstractHub *hub);
+    virtual void hubRemoved(NoronAbstractHub *hub);
 
 protected:
     qlonglong invokeOnPeer(
@@ -51,6 +61,8 @@ protected:
             QVariant val7 = QVariant(),
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
+
+signals:
 };
 
 QT_END_NAMESPACE

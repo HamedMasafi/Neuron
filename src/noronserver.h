@@ -42,6 +42,7 @@ class NORON_EXPORT NoronServer : public NoronAbstractHub
 public:
     explicit NoronServer(QObject *parent = 0);
     explicit NoronServer(qint16 port, QObject *parent = 0);
+    virtual ~NoronServer();
 
     enum ServerType{
         SingleThread,

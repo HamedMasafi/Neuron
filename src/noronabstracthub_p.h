@@ -37,6 +37,8 @@
 QT_BEGIN_NAMESPACE
 
 class QTcpSocket;
+class QJSEngine;
+class QQmlEngine;
 class NoronAbstractHubPrivate{
     NoronAbstractHub *q_ptr;
     Q_DECLARE_PUBLIC(NoronAbstractHub)
@@ -50,14 +52,24 @@ public:
     bool isTransaction;
 
     NoronPeer* peer;
-    QHash<QString, NoronSharedObject*> sharedObjects;
+    QHash<const QString, NoronSharedObject*> sharedObjects;
     bool isConnected;
     QString validateToken;
     NoronAbstractSerializer* serializer;
+    bool isMultiThread;
+
+    qlonglong peerId;
+
+#ifdef QT_QML_LIB
+    QJSEngine *jsEngine;
+    QQmlEngine *qmlEngine;
+#endif
 
     void addToMap(QVariantMap *map, QVariant var, int index);
     void procMap(QVariantMap map);
     bool response(qlonglong id, QString senderName, QVariant returnValue);
+
+    QString createValidateToken(QVariantMap *map);
     void addValidateToken(QVariantMap *map);
     bool checkValidateToken(QVariantMap *map);
     QString MD5(QString text);

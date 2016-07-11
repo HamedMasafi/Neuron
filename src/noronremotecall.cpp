@@ -63,10 +63,13 @@ NoronRemoteCallBase::NoronRemoteCallBase(std::function<void ()> func)
 }
 #endif
 #ifdef QT_QML_LIB
-NoronRemoteCallBase::NoronRemoteCallBase(QJSValue jsvalue)
+NoronRemoteCallBase::NoronRemoteCallBase(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *engine) :
+    type(JSValue), qmlEngine(qmlEngine), jsEngine(engine), jsvalue(jsvalue)
 {
-    this->type = JSValue;
-    this->jsvalue = jsvalue;
+//    this->type = JSValue;
+//    this->jsEngine = engine;
+//    this->qmlEngine = qmlEngine;
+//    this->jsvalue = jsvalue;
 }
 #endif
 NoronRemoteCallBase::NoronRemoteCallBase(QObject *obj, char *slotName)

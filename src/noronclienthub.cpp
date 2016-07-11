@@ -25,6 +25,7 @@
 #include "noronclienthub.h"
 #include "noronabstractserializer.h"
 #include "noronpeer.h"
+#include "noronsharedobject.h"
 
 #ifdef QT_QML_LIB
 #   include <QtQml>
@@ -72,6 +73,22 @@ NoronClientHub::NoronClientHub(QObject *parent) : NoronAbstractHub(parent),
     connect(this, &NoronAbstractHub::isConnectedChanged, this, &NoronClientHub::isConnectedChanged);
 }
 
+#ifdef QT_QML_LIB
+NoronClientHub::NoronClientHub(QQmlEngine *qmlEngine, QJSEngine *engine, QObject *parent) : NoronAbstractHub(parent),
+    d_ptr(new NoronClientHubPrivate(this))
+{
+    setJsEngine(engine);
+    setQmlEngine(qmlEngine);
+    connect(this, &NoronAbstractHub::isConnectedChanged, this, &NoronClientHub::isConnectedChanged);
+}
+#endif
+
+NoronClientHub::~NoronClientHub()
+{
+    Q_D(NoronClientHub);
+    delete d;
+}
+
 QString NoronClientHub::serverAddress() const
 {
     Q_D(const NoronClientHub);
@@ -91,23 +108,26 @@ bool NoronClientHub::isAutoReconnect() const
 }
 
 #ifdef QT_QML_LIB
-static QObject* create_singelton_object_client_hub(QQmlEngine *, QJSEngine *)
+static QObject* create_singelton_object_client_hub(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
-    return new NoronClientHub();
+    qDebug() << "create_singelton_object_client_hub";
+    return new NoronClientHub(qmlEngine, jsEngine);
 }
 
-void NoronClientHub::registerQml(const char *uri, int versionMajor, int versionMinor)
+int NoronClientHub::registerQml(const char *uri, int versionMajor, int versionMinor)
 {
-    qmlRegisterType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub");
     qmlRegisterUncreatableType<NoronAbstractHub>(uri, versionMajor, versionMinor, "AbstractHub", "Abstract class for ClientHub base");
     qmlRegisterUncreatableType<NoronPeer>(uri, versionMajor, versionMinor, "NoronPeer", "Abstract type used by custom generated peer");
+    qmlRegisterUncreatableType<NoronSharedObject>(uri, versionMajor, versionMinor, "NoronSharedObject", "Abstract type used by ClientHub");
+    return qmlRegisterType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub");
 }
 
-void NoronClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versionMinor)
+int NoronClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versionMinor)
 {
-    qmlRegisterSingletonType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub", create_singelton_object_client_hub);
     qmlRegisterUncreatableType<NoronAbstractHub>(uri, versionMajor, versionMinor, "AbstractHub", "Abstract class for ClientHub base");
     qmlRegisterUncreatableType<NoronPeer>(uri, versionMajor, versionMinor, "NoronPeer", "Abstract type used by custom generated peer");
+    qmlRegisterUncreatableType<NoronSharedObject>(uri, versionMajor, versionMinor, "NoronSharedObject", "Abstract type used by ClientHub");
+    return qmlRegisterSingletonType<NoronClientHub>(uri, versionMajor, versionMinor, "ClientHub", create_singelton_object_client_hub);
 }
 #endif
 
@@ -117,6 +137,7 @@ void NoronClientHub::timerEvent(QTimerEvent *)
 
     if(socket->state() == QAbstractSocket::UnconnectedState){
         connectToHost();
+        qDebug() << "reconnecting...";
     }else if(socket->state() == QAbstractSocket::ConnectedState){
         killTimer(d->reconnectTimerId);
         d->sync();

@@ -31,7 +31,7 @@
 QT_BEGIN_NAMESPACE
 
 NoronServerPrivate::NoronServerPrivate(NoronServer *parent) : q_ptr(parent),
-    serverSocket(0), typeId(0), serverType(NoronServer::SingleThread)
+    serverSocket(0), typeId(0), serverType(NoronServer::SingleThread), peerId(0)
 {
 }
 
@@ -52,11 +52,18 @@ NoronServer::NoronServer(qint16 port, QObject *parent) : NoronAbstractHub(parent
     Q_D(NoronServer);
 
     d->serverSocket = new NoronTcpSocketServer;
-    d->serverSocket->listen(QHostAddress::Any, port);
     d->serverSocket->setObjectName("serverSocket");
 
     connect(d->serverSocket, &NoronTcpSocketServer::newIncomingConnection,
             this, &NoronServer::server_newIncomingConnection);
+
+    d->serverSocket->listen(QHostAddress::Any, port);
+}
+
+NoronServer::~NoronServer()
+{
+    Q_D(NoronServer);
+    delete d;
 }
 
 QSet<NoronPeer *> NoronServer::peers()
@@ -129,7 +136,7 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         hub = thread->hub();
         hub->setServerThread(thread);
 
-        hub->_isMultiThread = true;
+        hub->setIsMultiThread(true);
         hubIsValid = (hub != 0);
     }else{
         hub = new NoronServerHub(this);
@@ -158,10 +165,15 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 
     hub->setSerializer(serializer());
     hub->setValidateToken(validateToken());
-    foreach (NoronSharedObject *o, sharedObjects())
-        hub->addSharedObject(o);
+    foreach (NoronSharedObject *sharedObj, sharedObjects())
+        hub->addSharedObject(sharedObj);
 
     connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+
+    /*if(d->peerId++ >= LONG_LONG_MAX - 1)
+        d->peerId = 1;
+
+    hub->setPeerId(d->peerId);*/
 
     d->hubs.insert(hub);
     d->peers.insert(peer);

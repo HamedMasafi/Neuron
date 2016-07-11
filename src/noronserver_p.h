@@ -39,6 +39,7 @@ public:
     int typeId;
     NoronAbstractSerializer* serializer;
     NoronServer::ServerType serverType;
+    qlonglong peerId;
 };
 
 QT_END_NAMESPACE

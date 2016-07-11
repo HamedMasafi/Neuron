@@ -74,7 +74,7 @@ QString TextHelper::indent(QString text)
             deindentInNextLine = false;
         }
 
-        if(line.endsWith("{"))
+        if(line.endsWith("{") && !line.startsWith("namespace"))
             indentLevel++;
 
         if(!line.startsWith("Q_") && !line.startsWith("#") && !line.endsWith(":")

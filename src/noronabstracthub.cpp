@@ -24,6 +24,10 @@
 #include <QtCore/QVariant>
 #include <QtNetwork/QTcpSocket>
 
+#ifdef QT_QML_LIB
+#   include <QtQml/QJSEngine>
+#endif
+
 #include "noronpeer.h"
 #include "noronabstracthub_p.h"
 #include "noronabstracthub.h"
@@ -32,11 +36,23 @@
 #include "noronsharedobject.h"
 #include "noronjsonbinaryserializer.h"
 
+
+#ifdef LONG_LONG_MAX
+#   define MAX LONG_LONG_MAX
+#endif
+
+#ifdef LONG_MAX
+#   define MAX LONG_MAX
+#endif
+
 QT_BEGIN_NAMESPACE
 
 NoronAbstractHubPrivate::NoronAbstractHubPrivate(NoronAbstractHub *parent) : q_ptr(parent),
     peer(0), isConnected(false), validateToken(QString::null), serializer(0), requestId(0),
-    isTransaction(false)
+    isTransaction(false), isMultiThread(false)
+#ifdef QT_QML_LIB
+   ,qmlEngine(0), jsEngine(0)
+#endif
 {
 
 }
@@ -53,11 +69,12 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
 {
     Q_Q(NoronAbstractHub);
 
+    QList<QGenericArgument> args;
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
 
     if(!ok){
-        qWarning("An injection detected. The id '" + map[ID].toString().toLatin1() + "' is not numeric");
+        qWarning("An injection detected. The id '%s' is not numeric", map[ID].toString().toLatin1().data());
         return;
     }
 
@@ -65,10 +82,12 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
         if(q->_calls[id]){
             q->_calls[id]->returnData = map[MAP_RETURN_VALUE];
             q->_calls[id]->returnToCaller();
+            //TODO flowing two lines must be test
+            delete q->_calls[id];
+            q->_calls.remove(id);
         }
         return;
     }
-
     if(!q->validateToken().isNull())
         if(!checkValidateToken(&map)){
             qWarning("Token validation was faild!");
@@ -77,11 +96,13 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
 
     QObject *target = sharedObjects[map[CLASS_NAME].toString()];
 
-    if(!target && map[CLASS_NAME] == q->peer()->metaObject()->className())
+    if(!target && map[CLASS_NAME] == q->peer()->peerName())
         target = q->peer();
+//    else if(!map.value(METHOD_NAME).toString().startsWith("set"))
+//        args.prepend(Q_ARG(NoronPeer*, peer));
 
     if(!target){
-        qWarning("There are no '" + map[CLASS_NAME].toString().toLatin1() + "' service");
+        qWarning("There are no '%s' service", map[CLASS_NAME].toString().toLatin1().data());
         return;
     }
 
@@ -91,29 +112,49 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     QByteArray methodName = map.value(METHOD_NAME).toByteArray();
     if(methodName == "")
         return;
-
-    QVariant returnData = QVariant("");
+//qDebug() << map;
+    //TODO: ...
+    /*
+     * returnData MUST NOT BE null
+     *
+     * From qdoc:
+     * Warning: For historical reasons, converting a null QVariant
+     * results in a null value of the desired type (e.g., an empty
+     * string for QString) and a result of false.
+     */
+    QVariant returnData;// = QVariant::fromValue(o);
 
     // find method
     for(int i = 0; i < target->metaObject()->methodCount(); i++){
         method = target->metaObject()->method(i);
         if(method.name() == methodName){
             const char* type = QVariant::typeToName(method.returnType());
-            QVariant::Type returnType = QVariant::nameToType(type);
-            returnData.convert(returnType);
-            returnArgument = QGenericReturnArgument(type, &returnData);
+            QString typeString = QString(type);
 
-            if(QString(type) == "void")
+            if(typeString == "void"){
                 returnData = QVariant(QVariant::Invalid);
+            }else{
+                returnData = QVariant(method.returnType(), (const void *)0);
+                returnArgument = QGenericReturnArgument(QMetaType::typeName(method.returnType()), returnData.data());
+
+                if(!method.returnType())
+                    qWarning("%s is not registered in meta type. Did you forget to call qRegisterMetaType?",
+                              qPrintable(method.typeName()));
+            }
+
+            if(map[CLASS_NAME].toString() != q->peer()->peerName() && method.parameterCount() > 0)
+                if(method.parameterType(0) == QMetaType::type("NoronPeer*"))
+                    args.prepend(Q_ARG(NoronPeer*, peer));
 
             break;
         }
     }
 
-    if(method.name().isEmpty())
+    if(method.name().isEmpty()){
+        qWarning("No such method %s", qPrintable(methodName));
         return;
+    }
 
-    QList<QGenericArgument> args;
     for(int i = 0; i < 10; i++){
         QString indexString = QString::number(i);
         if(!map.contains("val" + indexString))
@@ -161,13 +202,14 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
                     args.value(9, QGenericArgument() ));
 
     if(!ok)
-        qWarning("Invoke " + method.name() + " on " + map[CLASS_NAME].toString().toLatin1() + " faild");
+        qWarning("Invoke %s on %s faild", qPrintable(method.name()), qPrintable(map[CLASS_NAME].toString()));
     else
         response(id,
                  map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid
                     ? QVariant()
                     : returnData);
+
 
     QObject *returnDataPointer = returnData.value<QObject*>();
 
@@ -194,6 +236,25 @@ bool NoronAbstractHubPrivate::response(qlonglong id, QString senderName, QVarian
     return 0 != res;
 }
 
+QString NoronAbstractHubPrivate::createValidateToken(QVariantMap *map)
+{
+    Q_Q(NoronAbstractHub);
+
+    QString s = "";
+    QMapIterator<QString, QVariant> i(*map);
+    while (i.hasNext()) {
+        i.next();
+
+        if(QString(i.value().typeName()).endsWith("*"))
+            s.append(i.key() + ": " + i.value().typeName() + "*");
+        else
+            s.append(i.key() + ": " + i.value().toString() + "*");
+    }
+
+//    qDebug() << "NoronAbstractHubPrivate::createValidateToken" << map->value(METHOD_NAME).toString() << MD5(s + q->validateToken()) << s << q->validateToken();
+    return MD5(s + q->validateToken());
+}
+
 void NoronAbstractHubPrivate::addValidateToken(QVariantMap *map)
 {
     Q_Q(NoronAbstractHub);
@@ -202,13 +263,7 @@ void NoronAbstractHubPrivate::addValidateToken(QVariantMap *map)
 
     map->insert(MAP_TOKEN_ITEM, QVariant(""));
 
-    QMapIterator<QString, QVariant> i(*map);
-    while (i.hasNext()) {
-        i.next();
-        s.append(i.key() + ": " + i.value().toString() + "*");
-    }
-
-    map->insert(MAP_TOKEN_ITEM, QVariant(MD5(s + q->validateToken())));
+    map->insert(MAP_TOKEN_ITEM, createValidateToken(map));
 }
 
 bool NoronAbstractHubPrivate::checkValidateToken(QVariantMap *map)
@@ -218,15 +273,9 @@ bool NoronAbstractHubPrivate::checkValidateToken(QVariantMap *map)
     QString token = map->value(MAP_TOKEN_ITEM).toString();
     map->insert(MAP_TOKEN_ITEM, QVariant(""));
 
-    QByteArray s;
+    QString validateToken = createValidateToken(map);
 
-    QMapIterator<QString, QVariant> i(*map);
-    while (i.hasNext()) {
-        i.next();
-        s.append(i.key() + ": " + i.value().toString() + "*");
-    }
-
-    return token == MD5(s + q->validateToken());
+    return token == validateToken;
 }
 
 QString NoronAbstractHubPrivate::MD5(QString text)
@@ -240,7 +289,7 @@ QString NoronAbstractHubPrivate::MD5(QByteArray text)
 }
 
 NoronAbstractHub::NoronAbstractHub(QObject *parent) : QObject(parent),
-    d_ptr(new NoronAbstractHubPrivate(this)), _isMultiThread(false)
+    d_ptr(new NoronAbstractHubPrivate(this))
 {
     socket = new QTcpSocket(this);
 
@@ -249,6 +298,12 @@ NoronAbstractHub::NoronAbstractHub(QObject *parent) : QObject(parent),
     connect(socket, &QTcpSocket::connected, this, &NoronAbstractHub::socket_connected);
 
     setSerializer(new NoronJsonBinarySerializer(this));
+}
+
+NoronAbstractHub::~NoronAbstractHub()
+{
+    Q_D(NoronAbstractHub);
+    delete d;
 }
 
 NoronPeer *NoronAbstractHub::peer() const
@@ -280,16 +335,17 @@ void NoronAbstractHub::addSharedObject(NoronSharedObject *o)
     Q_D(NoronAbstractHub);
 
     o->addHub(this);
-    d->sharedObjects[o->metaObject()->className()] = o;
+    //d->sharedObjects[o->metaObject()->className()] = o;
+    d->sharedObjects[o->peerName()] = o;
 }
 
 void NoronAbstractHub::removeSharedObject(NoronSharedObject *o)
 {
     Q_D(NoronAbstractHub);
 
-    if(d->sharedObjects.contains(o->metaObject()->className())){
+    if(d->sharedObjects.contains(o->peerName())){
         o->removeHub(this);
-        d->sharedObjects.remove(o->metaObject()->className());
+        d->sharedObjects.remove(o->peerName());
     }
 }
 
@@ -299,9 +355,43 @@ QList<NoronSharedObject *> NoronAbstractHub::sharedObjects() const
     return d->sharedObjects.values();
 }
 
+QList<NoronSharedObject *> NoronAbstractHub::sharedObjects(QString peerName) const
+{
+    Q_D(const NoronAbstractHub);
+    return d->sharedObjects.values(peerName);
+}
+
 bool NoronAbstractHub::isMultiThread() const
 {
-    return _isMultiThread;
+    Q_D(const NoronAbstractHub);
+    return d->isMultiThread;
+}
+
+#ifdef QT_QML_LIB
+QJSEngine *NoronAbstractHub::jsEngine() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->jsEngine;
+}
+
+QQmlEngine *NoronAbstractHub::qmlEngine() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->qmlEngine;
+}
+#endif
+
+qlonglong NoronAbstractHub::peerId() const
+{
+    Q_D(const NoronAbstractHub);
+    return d->peerId;
+}
+
+void NoronAbstractHub::setPeerId(qlonglong id)
+{
+    Q_D(NoronAbstractHub);
+    invokeOnPeer("::Hub", QT_STRINGIFY(setPeerId), id);
+    d->peerId = id;
 }
 
 void NoronAbstractHub::socket_connected()
@@ -380,6 +470,7 @@ void NoronAbstractHub::commit()
     d->isTransaction = false;
 }
 
+//TODO: remove val8, val9
 qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
     Q_D(NoronAbstractHub);
@@ -387,7 +478,7 @@ qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName, QVa
     if(d->locks.contains(sender + "::" + methodName))
         return 0;
 
-    if(d->requestId++ >= LONG_LONG_MAX - 1)
+    if(d->requestId++ >= MAX - 1)
         d->requestId = 0;
 
     QVariantMap map;
@@ -461,6 +552,36 @@ void NoronAbstractHub::setSerializer(NoronAbstractSerializer *serializer)
 
     d->serializer = serializer;
     emit serializerChanged(serializer);
+}
+
+#ifdef QT_QML_LIB
+void NoronAbstractHub::setJsEngine(QJSEngine *engine)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->jsEngine == engine)
+        return;
+
+    d->jsEngine = engine;
+    emit jsEngineChanged(engine);
+}
+
+void NoronAbstractHub::setQmlEngine(QQmlEngine *qmlEngine)
+{
+    Q_D(NoronAbstractHub);
+
+    if (d->qmlEngine == qmlEngine)
+        return;
+
+    d->qmlEngine = qmlEngine;
+    emit qmlEngineChanged(qmlEngine);
+}
+#endif
+
+void NoronAbstractHub::setIsMultiThread(bool isMultiThread)
+{
+    Q_D(NoronAbstractHub);
+    d->isMultiThread = isMultiThread;
 }
 
 QT_END_NAMESPACE

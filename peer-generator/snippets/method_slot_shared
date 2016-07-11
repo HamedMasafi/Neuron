@@ -1,0 +1,3 @@
+%4 ret;
+emit %1Signal(%3,&ret);
+return ret;

@@ -18,7 +18,8 @@ HEADERS += \
     $$PWD/src/noronsharedobject.h \
     $$PWD/src/noronserverhub_p.h \
     $$PWD/src/noronpeer.h \
-    $$PWD/src/noronserverthread.h
+    $$PWD/src/noronserverthread.h \
+    $$PWD/src/syntax_p.h
 
 SOURCES += \
     $$PWD/src/noronabstracthub.cpp \

@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
     QRegularExpressionMatchIterator i = classRegex.globalMatch(fileContent);
     QString savePath = parser.value(targetOption);
 
+    QRegularExpression namespaceRegex("namespace\\s+(\\S+)", QRegularExpression::DotMatchesEverythingOption);
+    QString namespaceStr = namespaceRegex.match(fileContent).captured(1);
+
     int peersCount = 0;
     int sharedObjectsCount = 0;
 
@@ -90,6 +93,7 @@ int main(int argc, char *argv[])
 //    }
 
     foreach (Class *cls, classParser.classes()) {
+        cls->setNameSpace(namespaceStr);
         cls->save(savePath);
 
         qStdOut() << "The class " << cls->name() << " created in two files:\n";

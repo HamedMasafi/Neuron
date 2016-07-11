@@ -18,7 +18,7 @@ class Class : public QObject
     Q_PROPERTY(QString headerFileName READ headerFileName WRITE setHeaderFileName NOTIFY headerFileNameChanged)
     Q_PROPERTY(QString headerIncludeBlockCode READ headerIncludeBlockCode)
     Q_PROPERTY(QString sourceIncludeBlockCode READ sourceIncludeBlockCode)
-    Q_PROPERTY(bool wrapQtNamespace READ wrapQtNamespace WRITE setWrapQtNamespace NOTIFY wrapQtNamespaceChanged)
+    Q_PROPERTY(QString nameSpace READ nameSpace WRITE setNameSpace NOTIFY nameSpaceChanged)
 
     QStringList propertiesList;
     QStringList variables;
@@ -64,14 +64,14 @@ public:
     QString headerIncludeBlockCode() const;
     bool wrapQtNamespace() const;
     QString sourceIncludeBlockCode() const;
-
+    QString nameSpace() const;
 
 public slots:
     void setName(QString name);    
     void setBaseType(QString baseType);
     void setSourceFileName(QString sourceFileName);
     void setHeaderFileName(QString headerFileName);
-    void setWrapQtNamespace(bool wrapQtNamespace);
+    void setNameSpace(QString nameSpace);
 
 signals:
     void nameChanged(QString name);    
@@ -79,8 +79,8 @@ signals:
     void sourceFileNameChanged(QString sourceFileName);
     void headerFileNameChanged(QString headerFileName);
     void headerIncludeBlockCodeChanged(QString headerIncludeBlockCode);
-    void wrapQtNamespaceChanged(bool wrapQtNamespace);
     void sourceIncludeBlockCodeChanged(QString sourceIncludeBlockCode);
+    void nameSpaceChanged(QString nameSpace);
 
 private:
     void setMethodCode(Method *m, QString fileName);
@@ -91,7 +91,7 @@ private:
     QString m_headerFileName;
 //    QString m_headerIncludeBlockCode;
 //    QString m_sourceIncludeBlockCode;
-    bool m_wrapQtNamespace;
+    QString m_nameSpace;
 };
 
 #endif // CLASS_H

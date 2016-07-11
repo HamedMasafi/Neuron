@@ -32,9 +32,11 @@ public:
 
     bool includeUsedType(Class *cls, QString propType);
 
+    void addQmlRegisterMethods(Class *cls);
+
 private:
     void procLine(Class *cls, QString line);
-    void procPropertyPeer(Class *cls, QString line);
+    void procPropertyPeer(Class *cls, QString line, QString baseType);
     void procPropertyData(Class *cls, QString line);
 
     void setMethodCode(Method *m, QString fileName);

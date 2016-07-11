@@ -20,6 +20,7 @@ class Method : public QObject
     Q_PROPERTY(QString inheristanceDeclare READ inheristanceDeclare WRITE setInheristanceDeclare NOTIFY inheristanceDeclareChanged)
     Q_PROPERTY(bool isStatic READ isStatic WRITE setIsStatic NOTIFY isStaticChanged)
     Q_PROPERTY(bool isExtern READ isExtern WRITE setIsExtern NOTIFY isExternChanged)
+    Q_PROPERTY(bool isVirtual READ isVirtual WRITE setIsVirtual NOTIFY isVirtualChanged)
 
 public:
     explicit Method(QObject *parent = 0);
@@ -40,6 +41,8 @@ public:
     QString inheristanceDeclare() const;
     bool isStatic() const;
     bool isExtern() const;
+    bool isVirtual() const
+;
 
 signals:
     void declTypeChanged(QString declType);
@@ -53,6 +56,7 @@ signals:
     void inheristanceDeclareChanged(QString inheristanceDeclare);
     void isStaticChanged(bool isStatic);
     void isExternChanged(bool isExtern);
+    void isVirtualChanged(bool isVirtual);
 
 public slots:
     void setDeclType(QString declType);
@@ -66,6 +70,7 @@ public slots:
     void setInheristanceDeclare(QString inheristanceDeclare);
     void setIsStatic(bool isStatic);
     void setIsExtern(bool isExtern);
+    void setIsVirtual(bool isVirtual);
 
 private:
     QString replaceParams(QString text);
@@ -83,6 +88,7 @@ private:
     QString m_inheristanceDeclare;
     bool m_isStatic;
     bool m_isExtern;
+    bool m_isVirtual;
 };
 
 #endif // METHOD_H

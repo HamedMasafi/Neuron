@@ -23,11 +23,14 @@
 
 #include <QtCore/qglobal.h>
 #include <QtCore/QDebug>
+#include <QtCore/QList>
 #include <QtCore/QVariant>
 #include <QtCore/QEventLoop>
 #include <QtCore/QMetaMethod>
 
 #ifdef QT_QML_LIB
+#   include <QtQml/QJSEngine>
+#   include <QtQml/QQmlEngine>
 #   include <QtQml/QJSValue>
 #endif
 #if __cplusplus >= 201103L
@@ -43,6 +46,8 @@ public:
 #endif
 #ifdef QT_QML_LIB
     QJSValue jsvalue;
+    QJSEngine *jsEngine;
+    QQmlEngine *qmlEngine;
 #endif
 
     enum ReturnType{
@@ -73,7 +78,7 @@ public:
     NoronRemoteCallBase(std::function<void()> func);
 #endif
 #ifdef QT_QML_LIB
-    NoronRemoteCallBase(QJSValue jsvalue);
+    NoronRemoteCallBase(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 #endif
     void setReturnData(){
 
@@ -95,7 +100,7 @@ public:
     NoronRemoteCall(std::function<void(T)> func) : NoronRemoteCallBase(), _func(func){}
 #endif
 #ifdef QT_QML_LIB
-    NoronRemoteCall(QJSValue jsvalue) : NoronRemoteCallBase(jsvalue) {}
+    NoronRemoteCall(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *jsEngine) : NoronRemoteCallBase(jsvalue, qmlEngine, jsEngine) {}
 #endif
     NoronRemoteCall() : NoronRemoteCallBase() {}
     NoronRemoteCall(QObject *obj, char *slotName) : NoronRemoteCallBase(obj, slotName) {}
@@ -104,15 +109,93 @@ public:
 
     void returnToCaller(){
 #if __cplusplus >= 201103L
-        qDebug()<<"Calling................"<<type;
-        if(type == Function)
+        if(type == Function){
             _func(returnData.value<T>());
+        }
 #endif
 #ifdef QT_QML_LIB
-        if(type == JSValue){
+        if(type == JSValue/* && jsvalue.isCallable()*/) {
             QJSValueList values;
-            values.append(QJSValue(returnData.toString()));
-            jsvalue.call(values);
+            if(returnData.type() == QVariant::List){
+                QVariantList list = returnData.toList();
+                QJSValue param1;
+                int i = 0;
+                param1 = jsEngine->newArray(list.length());
+
+                foreach (QVariant var, list) {
+                    if(QString(var.typeName()).endsWith("*")){
+                        qDebug() << var.typeName() << var.isNull() << var.isValid();
+
+//                        var.convert(QMetaType::type("QObject*"));
+                        QObject *o = var.value<QObject*>();
+                        if(!o)
+                            qWarning("Object is not valid");
+                        qmlEngine->setObjectOwnership(o, QQmlEngine::JavaScriptOwnership);
+                        param1.setProperty(i, jsEngine->newQObject(o));
+                    }else{
+                        switch(var.type()){
+                        case QVariant::Int:
+                            param1.setProperty(i, QJSValue(var.toInt()));
+                            break;
+
+                        case QVariant::Bool:
+                            param1.setProperty(i, QJSValue(var.toBool()));
+                            break;
+
+                        case QVariant::UInt:
+                            param1.setProperty(i, QJSValue(var.toUInt()));
+                            break;
+
+                        case QVariant::Double:
+                            param1.setProperty(i, QJSValue(var.toDouble()));
+                            break;
+
+                        default:
+                            param1.setProperty(i, QJSValue(var.toString()));
+                        }
+                    }
+                    i++;
+                }
+
+                values.append(param1);
+            }else{
+                if(QString(returnData.typeName()).endsWith("*")){
+                    QObject *o = returnData.value<QObject*>();
+                    if(!o)
+                        qWarning("Object is not valid");
+                    qmlEngine->setObjectOwnership(o, QQmlEngine::JavaScriptOwnership);
+                    values.append(jsEngine->newQObject(o));
+                }else{
+                    switch(returnData.type()){
+                    case QVariant::Int:
+                        values.append(QJSValue(returnData.toInt()));
+                        break;
+
+                    case QVariant::Bool:
+                        values.append(QJSValue(returnData.toBool()));
+                        break;
+
+                    case QVariant::UInt:
+                        values.append(QJSValue(returnData.toUInt()));
+                        break;
+
+                    case QVariant::Double:
+                        values.append(QJSValue(returnData.toDouble()));
+                        break;
+
+                    default:
+                        values.append(QJSValue(returnData.toString()));
+                    }
+                }
+            }
+
+            QJSValue callResult = jsvalue.call(values);
+
+            if(callResult.isError())
+                qWarning("Uncaught exception at line n; message = %s",
+//                         //qPrintable(callResult.property("fileName").toString()),
+//                         callResult.property("lineNumber").toInt(),
+                         qPrintable(callResult.toString()));
         }
 #endif
         if(type == Slot)
@@ -124,6 +207,11 @@ public:
         if(type == MetaMethod)
             method->invoke(obj, Q_ARG(T, returnData.value<T>()));
     }
+
+};
+
+template <typename T>
+class NoronRemoteCallList : public NoronRemoteCallBase{
 
 };
 

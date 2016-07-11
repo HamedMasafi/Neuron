@@ -21,7 +21,7 @@
 
 
 Class::Class(QObject *parent) : QObject(parent), m_headerFileName(QString::null), m_sourceFileName(QString::null),
-    afterClass(QString::null), beginOfClass(QString::null), m_wrapQtNamespace(true)
+    afterClass(QString::null), beginOfClass(QString::null), m_nameSpace(QString::null)
 {
 
 }
@@ -72,8 +72,8 @@ QString Class::headerCode() const
 
     code.append(includeBlock + LB);
 
-    if(wrapQtNamespace())
-        code.append("QT_BEGIN_NAMESPACE" LB LB LB);
+    if(!m_nameSpace.isNull())
+        code.append("namespace " + m_nameSpace + "{" LB LB LB);
 
     foreach (QString className, declaredClasses)
         code.append("class " + className + ";" LB);
@@ -94,8 +94,9 @@ QString Class::headerCode() const
     if(!afterClass.isNull())
         code.append(LB + afterClass + LB);
 
-    if(wrapQtNamespace())
-        code.append(LB "QT_END_NAMESPACE" LB LB);
+    if(!m_nameSpace.isNull())
+        code.append("}" LB LB LB);
+
 
     code.append(TextHelper::instance()->joinSet(afterNameSpace, LB));
     code.append(LB LB);
@@ -114,8 +115,8 @@ QString Class::sourceCode() const
 
     code.append(sourceIncludeBlockCode() + LB);
 
-    if(wrapQtNamespace())
-        code.append("QT_BEGIN_NAMESPACE" LB LB LB);
+    if(!m_nameSpace.isNull())
+        code.append("namespace " + m_nameSpace + LB "{" LB LB LB);
 
     foreach (Method *m, methods){
         if(!m->isExtern())
@@ -132,8 +133,8 @@ QString Class::sourceCode() const
         code.append(m->implement() + LB LB);
     }
 
-    if(wrapQtNamespace())
-        code.append("QT_END_NAMESPACE" LB);
+    if(!m_nameSpace.isNull())
+        code.append("}" LB);
 
     return TextHelper::instance()->indent(code);
 }
@@ -248,7 +249,7 @@ void Class::addInclude(QString fileName, bool putInHeader, bool isGlobal, QStrin
         m_headerIncludeBlockCode.insert(line);
     }else{
         m_sourceIncludeBlockCode.insert(line);
-        if(fileName.startsWith("Q") && isClass)
+        if(/*fileName.startsWith("Q") && */isClass)
             declaredClasses.append(fileName);
     }
 }
@@ -304,14 +305,14 @@ QString Class::headerIncludeBlockCode() const
     return TextHelper::instance()->joinSet(m_headerIncludeBlockCode, LB);
 }
 
-bool Class::wrapQtNamespace() const
-{
-    return m_wrapQtNamespace;
-}
-
 QString Class::sourceIncludeBlockCode() const
 {
     return TextHelper::instance()->joinSet(m_sourceIncludeBlockCode, LB);
+}
+
+QString Class::nameSpace() const
+{
+    return m_nameSpace;
 }
 
 void Class::setName(QString name)
@@ -350,14 +351,13 @@ void Class::setHeaderFileName(QString headerFileName)
     emit headerFileNameChanged(headerFileName);
 }
 
-
-void Class::setWrapQtNamespace(bool wrapQtNamespace)
+void Class::setNameSpace(QString nameSpace)
 {
-    if (m_wrapQtNamespace == wrapQtNamespace)
+    if (m_nameSpace == nameSpace)
         return;
 
-    m_wrapQtNamespace = wrapQtNamespace;
-    emit wrapQtNamespaceChanged(wrapQtNamespace);
+    m_nameSpace = nameSpace;
+    emit nameSpaceChanged(nameSpace);
 }
 
 

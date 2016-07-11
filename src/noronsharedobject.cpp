@@ -25,35 +25,86 @@
 
 QT_BEGIN_NAMESPACE
 
-NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent)
+NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent), _activeHub(0)
 {
 
 }
 
-NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)
+NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent), _activeHub(0)
 {
     addHub(hub);
 }
 
 void NoronSharedObject::addHub(NoronAbstractHub *hub)
 {    
-    if(!hub->inherits(QT_STRINGIFY(NoronServer)))
+    if(!hub->inherits(QT_STRINGIFY(NoronServer))){
         hubs.insert(hub);
+        hubAdded(hub);
+    }
 }
 
 void NoronSharedObject::removeHub(NoronAbstractHub *hub)
 {
     hubs.remove(hub);
+    hubRemoved(hub);
+}
+
+bool NoronSharedObject::setActiveHub(NoronAbstractHub *hub)
+{
+    if(!hub){
+        _activeHub = 0;
+        return true;
+    }
+
+    if(hubs.contains(hub)){
+        _activeHub = hub;
+        return true;
+    }
+    return false;
+}
+
+void NoronSharedObject::setHub(NoronAbstractHub *hub)
+{
+    if (m_hub == hub)
+        return;
+
+    m_hub = hub;
+    emit hubChanged(hub);
+    hub->addSharedObject(this);
+}
+
+const QString NoronSharedObject::peerName()
+{
+    return QString::null;
+}
+
+void NoronSharedObject::hubAdded(NoronAbstractHub *hub)
+{
+    Q_UNUSED(hub);
+}
+
+void NoronSharedObject::hubRemoved(NoronAbstractHub *hub)
+{
+    Q_UNUSED(hub);
 }
 
 qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
-    foreach (NoronAbstractHub *hub, hubs) {
+    QSet<NoronAbstractHub*> tmpHubs;;
 
+    if(_activeHub){
+        tmpHubs.insert(_activeHub);
+    }else{
+        tmpHubs = hubs;
+        if(hub())
+            tmpHubs.insert(hub());
+    }
+
+    foreach (NoronAbstractHub *hub, tmpHubs) {
         if(hub->isMultiThread())
             hub->metaObject()->invokeMethod(hub,
                                             QT_STRINGIFY(invokeOnPeer),
-                                            Q_ARG(QString, metaObject()->className()),
+                                            Q_ARG(QString, peerName()),
                                             Q_ARG(QString, methodName),
                                             Q_ARG(QVariant, val0),
                                             Q_ARG(QVariant, val1),
@@ -64,14 +115,14 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
                                             Q_ARG(QVariant, val6),
                                             Q_ARG(QVariant, val7));
         else
-            hub->invokeOnPeer(
-                        metaObject()->className(),
+            return hub->invokeOnPeer(
+                        peerName(),
                         methodName,
                         val0, val1, val2, val3, val4,
                         val5, val6, val7, val8, val9);
     }
 
-    return 1;
+    return 0;
 }
 
 QT_END_NAMESPACE

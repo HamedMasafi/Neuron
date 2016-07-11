@@ -50,6 +50,12 @@ NoronServerHub::NoronServerHub(QTcpSocket *socket, QObject *parent) : NoronAbstr
     this->socket = socket;
 }
 
+NoronServerHub::~NoronServerHub()
+{
+    Q_D(NoronServerHub);
+    delete d;
+}
+
 NoronServerThread *NoronServerHub::serverThread() const
 {
     Q_D(const NoronServerHub);

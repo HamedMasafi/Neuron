@@ -27,6 +27,9 @@
 #include <QtCore/QJsonValue>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QVariant>
+#include <QtCore/QList>
+
+#include <NoronPeer>
 
 #include "noronjsonbinaryserializer.h"
 
@@ -119,22 +122,40 @@ QJsonObject NoronJsonBinarySerializer::toJson(QVariant v)
     case QVariant::Invalid:
         qWarning("QVariant type is Invalid!");
         break;
+
     default:
         // disable compiler warning
         break;
     }
 
-    QByteArray data;
-    QDataStream ds(&data, QIODevice::WriteOnly);
-    ds << v;
     QJsonObject o;
-    o.insert(VARIANT_TYPE, v.typeName());
-    o.insert(VARIANT_VALUE, QString(data.toBase64()));
+
+    QString typeName = QString(v.typeName());
+    if(typeName.endsWith("*")){
+        //TODO: remove this line
+        if(v.value<QObject*>()->metaObject()->inherits(&NoronPeer::staticMetaObject))
+            o.insert(VARIANT_TYPE, QString(v.value<NoronPeer*>()->peerName())+ "*");
+        else
+            o.insert(VARIANT_TYPE, QString(v.value<QObject*>()->metaObject()->className()) + "*");
+        o.insert(VARIANT_VALUE, toJson(serializeQObject(qvariant_cast<QObject*>(v))));
+    }else{
+        if(typeName.startsWith("QList<"))
+            return toJson(v.value<QVariantList>());
+
+        QByteArray data;
+        QDataStream ds(&data, QIODevice::WriteOnly);
+        ds << v;
+        o.insert(VARIANT_TYPE, v.typeName());
+        o.insert(VARIANT_VALUE, QString(data.toBase64()));
+    }
     return o;
 }
 
 QJsonObject NoronJsonBinarySerializer::toJson(QVariantList list)
 {
+    if(!list.count())
+        qWarning("Count = 0");
+
     QJsonArray array;
     foreach (QVariant v, list) {
         array.append(toJson(v));
@@ -189,6 +210,39 @@ QVariant NoronJsonBinarySerializer::fromJson(QJsonObject object)
         foreach (QString key, mapObject.keys())
             map.insert(key, fromJson(mapObject[key].toObject()));
         return map;
+    }
+
+//    if(QMetaType::type(typeName.toLatin1().data())> 1024){
+    if(typeName.endsWith("*")){
+        QObject *obj;
+        QVariantMap map;
+        QJsonObject mapObject = object[VARIANT_VALUE].toObject().value(VARIANT_VALUE).toObject();
+
+        foreach (QString key, mapObject.keys())
+            map.insert(key, fromJson(mapObject[key].toObject()));
+        int typeCode = QMetaType::type(typeName.toLatin1().data());
+
+        if(typeCode == QMetaType::UnknownType){
+            qWarning("Type %s is not registered!", qPrintable(typeName));
+            return QVariant(QVariant::Invalid);
+        }
+
+        const QMetaObject *metaObject = QMetaType::metaObjectForType(typeCode);
+        obj = metaObject->newInstance();
+
+        if(!obj){
+            qWarning("Object type %s can not deserialized", qPrintable(object[VARIANT_TYPE].toString()));
+            return 0;
+        }
+
+        deserializeQObject(obj, map);
+
+
+        QVariant ret = QVariant::fromValue(obj);
+        qDebug() << "object detected" << typeName << obj << ret.canConvert(typeCode);
+
+        ret.convert(typeCode);
+        return ret;// QVariant(typeCode, (const void*)obj);
     }
 
     QVariant v;

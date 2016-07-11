@@ -12,8 +12,10 @@ QT_BEGIN_NAMESPACE
 
 %1::%1(NoronAbstractHub *hub, QObject *parent) : %6(parent)
 {
-    if(hub)
+    if(hub){
         setHub(hub);
+        hub->addSharedObject(this);
+    }
 }
 
 %2

@@ -1,11 +1,11 @@
-qlonglong id = invokeOnPeer("%1Slot"%2%3);
+qlonglong __call_id = invokeOnPeer("%1Slot"%2%3);
 
-if(id){
+if(__call_id){
     NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);
-    addCall(id, call);
+    addCall(__call_id, call);
     call->eventLoop->exec();
     %4 ret = call->returnData.value<%4>();
-    removeCall(id);
+    removeCall(__call_id);
     delete call;
     return ret;
 }

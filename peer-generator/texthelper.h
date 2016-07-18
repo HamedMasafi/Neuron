@@ -22,6 +22,8 @@ public:
 
     QString joinSet(QSet<QString> set, QString seprator) const;
 
+    void normalizeCode(QString &code);
+    bool extractBlock(const QString &blockName, QString &code, QString &firstLine, QString &content);
 signals:
 
 public slots:

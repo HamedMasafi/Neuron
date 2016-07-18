@@ -172,3 +172,58 @@ QString TextHelper::joinSet(QSet<QString> set, QString seprator) const
     return ret;
 }
 
+void TextHelper::normalizeCode(QString &code)
+{
+    code = code
+            .replace("};", "}")
+            .replace("{", LB "{" LB)
+            .replace("}", LB "}" LB)
+            .replace("\t", "");
+    int len = code.length();
+    do{
+        code = code
+                .replace(LB " ", LB)
+                .replace(" " LB, LB)
+                .replace(LB LB, LB);
+    }while(len == code.length());
+
+//    qInfo(qPrintable(code));
+}
+
+bool TextHelper::extractBlock(const QString &blockName, QString &code, QString &firstLine, QString &content)
+{
+    bool found = false;
+    int bracketsCount = 0;
+    QStringList lines = code.split(LB);
+    foreach (QString l, lines) {
+        if(found){
+            if(l == "{")
+                bracketsCount++;
+            else if(l == "}")
+                bracketsCount--;
+            else
+                content.append(l + LB);
+
+            if(!bracketsCount){
+                qDebug() << "code";
+                qInfo(qPrintable(code));
+
+                qDebug() << "code 2";
+                qInfo(qPrintable(firstLine + LB + "{" LB + content + "}"));
+
+                code = code.replace(firstLine + LB + "{" LB + content + "}", "");
+                return true;
+            }
+        }
+
+        if(l.startsWith(blockName)){
+            firstLine = l;
+            found = true;
+        }
+
+//        qDebug() << l;
+    }
+
+    return false;
+}
+

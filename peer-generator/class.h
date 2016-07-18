@@ -9,6 +9,7 @@
 
 class Method;
 class Property;
+class Enum;
 class Class : public QObject
 {
     Q_OBJECT
@@ -27,6 +28,7 @@ class Class : public QObject
     QList<Method*> methods;
     QList<Method*> constructors;
     QList<Property*> properties;
+    QList<Enum*> enums;
 
     QSet<QString> m_headerIncludeBlockCode;
     QSet<QString> m_sourceIncludeBlockCode;
@@ -48,6 +50,7 @@ public:
     void addMethod(Method *m);
     void addConstructor(Method *m);
     void addVariable(QString declareLine);
+    void addEnum(Enum *e);
 
     void addInclude(QString fileName, bool putInHeader = true, bool isGlobal = true, QString wrapperMacro = QString::null, bool isClass = true);
 

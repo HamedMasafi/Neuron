@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     texthelper.cpp \
     property.cpp \
     templatecreatot.cpp \
-    constructor.cpp
+    constructor.cpp \
+    enum.cpp
 
 RESOURCES += \
     snippets.qrc
@@ -32,4 +33,5 @@ HEADERS += \
     property.h \
     templatecreatot.h \
     defines.h \
-    constructor.h
+    constructor.h \
+    enum.h

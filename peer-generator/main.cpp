@@ -8,6 +8,7 @@
 
 #include "class.h"
 #include "classparser.h"
+#include "texthelper.h"
 
 using namespace std;
 
@@ -53,7 +54,36 @@ int main(int argc, char *argv[])
     QString fileContent = f.readAll();
     f.close();
 
-    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*(:\\s*(?<base_type>\\S+))?\\s*\\{(?<content>[^}]*)\\}", QRegularExpression::DotMatchesEverythingOption);
+    TextHelper::instance()->normalizeCode(fileContent);
+
+    QString firstLine;
+    QString content;
+    QHash<QString, QString> classesCode;
+    ClassParser classParser;
+    int len = fileContent.length();
+    while(TextHelper::instance()->extractBlock("class", fileContent, firstLine, content)){
+//        qDebug() << firstLine << content;
+        if(len == fileContent.length())
+            qFatal("Len equal");
+        firstLine = firstLine
+                .replace("class ", "")
+                .replace("pubic ", "");
+        QStringList parts = firstLine.split(":");
+        if(parts.length() != 2){
+            qFatal("Syntax error at: %s", qPrintable(firstLine));
+            return EXIT_SUCCESS;
+        }
+
+        classesCode.insert(parts.at(0).trimmed(), content);
+
+        classParser.addClass(parts.at(1).trimmed(),
+                             parts.at(0).trimmed(),
+                             content);
+    }
+    return EXIT_SUCCESS;
+
+
+    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*(:\\s*(?<base_type>\\S+))?\\s*\\{(?<content>[^}]*)\\}[^;]", QRegularExpression::DotMatchesEverythingOption);
     QRegularExpressionMatchIterator i = classRegex.globalMatch(fileContent);
     QString savePath = parser.value(targetOption);
 
@@ -63,11 +93,11 @@ int main(int argc, char *argv[])
     int peersCount = 0;
     int sharedObjectsCount = 0;
 
-    QHash<QString, QString> classesCode;
 //    QList<Class*> classes;
 
-    ClassParser classParser;
     while (i.hasNext()) {
+        qFatal("Regex found");
+
         QRegularExpressionMatch match = i.next();
 
         QString baseType = match.captured("base_type");

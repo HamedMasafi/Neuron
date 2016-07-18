@@ -3,6 +3,7 @@
 #include "method.h"
 #include "property.h"
 #include "defines.h"
+#include "enum.h"
 
 #include <QDebug>
 #include <QFile>
@@ -84,10 +85,17 @@ QString Class::headerCode() const
     if(!beginOfClass.isNull())
         code.append(beginOfClass);
 
-    if(!privateBlock.isEmpty())
-        code.append(privateBlock + LB LB);
+    if(enums.count()){
+        code.append("public:" LB);
+        foreach (Enum *e, enums)
+            code.append(e->toString() + LB);
+    }
 
     code.append(methodsBlock + LB);
+
+    if(!privateBlock.isEmpty())
+        code.append("private:" LB + privateBlock + LB LB);
+
 
     code.append("};" LB);
 
@@ -228,6 +236,11 @@ void Class::addConstructor(Method *m)
 void Class::addVariable(QString declareLine)
 {
     variables.append(declareLine);
+}
+
+void Class::addEnum(Enum *e)
+{
+    enums.append(e);
 }
 
 void Class::addInclude(QString fileName, bool putInHeader, bool isGlobal, QString wrapperMacro, bool isClass)

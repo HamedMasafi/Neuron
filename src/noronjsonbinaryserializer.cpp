@@ -133,7 +133,9 @@ QJsonObject NoronJsonBinarySerializer::toJson(QVariant v)
     QString typeName = QString(v.typeName());
     if(typeName.endsWith("*")){
         //TODO: remove this line
-        if(v.value<QObject*>()->metaObject()->inherits(&NoronPeer::staticMetaObject))
+        //issue #1: Can't build with Qt 5.5 and Qt 5.6
+//        if(v.value<QObject*>()->metaObject()->inherits(&NoronPeer::staticMetaObject))
+        if(v.value<QObject*>()->inherits("NoronPeer"))
             o.insert(VARIANT_TYPE, QString(v.value<NoronPeer*>()->peerName())+ "*");
         else
             o.insert(VARIANT_TYPE, QString(v.value<QObject*>()->metaObject()->className()) + "*");

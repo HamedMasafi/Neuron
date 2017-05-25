@@ -3,7 +3,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 Server::Server(QObject *parent) : NoronSharedObject(parent)
 {
@@ -51,7 +51,7 @@ void Server::broadcastMessage(QString message, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -107,7 +107,7 @@ void Server::imageSent(QString username, QPixmap image, QJSValue callbackFunctio
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -194,7 +194,7 @@ void Server::userJoined(QString username, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -286,7 +286,7 @@ void Server::userLeaved(QString username, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -347,4 +347,4 @@ void Server::userLeavedSlot(QString username)
 }
 
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

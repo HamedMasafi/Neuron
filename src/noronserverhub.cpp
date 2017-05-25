@@ -18,6 +18,7 @@
 **
 **************************************************************************/
 
+#include <QEventLoop>
 #include <QtCore/QDebug>
 #include <QtNetwork/QTcpSocket>
 
@@ -25,9 +26,9 @@
 #include "noronserverhub.h"
 #include "noronserverhub_p.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
-NoronServerHubPrivate::NoronServerHubPrivate(NoronServerHub *parent) : q_ptr(parent), serverThread(0)
+NoronServerHubPrivate::NoronServerHubPrivate(NoronServerHub *parent) : q_ptr(parent), serverThread(0), connectionEventLoop(0)
 {
 
 }
@@ -38,10 +39,9 @@ NoronServerHub::NoronServerHub(QObject *parent) : NoronAbstractHub(parent),
 
 }
 
-NoronServerHub::NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent) : NoronAbstractHub(parent),
+NoronServerHub::NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent) : NoronAbstractHub(serializer, parent),
     d_ptr(new NoronServerHubPrivate(this))
 {
-    setSerializer(serializer);
 }
 
 NoronServerHub::NoronServerHub(QTcpSocket *socket, QObject *parent) : NoronAbstractHub(parent),
@@ -53,6 +53,26 @@ NoronServerHub::NoronServerHub(QTcpSocket *socket, QObject *parent) : NoronAbstr
 NoronServerHub::~NoronServerHub()
 {
     Q_D(NoronServerHub);
+
+//    QList<NoronSharedObject *> soList = sharedObjects();
+//    foreach (NoronSharedObject *so, soList) {
+//        if(so)
+//        removeSharedObject(so);
+//    }
+
+//    while(sharedObjects().count()){
+//        qDebug() << "removing " << sharedObjects().at(0);
+//        removeSharedObject(sharedObjects().at(0));
+//    }
+    auto so = sharedObjectHash();
+    QHashIterator<const QString, NoronSharedObject*> i(so);
+    while (i.hasNext()) {
+        i.next();
+//        cout << i.key() << ": " << i.value() << endl;
+        qDebug() << "removing " << i.key();
+        removeSharedObject(i.value());
+    }
+
     delete d;
 }
 
@@ -61,6 +81,23 @@ NoronServerThread *NoronServerHub::serverThread() const
     Q_D(const NoronServerHub);
 
     return d->serverThread;
+}
+
+qlonglong NoronServerHub::hi(qlonglong hubId)
+{
+    Q_D(NoronServerHub);
+
+    setHubId(hubId);
+    emit connected();
+
+//    invokeOnPeer(THIS_HUB, "hi", hubId);
+    if(d->connectionEventLoop){
+        d->connectionEventLoop->quit();
+        d->connectionEventLoop->deleteLater();
+    }
+
+//    setStatus(Connected);
+    return this->hubId();
 }
 
 bool NoronServerHub::setSocketDescriptor(qintptr socketDescriptor, bool waitForConnect)
@@ -81,4 +118,12 @@ void NoronServerHub::setServerThread(NoronServerThread *serverThread)
         d->serverThread = serverThread;
 }
 
-QT_BEGIN_NAMESPACE
+void NoronServerHub::beginConnection()
+{
+    Q_D(NoronServerHub);
+    d->connectionEventLoop = new QEventLoop;
+    K_REG_OBJECT(d->connectionEventLoop);
+    d->connectionEventLoop->exec();
+}
+
+NORON_END_NAMESPACE

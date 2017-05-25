@@ -23,10 +23,29 @@
 
 #include <QtCore/QtGlobal>
 
-#define QT_NAMESPACE noron
+//#define NORON_NAMESPACE Noron
 
 #define NORON_VERSION 0x000100
 #define NORON_VERSION_STR "0.1.0"
+
+#ifdef NORON_NAMESPACE
+#   define NORON_BEGIN_NAMESPACE     namespace NORON_NAMESPACE {
+#   define NORON_END_NAMESPACE       }
+#else
+#   define NORON_BEGIN_NAMESPACE
+#   define NORON_END_NAMESPACE
+#endif
+
+#ifdef KAJ_LOGGER_LIB
+#   include "logger.h"
+#   include "objectprofiller.h"
+#else
+#   define K_REG_OBJECT(x)
+#   define K_TRACE(...)
+#   define K_INFORMATION(...)
+#   define K_WARNING(...)
+#   define K_ERROR(...)
+#endif
 
 #ifdef NORON_COMPILE_STATIC
 #   define NORON_EXPORT

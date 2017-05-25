@@ -64,7 +64,7 @@ void ClientWindow::on_hub_isConnectedChanged(bool isConnected)
 
 void ClientWindow::on_pushButtonGetRandomNumberWithTimeout_clicked()
 {
-    client->getRandomNumber(spinBox->value());
+    //client->getRandomNumber(spinBox->value());
 }
 
 void ClientWindow::on_pushButtonGetRandomNumber_clicked()

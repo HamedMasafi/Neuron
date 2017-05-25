@@ -1,0 +1,31 @@
+//int callNumber(int number, std::function<void(int)> callbackFunction);
+#ifndef NO_STD_FUNC
+#   define METHOD_DECL_P_STD_FUNC(ret, name, count, sep, ...) \
+        void name(__NAMEVALUE(count, __VA_ARGS__) sep std::function<void(ret)> callbackFunction);
+
+#   define METHOD_IMPL_P_STD_FUNC_VOID(class, ret, name, count, sep, ...) \
+    void class::name(__NAMEVALUE(count, __VA_ARGS__) sep std::function<void(ret)> callbackFunction) \
+    {   \
+        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if(id){ \
+            NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);  \
+            addCall(id, call);  \
+        }   \
+    }
+
+#   define METHOD_IMPL_P_STD_FUNC_NONVOID(class, ret, name, count, sep, ...) \
+    void class::name(__NAMEVALUE(count, __VA_ARGS__) sep std::function<void(ret)> callbackFunction) \
+    {   \
+        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if(id){ \
+            NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(callbackFunction);  \
+            addCall(id, call);  \
+        }   \
+    }
+
+#else
+#   define METHOD_DECL_P_STD_FUNC(ret, name, count, sep, ...)
+#   define METHOD_IMPL_P_STD_FUNC_VOID(class, ret, name, count, sep, ...)
+#   define METHOD_IMPL_P_STD_FUNC_NONVOID(class, ret, name, count, sep, ...)
+#endif
+

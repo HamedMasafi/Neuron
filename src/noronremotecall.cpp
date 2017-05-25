@@ -20,7 +20,7 @@
 
 #include "noronremotecall_p.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 void NoronRemoteCallBase::returnToCaller()
 {
@@ -35,8 +35,10 @@ void NoronRemoteCallBase::returnToCaller()
     if(type == Slot)
         obj->metaObject()->invokeMethod(const_cast<QObject*>(obj), slotName);
 
-    if(type == EventLoop)
+    if(type == EventLoop){
         eventLoop->quit();
+        eventLoop->deleteLater();
+    }
 
     if(type == MetaMethod)
         method->invoke(const_cast<QObject*>(obj));
@@ -48,29 +50,84 @@ NoronRemoteCallBase::NoronRemoteCallBase(){
 
 NoronRemoteCallBase::NoronRemoteCallBase(NoronRemoteCallBase::ReturnType type)
 {
-
     if(type == EventLoop){
         this->type = EventLoop;
         eventLoop = new QEventLoop();
+        K_REG_OBJECT(eventLoop);
+    }else{
+        qFatal("Call me by an another constructor");
     }
 }
 
 #if __cplusplus >= 201103L
-NoronRemoteCallBase::NoronRemoteCallBase(std::function<void ()> func)
+NoronRemoteCallBase::NoronRemoteCallBase(std::function<void ()> func) : type(Function), func(func)
 {
-    this->type = Function;
-    this->func = func;
 }
 #endif
 #ifdef QT_QML_LIB
 NoronRemoteCallBase::NoronRemoteCallBase(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *engine) :
     type(JSValue), qmlEngine(qmlEngine), jsEngine(engine), jsvalue(jsvalue)
 {
-//    this->type = JSValue;
-//    this->jsEngine = engine;
-//    this->qmlEngine = qmlEngine;
-//    this->jsvalue = jsvalue;
 }
+
+
+QJSValue NoronRemoteCallBase::toJsValue(QVariant var)
+{
+    if (var.type() == QVariant::List) {
+       return toJsValue(var.toList());
+    } else if (var.type() == QVariant::Map) {
+       return toJsValue(var.toMap());
+    } else {
+        if(QString(returnData.typeName()).endsWith("*")){
+            QObject *o = returnData.value<QObject*>();
+            if(!o)
+                qWarning("Object is not valid");
+            qmlEngine->setObjectOwnership(o, QQmlEngine::JavaScriptOwnership);
+            return jsEngine->newQObject(o);
+        }else{
+            switch(returnData.type()){
+            case QVariant::Int:
+                return QJSValue(returnData.toInt());
+
+            case QVariant::Bool:
+                return QJSValue(returnData.toBool());
+
+            case QVariant::UInt:
+                return QJSValue(returnData.toUInt());
+
+            case QVariant::Double:
+                return QJSValue(returnData.toDouble());
+
+            default:
+                return QJSValue(returnData.toString());
+            }
+        }
+    }
+}
+QJSValue NoronRemoteCallBase::toJsValue(QVariantMap map)
+{
+    QJSValue param1 = jsEngine->newObject();
+
+    QMapIterator<QString, QVariant> i(map);
+    while (i.hasNext()) {
+        i.next();
+//        cout << i.key() << ": " << i.value() << endl;
+        param1.setProperty(i.key(), toJsValue(i.value()));
+    }
+
+    return param1;
+}
+QJSValue NoronRemoteCallBase::toJsValue(QVariantList list)
+{
+    QJSValue param1 = jsEngine->newArray(list.length());
+
+    int i = 0;
+    foreach (QVariant var, list)
+        param1.setProperty(i++, toJsValue(var));
+
+    return param1;
+}
+
 #endif
 NoronRemoteCallBase::NoronRemoteCallBase(QObject *obj, char *slotName)
 {
@@ -94,4 +151,4 @@ NoronRemoteCallBase::~NoronRemoteCallBase()
 
 
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

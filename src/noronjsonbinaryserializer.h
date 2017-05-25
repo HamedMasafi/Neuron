@@ -26,7 +26,7 @@
 
 #include <QtCore/QObject>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NORON_EXPORT NoronJsonBinarySerializer : public NoronAbstractSerializer
 {
@@ -53,6 +53,6 @@ public:
 public slots:
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONJSONBINARYSERIALIZER_H

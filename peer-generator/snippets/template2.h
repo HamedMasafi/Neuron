@@ -16,7 +16,7 @@
 #include <%6>
 %4
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class %1 : public %6
 {
@@ -29,6 +29,6 @@ public:
 %2
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // %3_H

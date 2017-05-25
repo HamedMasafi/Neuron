@@ -21,22 +21,29 @@
 #include <QtCore/QMetaObject>
 #include "noronpeer.h"
 #include "noronabstracthub.h"
+#include "noronsharedobject.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 /*!
  * \brief NoronPeer
  * This is base class of all peers.
  */
 
-NoronPeer::NoronPeer(QObject *parent) : QObject(parent), m_hub(0)
+NoronPeer::NoronPeer(QObject *parent) : QObject(parent), m_hub(0), _peerName(QString::null)
 {
 
 }
 
-NoronPeer::NoronPeer(NoronAbstractHub *hub, QObject *parent) : QObject(parent), m_hub(0)
+NoronPeer::NoronPeer(NoronAbstractHub *hub, QObject *parent) : QObject(parent), m_hub(0), _peerName(QString::null)
 {
     setHub(hub);
+}
+
+NoronPeer::~NoronPeer()
+{
+//    if(hub())
+//        hub()->deleteLater();
 }
 
 NoronAbstractHub *NoronPeer::hub() const
@@ -52,6 +59,7 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
 
     if(hub()->isMultiThread()){
 //        qlonglong ret;
+        qDebug() <<"peerName()"<<peerName();
         hub()->metaObject()->invokeMethod(hub(),
                                           QT_STRINGIFY(invokeOnPeer),
 //                                          Qt::DirectConnection,
@@ -79,9 +87,9 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
     }
 }
 
-const QString NoronPeer::peerName()
+const QString NoronPeer::peerName() const
 {
-    return QString("");
+    return _peerName;
 }
 
 void NoronPeer::addCall(long id, NoronRemoteCallBase *call)
@@ -91,7 +99,13 @@ void NoronPeer::addCall(long id, NoronRemoteCallBase *call)
 
 void NoronPeer::removeCall(long id)
 {
+    delete hub()->_calls[id];
     hub()->_calls.remove(id);
+}
+
+void NoronPeer::setPeerName(const QString &name)
+{
+    _peerName = name;
 }
 
 void NoronPeer::setHub(NoronAbstractHub *hub)
@@ -100,8 +114,16 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
         return;
 
     m_hub = hub;
-    hub->setPeer(this);
+
+    NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
+
+    if(so)
+        hub->addSharedObject(so);
+    else
+        hub->setPeer(this);
+
+    qDebug() << "peer changed" << (so ? "NoronSharedObject" : "NoronPeer");
     emit hubChanged(hub);
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

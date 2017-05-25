@@ -10,6 +10,7 @@
 #include "classparser.h"
 #include "texthelper.h"
 
+//TODO: code cleanup for this roject is needed
 using namespace std;
 
 QTextStream& qStdOut()
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
             qFatal("Len equal");
         firstLine = firstLine
                 .replace("class ", "")
-                .replace("pubic ", "");
+                .replace("public ", "");
         QStringList parts = firstLine.split(":");
         if(parts.length() != 2){
             qFatal("Syntax error at: %s", qPrintable(firstLine));
@@ -79,12 +80,12 @@ int main(int argc, char *argv[])
         classParser.addClass(parts.at(1).trimmed(),
                              parts.at(0).trimmed(),
                              content);
+//        qInfo("%s", qPrintable(content));
     }
-    return EXIT_SUCCESS;
 
 
-    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*(:\\s*(?<base_type>\\S+))?\\s*\\{(?<content>[^}]*)\\}[^;]", QRegularExpression::DotMatchesEverythingOption);
-    QRegularExpressionMatchIterator i = classRegex.globalMatch(fileContent);
+//    QRegularExpression classRegex("class\\s+(?<type>MAIN\\s+)?(?<name>\\S+)\\s*(:\\s*(?<base_type>\\S+))?\\s*\\{(?<content>[^}]*)\\}[^;]", QRegularExpression::DotMatchesEverythingOption);
+//    QRegularExpressionMatchIterator i = classRegex.globalMatch(fileContent);
     QString savePath = parser.value(targetOption);
 
     QRegularExpression namespaceRegex("namespace\\s+(\\S+)", QRegularExpression::DotMatchesEverythingOption);
@@ -93,28 +94,6 @@ int main(int argc, char *argv[])
     int peersCount = 0;
     int sharedObjectsCount = 0;
 
-//    QList<Class*> classes;
-
-    while (i.hasNext()) {
-        qFatal("Regex found");
-
-        QRegularExpressionMatch match = i.next();
-
-        QString baseType = match.captured("base_type");
-        if(baseType.isEmpty())
-            baseType = "NoronSharedObject";
-
-
-        if(baseType == "NoronPeer")
-            peersCount++;
-
-        classesCode.insert(match.captured("name"), match.captured("content"));
-
-        classParser.addClass(baseType,
-                             match.captured("name"),
-                             match.captured("content"));
-
-    }
     classParser.parseAll();
 
 //    if(peersCount == 0 && classes.count() != 0){

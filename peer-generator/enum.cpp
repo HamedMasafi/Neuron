@@ -12,7 +12,7 @@ Enum::Enum(QString name, QString content) : _name(name), _lines(content)
 
 QString Enum::toString()
 {
-    return QString("enum %1{%2};" LB "Q_ENUM(%1)")
+    return QString("enum %1{" LB "%2};" LB "Q_ENUM(%1)")
             .arg(_name)
             .arg(_lines);
 }

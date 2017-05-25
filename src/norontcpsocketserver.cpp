@@ -18,9 +18,11 @@
 **
 **************************************************************************/
 
+#include <QtCore/QDebug>
+
 #include "norontcpsocketserver_p.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 NoronTcpSocketServer::NoronTcpSocketServer(QObject *parent) : QTcpServer(parent)
 {
@@ -36,4 +38,4 @@ void NoronTcpSocketServer::incomingConnection(qintptr socketDescriptor)
     emit newIncomingConnection(socketDescriptor);
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

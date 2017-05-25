@@ -25,13 +25,14 @@
 
 #include "noronabstracthub.h"
 
-QT_BEGIN_NAMESPACE
-
-class NoronClientHubPrivate;
 #ifdef QT_QML_LIB
 class QJSEngine;
 class QQmlEngine;
 #endif
+
+NORON_BEGIN_NAMESPACE
+
+class NoronClientHubPrivate;
 class NORON_EXPORT NoronClientHub : public NoronAbstractHub
 {
     Q_OBJECT
@@ -49,7 +50,7 @@ public:
     NoronClientHub(QQmlEngine *qmlEngine, QJSEngine *jsEngine, QObject *parent = 0);
 #endif
 
-    ~NoronClientHub();
+    virtual ~NoronClientHub();
 
     QString serverAddress() const;
     int port() const;
@@ -72,14 +73,19 @@ public slots:
     void setAutoReconnect(bool isAutoReconnect);
 
 private slots:
-    void isConnectedChanged(bool isConnected);
+    void onStatusChanged(Status status);
+    void hi(qlonglong hubId);
 
 signals:
     void serverAddressChanged(QString serverAddress);
     void portChanged(int port);
     void isAutoReconnectChanged(bool isAutoReconnect);
+
+    // NoronAbstractHub interface
+protected:
+    void beginConnection();
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONCLIENTHUB_H

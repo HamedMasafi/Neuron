@@ -23,14 +23,20 @@
 
 #include <QtCore/QSet>
 
+#include "noronabstracthub.h"
 #include "noronpeer.h"
+#include "syntax/syntax.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
+//TODO: generate private class for me :-)
 class NORON_EXPORT NoronSharedObject : public NoronPeer
 {
     Q_OBJECT
+
     NoronAbstractHub *_activeHub;
+    NoronAbstractHub *_deactiveHub;
+    bool _autoDelete;
 
 public:
     NoronSharedObject(QObject *parent = 0);
@@ -39,14 +45,22 @@ public:
     void addHub(NoronAbstractHub *hub);
     void removeHub(NoronAbstractHub *hub);
     bool setActiveHub(NoronAbstractHub *hub);
+    bool setAllHubsActiveExcept(NoronAbstractHub *hub);
 
     QSet<NoronAbstractHub*> hubs;
 
-    void setHub(NoronAbstractHub* hub) /*Q_DECL_OVERRIDE*/;
+//    void setHub(NoronAbstractHub* hub) /*Q_DECL_OVERRIDE*/;
 
-    virtual const QString peerName() /*Q_DECL_OVERRIDE*/;
+    //BC
+//    virtual const QString peerName() /*Q_DECL_OVERRIDE*/;
     virtual void hubAdded(NoronAbstractHub *hub);
     virtual void hubRemoved(NoronAbstractHub *hub);
+
+    bool autoDelete() const;
+    void setAutoDelete(bool autoDelete);
+
+private slots:
+    void hub_statusChanged(NoronAbstractHub::Status status);
 
 protected:
     qlonglong invokeOnPeer(
@@ -65,6 +79,6 @@ protected:
 signals:
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSHAREDOBJECT_H

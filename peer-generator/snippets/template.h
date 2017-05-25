@@ -17,7 +17,7 @@
 #include <<IncludeName/>>
 </includes>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class <ClassName/> : public <BaseType/>
 {
@@ -45,6 +45,6 @@ public:
 
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // %3_H

@@ -3,7 +3,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 Client::Client(QObject *parent) : NoronPeer(parent)
 {
@@ -99,4 +99,4 @@ int Client::getRandomNumberSlot()
 }
 
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

@@ -24,7 +24,7 @@
 #include <QtCore/QObject>
 #include "noronglobal.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronAbstractSerializer : public QObject
 {
@@ -42,6 +42,6 @@ signals:
 public slots:
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONABSTRACTSERIALIZER_H

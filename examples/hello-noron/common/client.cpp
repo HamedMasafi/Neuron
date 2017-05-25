@@ -3,14 +3,14 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 Client::Client(QObject *parent) : NoronPeer(parent)
 {
 
 }
 
-Client::Client(NoronHub *hub, QObject *parent) : NoronPeer(parent)
+Client::Client(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)
 {
     if(hub)
         setHub(hub);
@@ -181,4 +181,4 @@ int Client::getRandomNumberWithTimeoutSlot(int timeout)
 }
 
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

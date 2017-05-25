@@ -23,7 +23,7 @@
 
 #include <QTcpSocket>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 NoronServerThread::NoronServerThread(qintptr socketDescriptor, QObject *parent) : QThread(parent),
     _hub(0), _isStarted(false)
@@ -44,13 +44,18 @@ bool NoronServerThread::isStarted() const
 
 void NoronServerThread::run()
 {
+    //TODO: pass serializer to here!
     _hub = new NoronServerHub;
     _hub->setSocketDescriptor(this->socketDescriptor, false);
     _hub->setServerThread(this);
 
+    K_REG_OBJECT(_hub);
+
     _isStarted = true;
 
     exec();
+
+    _hub->deleteLater();
 }
 
 NoronServerHub *NoronServerThread::hub()
@@ -58,4 +63,4 @@ NoronServerHub *NoronServerThread::hub()
     return _hub;
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

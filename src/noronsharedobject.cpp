@@ -23,14 +23,24 @@
 
 #include <QtCore/QDebug>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
-NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent), _activeHub(0)
+bool NoronSharedObject::autoDelete() const
+{
+    return _autoDelete;
+}
+
+void NoronSharedObject::setAutoDelete(bool autoDelete)
+{
+    _autoDelete = autoDelete;
+}
+
+NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent), _activeHub(0), _deactiveHub(0)
 {
 
 }
 
-NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent), _activeHub(0)
+NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent), _activeHub(0), _deactiveHub(0)
 {
     addHub(hub);
 }
@@ -40,13 +50,20 @@ void NoronSharedObject::addHub(NoronAbstractHub *hub)
     if(!hub->inherits(QT_STRINGIFY(NoronServer))){
         hubs.insert(hub);
         hubAdded(hub);
+
+        connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
     }
 }
 
 void NoronSharedObject::removeHub(NoronAbstractHub *hub)
 {
-    hubs.remove(hub);
-    hubRemoved(hub);
+    if(hubs.remove(hub)){
+        hubRemoved(hub);
+
+//        if(!hubs.count()){
+//            deleteLater();
+//        }
+    }
 }
 
 bool NoronSharedObject::setActiveHub(NoronAbstractHub *hub)
@@ -58,25 +75,43 @@ bool NoronSharedObject::setActiveHub(NoronAbstractHub *hub)
 
     if(hubs.contains(hub)){
         _activeHub = hub;
+        _deactiveHub = 0;
         return true;
     }
     return false;
 }
 
-void NoronSharedObject::setHub(NoronAbstractHub *hub)
+bool NoronSharedObject::setAllHubsActiveExcept(NoronAbstractHub *hub)
 {
-    if (m_hub == hub)
-        return;
+    if(!hub){
+        _deactiveHub = 0;
+        return true;
+    }
 
-    m_hub = hub;
-    emit hubChanged(hub);
-    hub->addSharedObject(this);
+    if(hubs.contains(hub)){
+        _deactiveHub = hub;
+        _activeHub = 0;
+        return true;
+    }
+    return false;
 }
 
-const QString NoronSharedObject::peerName()
-{
-    return QString::null;
-}
+//void NoronSharedObject::setHub(NoronAbstractHub *hub)
+//{
+//    if (m_hub == hub)
+//        return;
+
+//    qDebug()<<"NoronSharedObject::setHub(NoronAbstractHub *hub)";
+//    m_hub = hub;
+//    emit hubChanged(hub);
+//    hub->addSharedObject(this);
+//}
+
+//BC
+//const QString NoronSharedObject::peerName()
+//{
+//    return NoronPeer::peerName();
+//}
 
 void NoronSharedObject::hubAdded(NoronAbstractHub *hub)
 {
@@ -86,6 +121,15 @@ void NoronSharedObject::hubAdded(NoronAbstractHub *hub)
 void NoronSharedObject::hubRemoved(NoronAbstractHub *hub)
 {
     Q_UNUSED(hub);
+}
+
+void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
+{
+    NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
+
+    if(hub && status == NoronAbstractHub::Unconnected){
+        removeHub(hub);
+    }
 }
 
 qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
@@ -98,6 +142,9 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
         tmpHubs = hubs;
         if(hub())
             tmpHubs.insert(hub());
+
+        if(_deactiveHub)
+            tmpHubs.remove(_deactiveHub);
     }
 
     foreach (NoronAbstractHub *hub, tmpHubs) {
@@ -125,4 +172,4 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
     return 0;
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

@@ -1,0 +1,22 @@
+{
+  "name": "noron",
+  "description": "Qt Remote object sharing Edit",
+  "author": {
+    "name": "Hamed Masafi",
+    "email": "hamed.masafi@gmail.com"
+  },
+  "repository": {
+    "type": "GITHUB",
+    "url": "git@github.com/HamedMasafi/Noron.git"
+  },
+  "version": {
+    "label": "1.0.0",
+    "revision": "",
+    "fingerprint": ""
+  },
+  "dependencies": [
+  ],
+  "license": "LGPL_3_0",
+  "pri_filename": "noron.pri",
+  "webpage": "https://github.com/HamedMasafi/Noron"
+}

@@ -169,7 +169,6 @@ void ClassParser::procLine(Class *cls, QString line)
     includeUsedType(cls, returnType);
 
     QStringList types = methodsList[0]->getParametereTypes().split(",");
-//    qDebug() << "types"<<types;
     foreach(QString t, types)
         includeUsedType(cls, t.trimmed().replace("*", ""));
 }
@@ -194,9 +193,7 @@ bool ClassParser::includeUsedType(Class *cls, QString propType)
         propType =  propType.left(propType.length() - 4);
 
     foreach (ClassData *data, classDataList){
-//qDebug() << "check" <<data->name << propType;
         if(data->name == propType){
-//            qDebug() << " " << propType << " found;";
             cls->addInclude(data->name.toLower() + ".h", true, false);
             return true;
         }
@@ -430,17 +427,24 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
     cls->addInclude("QJSValue", true, true, "ifdef QT_QML_LIB");
     cls->addInclude("NoronAbstractHub");
 
-    QRegularExpression enumRegex("enum\\s+(?<name>\\S+)\\s*\\{(?<content>[^}])*\\};"/*,
-                                 QRegularExpression::MultilineOption | QRegularExpression::DotMatchesEverythingOption*/);
-    QRegularExpressionMatchIterator matchs = enumRegex.globalMatch(templateCode);
-    while (matchs.hasNext()) {
-        QRegularExpressionMatch match = matchs.next();
-        templateCode = templateCode.replace(match.captured(), "");
-//        cls->addBeginOfClass(match.captured() + "};" LB + "Q_ENUM(" + match.captured(1) + ")" LB);
-        qDebug() << "enum found" << match.captured();
-        Enum *e = new Enum(match.captured("name"), match.captured("content"));
+    QString firstLine;
+    QString content;
+    while(TextHelper::instance()->extractBlock("enum", templateCode, firstLine, content)){
+        Enum *e = new Enum(firstLine.replace("enum ", ""), content);
         cls->addEnum(e);
     }
+
+//    QRegularExpression enumRegex("enum\\s+(?<name>\\S+)\\s*\\{(?<content>[^}])*\\};"/*,
+//                                 QRegularExpression::MultilineOption | QRegularExpression::DotMatchesEverythingOption*/);
+//    QRegularExpressionMatchIterator matchs = enumRegex.globalMatch(templateCode);
+//    while (matchs.hasNext()) {
+//        QRegularExpressionMatch match = matchs.next();
+//        templateCode = templateCode.replace(match.captured(), "");
+////        cls->addBeginOfClass(match.captured() + "};" LB + "Q_ENUM(" + match.captured(1) + ")" LB);
+//        qDebug() << "enum found" << match.captured();
+//        Enum *e = new Enum(match.captured("name"), match.captured("content"));
+//        cls->addEnum(e);
+//    }
 
     QStringList lines = templateCode.split("\n");
 

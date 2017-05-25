@@ -4,7 +4,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 User::User(QObject *parent) : NoronPeer(parent)
 {
@@ -35,7 +35,7 @@ void User::messageRecived(QString username, QString message, QJSValue callbackFu
     qlonglong id = invokeOnPeer("messageRecivedSlot", username,message);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -127,7 +127,7 @@ void User::sendImage(QPixmap image, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("sendImageSlot", image);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -229,7 +229,7 @@ void User::sendMessage(QString message, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("sendMessageSlot", message);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);
+        NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -286,4 +286,4 @@ void User::setUsername(QString username)
 }
 
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

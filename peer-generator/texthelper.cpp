@@ -195,31 +195,39 @@ bool TextHelper::extractBlock(const QString &blockName, QString &code, QString &
     bool found = false;
     int bracketsCount = 0;
     QStringList lines = code.split(LB);
+    firstLine = content = "";
     foreach (QString l, lines) {
         if(found){
             if(l == "{")
-                bracketsCount++;
-            else if(l == "}")
+                if(++bracketsCount == 1)
+                    continue;
+            if(l == "}")
                 bracketsCount--;
-            else
+
+//            qInfo("Line %d: %s", bracketsCount, qPrintable(l));
+            if(bracketsCount){
                 content.append(l + LB);
+            }else{
+//            if(bracketsCount){
+//                qDebug() << "code";
+//                qInfo(qPrintable(code));
 
-            if(!bracketsCount){
-                qDebug() << "code";
-                qInfo(qPrintable(code));
-
-                qDebug() << "code 2";
-                qInfo(qPrintable(firstLine + LB + "{" LB + content + "}"));
+//                qDebug() << "code 2";
+//                qInfo("--------------------------code 2--------------------------");
+//                qInfo("sub %d: %s", bracketsCount, qPrintable(firstLine + LB + "{" LB + content + "}"));
+//                qInfo("found = %d", code.contains(firstLine + LB + "{" LB + content + "}"));
 
                 code = code.replace(firstLine + LB + "{" LB + content + "}", "");
                 return true;
             }
+
         }
 
         if(l.startsWith(blockName)){
             firstLine = l;
             found = true;
         }
+
 
 //        qDebug() << l;
     }

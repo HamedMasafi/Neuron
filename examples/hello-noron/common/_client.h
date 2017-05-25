@@ -16,7 +16,7 @@
 #include <NoronPeer>
 
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class Client : public NoronPeer
 {
@@ -58,6 +58,6 @@ signals:
 
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // CLIENT_H

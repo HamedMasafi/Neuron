@@ -18,7 +18,7 @@
 #include <QString>
 
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class User : public NoronPeer
 {
@@ -82,6 +82,6 @@ signals:
 
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // USER_H

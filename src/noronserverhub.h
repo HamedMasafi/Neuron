@@ -25,7 +25,7 @@
 
 #include "noronabstracthub.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronServerThread;
 class NoronServerHubPrivate;
@@ -41,15 +41,22 @@ public:
     NoronServerHub(NoronAbstractSerializer *serializer, QObject *parent = 0);
     NoronServerHub(QTcpSocket *socket, QObject *parent = 0);
 
-    ~NoronServerHub();
+    virtual ~NoronServerHub();
 
     NoronServerThread *serverThread() const;
+
+private slots:
+    qlonglong hi(qlonglong hubId);
 
 public slots:
     bool setSocketDescriptor(qintptr socketDescriptor, bool waitForConnect = false);
     void setServerThread(NoronServerThread *serverThread);
+
+    // NoronAbstractHub interface
+protected:
+    void beginConnection();
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSERVERHUB_H

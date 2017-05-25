@@ -45,7 +45,7 @@ ApplicationWindow {
     Hub{
         id: hub
         validateToken: RPC_TOKEN
-        autoReconnect: true
+        isAutoReconnect: true
     }
     User{
         id: user
@@ -78,8 +78,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        hub.addSharedObject(user)
-        hub.addSharedObject(server)
+        user.hub = hub
+        server.hub = hub
     }
 
     Flipable {
@@ -123,7 +123,9 @@ ApplicationWindow {
                 Button{
                     text: "Login"
                     onClicked: {
-                        hub.connectToServer(serverAddress.text, PORT)
+                        hub.serverAddress = serverAddress.text
+                        hub.port = PORT
+                        hub.connectToHost(true)
                         user.username = username.text
                         flipable.flipped = true
                     }
@@ -226,10 +228,16 @@ ApplicationWindow {
 
         transform: Rotation {
             id: rotation
-            origin.x: flipable.width/2
-            origin.y: flipable.height/2
-            axis.x: 0; axis.y: 1; axis.z: 0     // set axis.y to 1 to rotate around y-axis
-            angle: 0    // the default angle
+            angle: 0
+            origin{
+                x: flipable.width/2
+                y: flipable.height/2
+            }
+            axis{
+                x: 0
+                y: 1
+                z: 0
+            }
         }
 
         states: State {

@@ -3,7 +3,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 %4
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 %1::%1(QObject *parent) : %6(parent)
 {
@@ -19,4 +19,4 @@ QT_BEGIN_NAMESPACE
 }
 
 %2
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

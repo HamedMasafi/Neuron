@@ -24,7 +24,7 @@
 #include <QtCore/QObject>
 #include "noronabstracthub.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronPeer;
 class NoronServerPrivate;
@@ -38,6 +38,7 @@ class NORON_EXPORT NoronServer : public NoronAbstractHub
 
     Q_PROPERTY(int typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
     Q_PROPERTY(ServerType serverType READ serverType WRITE setServerType NOTIFY serverTypeChanged)
+    Q_PROPERTY(int reconnectTimeout READ reconnectTimeout WRITE setReconnectTimeout NOTIFY reconnectTimeoutChanged)
 
 public:
     explicit NoronServer(QObject *parent = 0);
@@ -48,7 +49,7 @@ public:
         SingleThread,
         MultiThread
     };
-    Q_ENUM(ServerType);
+    Q_ENUM(ServerType)
 
     template <typename T> void registerType(){
         setTypeId(qRegisterMetaType<T>());
@@ -57,8 +58,9 @@ public:
     QSet<NoronPeer *> peers();
     int typeId() const;
     ServerType serverType() const;
-
     void startServer(qint16 port);
+    int reconnectTimeout() const;
+    bool isListening() const;
 
 signals:
     void peerConnected(NoronPeer *peer);
@@ -66,15 +68,19 @@ signals:
     void typeIdChanged(int typeId);
     void serverTypeChanged(ServerType serverType);
 
+    void reconnectTimeoutChanged(int reconnectTimeout);
+
 private slots:
+    void hub_connected();
     void hub_disconnected();
     void server_newIncomingConnection(qintptr socketDescriptor);
 
 public slots:
     void setTypeId(int typeId);
     void setServerType(ServerType serverType);
+    void setReconnectTimeout(int reconnectTimeout);
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSERVER_H

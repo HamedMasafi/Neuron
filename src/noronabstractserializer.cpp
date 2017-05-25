@@ -20,11 +20,11 @@
 
 #include "noronabstractserializer.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 NoronAbstractSerializer::NoronAbstractSerializer(QObject *parent) : QObject(parent)
 {
 
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

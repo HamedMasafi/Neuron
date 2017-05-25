@@ -23,7 +23,9 @@
 
 #include <QtNetwork/QTcpServer>
 
-QT_BEGIN_NAMESPACE
+#include "noronglobal.h"
+
+NORON_BEGIN_NAMESPACE
 
 class NoronTcpSocketServer : public QTcpServer
 {
@@ -39,6 +41,6 @@ signals:
     void newIncomingConnection(qintptr socketDescriptor);
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONTCPSOCKETSERVER_H

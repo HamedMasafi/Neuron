@@ -23,7 +23,7 @@
 
 #include "noronserver.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronServerPrivate{
     NoronServer *q_ptr;
@@ -34,14 +34,16 @@ public:
 
     NoronTcpSocketServer *serverSocket;
     QSet<NoronPeer*> peers;
-    QSet<NoronAbstractHub*> hubs;
+    QHash<qlonglong, NoronAbstractHub*> hubs;
     QHash<QString, NoronSharedObject*> sharedPeers;
+
     int typeId;
     NoronAbstractSerializer* serializer;
     NoronServer::ServerType serverType;
-    qlonglong peerId;
+    qlonglong hubId;
+    int reconnectTimeout;
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSERVER_P_H

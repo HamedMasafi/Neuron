@@ -26,7 +26,7 @@
 #include "noronserverhub.h"
 #include "noronglobal.h"
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronServerThread : public QThread
 {
@@ -43,6 +43,6 @@ public:
     NoronServerHub *hub();
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSERVERTHREAD_H

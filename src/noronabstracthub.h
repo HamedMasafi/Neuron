@@ -21,24 +21,27 @@
 #ifndef NORONABSTRACTHUB_H
 #define NORONABSTRACTHUB_H
 
+#define THIS_HUB "::ThisHub"
+
 #include "noronglobal.h"
 
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
 
-QT_BEGIN_NAMESPACE
+class QTcpSocket;
+#ifdef QT_QML_LIB
+class QJSEngine;
+class QQmlEngine;
+#endif
+
+NORON_BEGIN_NAMESPACE
 
 class NoronPeer;
 class NoronAbstractHubPrivate;
 class NoronAbstractSerializer;
 class NoronSharedObject;
 class NoronRemoteCallBase;
-class QTcpSocket;
-#ifdef QT_QML_LIB
-class QJSEngine;
-class QQmlEngine;
-#endif
 class NORON_EXPORT NoronAbstractHub : public QObject
 {
     Q_OBJECT
@@ -47,18 +50,29 @@ class NORON_EXPORT NoronAbstractHub : public QObject
     Q_DECLARE_PRIVATE(NoronAbstractHub)
 
     Q_PROPERTY(NoronPeer* peer READ peer WRITE setPeer NOTIFY peerChanged)
-    Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
     Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(NoronAbstractSerializer* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
+    Q_PROPERTY(Status status READ status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(qlonglong hubId READ hubId WRITE setHubId NOTIFY hubIdChanged)
+
 #ifdef QT_QML_LIB
     Q_PROPERTY(QJSEngine* jsEngine READ jsEngine WRITE setJsEngine NOTIFY jsEngineChanged)
     Q_PROPERTY(QQmlEngine* qmlEngine READ qmlEngine WRITE setQmlEngine NOTIFY qmlEngineChanged)
 #endif
 
 public:
-    explicit NoronAbstractHub(QObject *parent = 0);
-    ~NoronAbstractHub();
+    enum Status{
+        Unconnected,
+        Connected,
+        Reconnecting
+    };
+    Q_ENUM(Status)
 
+    explicit NoronAbstractHub(QObject *parent = 0);
+    explicit NoronAbstractHub(NoronAbstractSerializer *serializer, QObject *parent = 0);
+    virtual ~NoronAbstractHub();
+
+    QHash<const QString, NoronSharedObject*> sharedObjectHash() const;
     QList<NoronSharedObject *> sharedObjects() const;
     QList<NoronSharedObject *> sharedObjects(QString peerName) const;
     NoronAbstractSerializer* serializer() const;
@@ -68,29 +82,34 @@ public:
     QString validateToken() const;
 
     bool isMultiThread() const;
+    Status status() const;
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine() const;
     QQmlEngine* qmlEngine() const;
 #endif
 
+    void waitForConnected();
 
 protected:
     QHash<long, NoronRemoteCallBase*> _calls;
     QTcpSocket *socket;
-    qlonglong peerId() const;
-    void setPeerId(qlonglong id);
+    qlonglong hubId() const;
+    Q_INVOKABLE void setHubId(qlonglong id);
 
 signals:
+    void connected();
     void disconnected();
+    void reconnected();
+
     void peerChanged(NoronPeer* peer);
-    void isConnectedChanged(bool isConnected);
     void validateTokenChanged(QString validateToken);
     void serializerChanged(NoronAbstractSerializer* serializer);
+    void statusChanged(Status status);
 #ifdef QT_QML_LIB
     void jsEngineChanged(QJSEngine *jsEngine);
     void qmlEngineChanged(QQmlEngine* qmlEngine);
 #endif
-
+    void hubIdChanged(qlonglong hubId);
 
 private slots:
     void socket_connected();
@@ -119,7 +138,6 @@ public slots:
     void addSharedObject(NoronSharedObject *o);
     void removeSharedObject(NoronSharedObject *o);
     void setPeer(NoronPeer* peer);
-    void setIsConnected(bool isConnected);
     void setValidateToken(QString validateToken);
     void setSerializer(NoronAbstractSerializer* serializer);
 #ifdef QT_QML_LIB
@@ -127,14 +145,15 @@ public slots:
     void setQmlEngine(QQmlEngine* qmlEngine);
 #endif
 
-
-private:
+protected:
+    virtual void beginConnection();
     void setIsMultiThread(bool isMultiThread);
+    void setStatus(Status status);
 
     friend class NoronPeer;
     friend class NoronServer;
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONABSTRACTHUB_H

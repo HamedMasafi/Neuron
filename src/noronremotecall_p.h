@@ -21,6 +21,8 @@
 #ifndef NORONREMOTECALL_H
 #define NORONREMOTECALL_H
 
+#include "noronglobal.h"
+
 #include <QtCore/qglobal.h>
 #include <QtCore/QDebug>
 #include <QtCore/QList>
@@ -37,7 +39,7 @@
 #   include <functional>
 #endif
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class NoronRemoteCallBase{
 public:
@@ -79,6 +81,10 @@ public:
 #endif
 #ifdef QT_QML_LIB
     NoronRemoteCallBase(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *jsEngine);
+
+    QJSValue toJsValue(QVariant v);
+    QJSValue toJsValue(QVariantMap map);
+    QJSValue toJsValue(QVariantList list);
 #endif
     void setReturnData(){
 
@@ -86,8 +92,6 @@ public:
 
     virtual ~NoronRemoteCallBase();
     virtual void returnToCaller();
-
-
 };
 
 template <typename T>
@@ -103,6 +107,7 @@ public:
     NoronRemoteCall(QJSValue jsvalue, QQmlEngine *qmlEngine, QJSEngine *jsEngine) : NoronRemoteCallBase(jsvalue, qmlEngine, jsEngine) {}
 #endif
     NoronRemoteCall() : NoronRemoteCallBase() {}
+    NoronRemoteCall(ReturnType type) : NoronRemoteCallBase(type) {}
     NoronRemoteCall(QObject *obj, char *slotName) : NoronRemoteCallBase(obj, slotName) {}
     NoronRemoteCall(QObject *obj, QMetaMethod *method) : NoronRemoteCallBase(obj, method) {}
     ~NoronRemoteCall(){}
@@ -116,7 +121,7 @@ public:
 #ifdef QT_QML_LIB
         if(type == JSValue/* && jsvalue.isCallable()*/) {
             QJSValueList values;
-            if(returnData.type() == QVariant::List){
+            /*if(returnData.type() == QVariant::List){
                 QVariantList list = returnData.toList();
                 QJSValue param1;
                 int i = 0;
@@ -124,10 +129,10 @@ public:
 
                 foreach (QVariant var, list) {
                     if(QString(var.typeName()).endsWith("*")){
-                        qDebug() << var.typeName() << var.isNull() << var.isValid();
-
-//                        var.convert(QMetaType::type("QObject*"));
                         QObject *o = var.value<QObject*>();
+
+                        K_REG_OBJECT(o);
+
                         if(!o)
                             qWarning("Object is not valid");
                         qmlEngine->setObjectOwnership(o, QQmlEngine::JavaScriptOwnership);
@@ -187,7 +192,9 @@ public:
                         values.append(QJSValue(returnData.toString()));
                     }
                 }
-            }
+            }*/
+
+            values.append(toJsValue(returnData));
 
             QJSValue callResult = jsvalue.call(values);
 
@@ -198,14 +205,20 @@ public:
                          qPrintable(callResult.toString()));
         }
 #endif
-        if(type == Slot)
-            obj->metaObject()->invokeMethod(obj, slotName, Q_ARG(T, returnData.value<T>()));
+        if(type == Slot){
+            QGenericArgument arg(returnData.typeName(), returnData.data());
+            QMetaObject::invokeMethod(obj, slotName, arg);
+        }
 
-        if(type == EventLoop)
+        if(type == EventLoop){
             eventLoop->quit();
+            eventLoop->deleteLater();
+        }
 
-        if(type == MetaMethod)
-            method->invoke(obj, Q_ARG(T, returnData.value<T>()));
+        if(type == MetaMethod){
+            QGenericArgument arg(returnData.typeName(), returnData.data());
+            method->invoke(obj, arg);
+        }
     }
 
 };
@@ -215,6 +228,6 @@ class NoronRemoteCallList : public NoronRemoteCallBase{
 
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONREMOTECALL_H

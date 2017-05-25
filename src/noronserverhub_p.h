@@ -3,7 +3,9 @@
 
 #include "noronserverhub.h"
 
-QT_BEGIN_NAMESPACE
+class QEventLoop;
+
+NORON_BEGIN_NAMESPACE
 
 class NoronServerHubPrivate{
     NoronServerHub *q_ptr;
@@ -13,8 +15,9 @@ public:
     NoronServerHubPrivate(NoronServerHub *parent);
 
     NoronServerThread *serverThread;
+    QEventLoop *connectionEventLoop;
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONSERVERHUB_P_H

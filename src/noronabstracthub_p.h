@@ -18,10 +18,12 @@
 **
 **************************************************************************/
 
-#ifndef NORONHUB_P_H
-#define NORONHUB_P_H
+#ifndef NORONABSTRACTHUB_P_H
+#define NORONABSTRACTHUB_P_H
 
 #include <QtCore/QSet>
+
+#include <QMutex>
 
 #include "noronabstracthub.h"
 
@@ -34,11 +36,12 @@
 #define MAP_TYPE_RESPONSE   "response"
 #define MAP_TOKEN_ITEM      "_token"
 
-QT_BEGIN_NAMESPACE
-
 class QTcpSocket;
 class QJSEngine;
 class QQmlEngine;
+
+NORON_BEGIN_NAMESPACE
+
 class NoronAbstractHubPrivate{
     NoronAbstractHub *q_ptr;
     Q_DECLARE_PUBLIC(NoronAbstractHub)
@@ -48,17 +51,18 @@ public:
 
     QSet<QString> locks;
     QVariantList buffer;
-    qlonglong requestId;
-    bool isTransaction;
+    QByteArray readBuffer;
+    QHash<const QString, NoronSharedObject*> sharedObjects;
+    QMutex socketReadMutes;
 
     NoronPeer* peer;
-    QHash<const QString, NoronSharedObject*> sharedObjects;
-    bool isConnected;
     QString validateToken;
     NoronAbstractSerializer* serializer;
+    qlonglong requestId;
+    bool isTransaction;
     bool isMultiThread;
-
-    qlonglong peerId;
+    qlonglong hubId;
+    NoronAbstractHub::Status status;
 
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine;
@@ -66,16 +70,17 @@ public:
 #endif
 
     void addToMap(QVariantMap *map, QVariant var, int index);
+    void procMap(QVariantList list);
     void procMap(QVariantMap map);
-    bool response(qlonglong id, QString senderName, QVariant returnValue);
-
-    QString createValidateToken(QVariantMap *map);
-    void addValidateToken(QVariantMap *map);
-    bool checkValidateToken(QVariantMap *map);
-    QString MD5(QString text);
+    bool response(const qlonglong &id, const QString &senderName, const QVariant &returnValue);
+    QString createValidateToken(QVariantMap &map);
+    void addValidateToken(QVariantMap &map);
+    bool checkValidateToken(QVariantMap &map);
+    QString MD5(const QString &text);
     QString MD5(QByteArray text);
+    void sync();
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
-#endif // NORONHUB_P_H
+#endif // NORONABSTRACTHUB_P_H

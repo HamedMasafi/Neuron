@@ -37,7 +37,7 @@
 #define VARIANT_VALUE "_value"
 #define CLASS_NAME(x) QString(#x)
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 NoronJsonBinarySerializer::NoronJsonBinarySerializer(QObject *parent) : NoronAbstractSerializer(parent)
 {
@@ -231,6 +231,7 @@ QVariant NoronJsonBinarySerializer::fromJson(QJsonObject object)
 
         const QMetaObject *metaObject = QMetaType::metaObjectForType(typeCode);
         obj = metaObject->newInstance();
+        K_REG_OBJECT(obj);
 
         if(!obj){
             qWarning("Object type %s can not deserialized", qPrintable(object[VARIANT_TYPE].toString()));
@@ -241,10 +242,8 @@ QVariant NoronJsonBinarySerializer::fromJson(QJsonObject object)
 
 
         QVariant ret = QVariant::fromValue(obj);
-        qDebug() << "object detected" << typeName << obj << ret.canConvert(typeCode);
-
         ret.convert(typeCode);
-        return ret;// QVariant(typeCode, (const void*)obj);
+        return ret;
     }
 
     QVariant v;
@@ -262,4 +261,4 @@ QVariant NoronJsonBinarySerializer::fromJson(QJsonArray array)
     return list;
 }
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE

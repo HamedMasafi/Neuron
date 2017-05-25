@@ -19,7 +19,7 @@
 #include <QString>
 
 
-QT_BEGIN_NAMESPACE
+NORON_BEGIN_NAMESPACE
 
 class Server : public NoronSharedObject
 {
@@ -90,6 +90,6 @@ signals:
 
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // SERVER_H

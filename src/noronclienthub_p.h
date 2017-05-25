@@ -23,7 +23,9 @@
 
 #include "noronclienthub.h"
 
-QT_BEGIN_NAMESPACE
+class QEventLoop;
+
+NORON_BEGIN_NAMESPACE
 
 class NoronClientHubPrivate{
     NoronClientHub *q_ptr;
@@ -36,10 +38,10 @@ public:
     QString serverAddress;     // address of server
     bool isAutoReconnect;
     int reconnectTimerId;
-
-    void sync();
+    //TODO: delete event loop
+    QEventLoop *connectionEventLoop;
 };
 
-QT_END_NAMESPACE
+NORON_END_NAMESPACE
 
 #endif // NORONCLIENTHUB_P_H

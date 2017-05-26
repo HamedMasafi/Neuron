@@ -147,6 +147,7 @@ QJsonObject NoronJsonBinarySerializer::toJson(QVariant v)
         QByteArray data;
         QDataStream ds(&data, QIODevice::WriteOnly);
         ds << v;
+        qDebug() << "typename" << (int)v.type() << v.typeName();
         o.insert(VARIANT_TYPE, v.typeName());
         o.insert(VARIANT_VALUE, QString(data.toBase64()));
     }

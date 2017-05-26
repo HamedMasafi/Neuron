@@ -62,7 +62,7 @@ NoronServer::NoronServer(qint16 port, QObject *parent) : NoronAbstractHub(parent
     connect(d->serverSocket, &NoronTcpSocketServer::newIncomingConnection,
             this, &NoronServer::server_newIncomingConnection);
 
-    d->serverSocket->listen(QHostAddress::Any, port);
+    startServer(port);
 }
 
 NoronServer::~NoronServer()
@@ -83,7 +83,7 @@ void NoronServer::startServer(qint16 port)
 
     bool ok = d->serverSocket->listen(QHostAddress::Any, port);
     if (!ok) {
-       qWarning("Unable to start server");
+       qWarning("Unable to start server. Error: %s", d->serverSocket->errorString().toUtf8().data());
     }
 }
 

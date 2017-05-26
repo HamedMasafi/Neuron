@@ -82,7 +82,6 @@ bool NoronClientHub::isAutoReconnect() const
 #ifdef QT_QML_LIB
 static QObject* create_singelton_object_client_hub(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
-    qDebug() << "create_singelton_object_client_hub";
     return new NoronClientHub(qmlEngine, jsEngine);
 }
 
@@ -138,8 +137,8 @@ void NoronClientHub::connectToHost(QString address, int port, bool waitForConnec
         this->waitForConnected();
 
     qDebug() << "socket->state()"<<socket->state();
-    if (socket->state() == QAbstractSocket::UnconnectedState)
-        qWarning("Unable to start client socket");
+    if (socket->state() != QAbstractSocket::ConnectedState)
+        qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
 }
 
 void NoronClientHub::disconnectFromHost()

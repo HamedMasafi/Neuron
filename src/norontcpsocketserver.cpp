@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include <QtCore/QDebug>
+#include <QtCore/QDebug>
 
 #include "norontcpsocketserver_p.h"
 
@@ -35,6 +36,7 @@ NoronTcpSocketServer::NoronTcpSocketServer(QObject *parent) : QTcpServer(parent)
 
 void NoronTcpSocketServer::incomingConnection(qintptr socketDescriptor)
 {
+    qDebug() << "NoronTcpSocketServer::incomingConnection";
     emit newIncomingConnection(socketDescriptor);
 }
 

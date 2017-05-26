@@ -94,12 +94,8 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     if (map[MAP_TYPE] == MAP_TYPE_RESPONSE) {
         if (q->_calls[id]) {
             q->_calls[id]->returnData = map[MAP_RETURN_VALUE];
-            qDebug() << "going to return"
-                   << map[MAP_RETURN_VALUE]
-                   << "to"
-                   << map[CLASS_NAME].toString().toUtf8().data();
-            // TODO flowing two lines must be test
             q->_calls[id]->returnToCaller();
+            // TODO flowing two lines must be test
             delete q->_calls[id];
             q->_calls.remove(id);
         }
@@ -114,9 +110,8 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     QObject *target = 0;
 
     if(map[CLASS_NAME] == "") {
-        qWarning("Error in data");
         qDebug() <<  map;
-        return;
+        qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
         target = q;
@@ -233,10 +228,11 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
                                        args.value(8, QGenericArgument()),
                                        args.value(9, QGenericArgument()));
 
-    if (!ok)
+    if (!ok) {
         qWarning("Invoke %s on %s faild", qPrintable(method.name()),
                  qPrintable(map[CLASS_NAME].toString()));
-    else {
+        qDebug()<<map;
+    } else {
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
@@ -472,12 +468,12 @@ NoronAbstractHub::Status NoronAbstractHub::status() const
 void NoronAbstractHub::waitForConnected()
 {
     Q_D(NoronAbstractHub);
-    if (d->status == Connected)
+    if (socket->state() == QAbstractSocket::ConnectedState)
         return;
 
     QEventLoop loop;
     connect(this, &NoronAbstractHub::connected, &loop, &QEventLoop::quit);
-    QTimer::singleShot(3000, &loop, SLOT(quit()));
+    QTimer::singleShot(10000, &loop, SLOT(quit()));
     loop.exec();
 }
 
@@ -676,7 +672,7 @@ qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName,
         d->buffer.append(map);
         return 0;
     } else {
-        int res = socket->write(serializer()->serialize(map));
+        qint64 res = socket->write(serializer()->serialize(map));
         return res == 0 ? 0 : d->requestId;
     }
 }

@@ -1,16 +1,20 @@
 #ifndef SYNTAX_H
 #define SYNTAX_H
 
-//#include <QtGlobal>
+#include <QtGlobal>
 
-#ifdef Q_CC_CLANG
-#   pragma clang diagnostic push
-#   pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-#endif
-#ifdef Q_CC_GNU
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wpedantic"
-#endif
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wgnu-zero-variadic-macro-arguments")
+QT_WARNING_DISABLE_GCC("-Wpedantic")
+
+//#ifdef Q_CC_CLANG
+//#   pragma clang diagnostic push
+//#   pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+//#endif
+//#ifdef Q_CC_GNU
+//#   pragma GCC diagnostic push
+//#   pragma GCC diagnostic ignored "-Wpedantic"
+//#endif
 
 #if defined (QT_QML_LIB) && !defined (NO_QML_CALLBACK)
 #   include <QJSValue>
@@ -105,7 +109,7 @@
     } \
     void class::write(type name){ \
         m_##name = name;    \
-        invokeOnPeer(#write, name); \
+        invokeOnPeer(#write, QVariant::fromValue(name)); \
         emit notify(name);  \
     }
 
@@ -146,11 +150,12 @@
 #endif
 #endif
 
-#ifdef Q_CC_CLANG
-#   pragma clang diagnostic pop
-#endif
-#ifdef Q_CC_GNU
-#   pragma GCC diagnostic pop
-#endif
+//#ifdef Q_CC_CLANG
+//#   pragma clang diagnostic pop
+//#endif
+//#ifdef Q_CC_GNU
+//#   pragma GCC diagnostic pop
+//#endif
+QT_WARNING_POP
 
 #endif // SYNTAX_H

@@ -91,7 +91,7 @@ public:
     void waitForConnected();
 
 protected:
-    QHash<long, NoronRemoteCallBase*> _calls;
+    QHash<qlonglong, NoronRemoteCallBase*> _calls;
     QTcpSocket *socket;
     qlonglong hubId() const;
     Q_INVOKABLE void setHubId(qlonglong id);

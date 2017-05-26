@@ -57,9 +57,9 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
     if(!hub())
         return 0;
 
+    qDebug() << methodName << val0;
     if(hub()->isMultiThread()){
 //        qlonglong ret;
-        qDebug() <<"peerName()"<<peerName();
         hub()->metaObject()->invokeMethod(hub(),
                                           QT_STRINGIFY(invokeOnPeer),
 //                                          Qt::DirectConnection,
@@ -92,12 +92,12 @@ const QString NoronPeer::peerName() const
     return _peerName;
 }
 
-void NoronPeer::addCall(long id, NoronRemoteCallBase *call)
+void NoronPeer::addCall(qlonglong id, NoronRemoteCallBase *call)
 {
     hub()->_calls.insert(id, call);
 }
 
-void NoronPeer::removeCall(long id)
+void NoronPeer::removeCall(qlonglong id)
 {
     delete hub()->_calls[id];
     hub()->_calls.remove(id);
@@ -122,7 +122,6 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
     else
         hub->setPeer(this);
 
-    qDebug() << "peer changed" << (so ? "NoronSharedObject" : "NoronPeer");
     emit hubChanged(hub);
 }
 

@@ -63,8 +63,8 @@ public:
 
 protected:
     NoronAbstractHub* m_hub;
-    void addCall(long id, NoronRemoteCallBase *call);
-    void removeCall(long id);
+    void addCall(qlonglong id, NoronRemoteCallBase *call);
+    void removeCall(qlonglong id);
     void setPeerName(const QString &name);
 
 signals:

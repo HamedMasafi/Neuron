@@ -19,7 +19,6 @@
     ret class::name(__NAMEVALUE(count, __VA_ARGS__)) \
     {   \
         qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
-    qDebug() << "normal" << #name; \
         if(id){ \
             NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(NoronRemoteCallBase::EventLoop);    \
             addCall(id, call);  \

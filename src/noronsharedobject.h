@@ -23,9 +23,11 @@
 
 #include <QtCore/QSet>
 
+#define NORON_SHARED_OBJECT
+#include "syntax/syntax_sharedobject.h"
 #include "noronabstracthub.h"
 #include "noronpeer.h"
-#include "syntax/syntax.h"
+#undef NORON_SHARED_OBJECT
 
 NORON_BEGIN_NAMESPACE
 

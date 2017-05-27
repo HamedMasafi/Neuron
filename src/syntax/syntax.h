@@ -1,20 +1,8 @@
-#ifndef SYNTAX_H
-#define SYNTAX_H
-
 #include <QtGlobal>
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_CLANG("-Wgnu-zero-variadic-macro-arguments")
 QT_WARNING_DISABLE_GCC("-Wpedantic")
-
-//#ifdef Q_CC_CLANG
-//#   pragma clang diagnostic push
-//#   pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-//#endif
-//#ifdef Q_CC_GNU
-//#   pragma GCC diagnostic push
-//#   pragma GCC diagnostic ignored "-Wpedantic"
-//#endif
 
 #if defined (QT_QML_LIB) && !defined (NO_QML_CALLBACK)
 #   include <QJSValue>
@@ -45,8 +33,12 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 #include "method_jscallback.h"
 #include "method_slotcallback.h"
 #include "method_stdfunc.h"
-#include "method_slot.h"
-#include "decl_signal.h"
+#ifdef NORON_SHARED_OBJECT
+//#error "sahred object"
+#endif
+#ifdef NORON_PEER
+//#error "peer"
+#endif
 //signals:
 //  void callNumberSignal(int number);
 
@@ -118,44 +110,36 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     Q_INVOKABLE  class(QObject *parent = 0); \
     class(NoronAbstractHub *hub, QObject *parent = 0);
 
-#ifdef NORONSHAREDOBJECT_H
-#   define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NoronSharedObject(parent) \
-        {  \
-            setPeerName(#class); \
-        }    \
-        class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
-        {   \
-            if(hub){    \
-                setHub(hub);    \
-                hub->addSharedObject(this); \
-            }   \
-            setPeerName(#class); \
-        }
-#else
-#ifdef NORONPEER_H
-#   define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NoronPeer(parent) \
-        {  \
-            setPeerName(#class); \
-        }    \
-        class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
-        {   \
-            if(hub)    \
-                setHub(hub);    \
-            setPeerName(#class); \
-        }
-#else
-#   error "No NORONSHAREDOBJECT_H nor NORONPEER_H are defined";
-#endif
-#endif
+//#ifdef NORON_SHARED_OBJECT
+//#   define N_CLASS_IMPL(class) \
+//        class::class(QObject *parent) : NoronSharedObject(parent) \
+//        {  \
+//            setPeerName(#class); \
+//        }    \
+//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
+//        {   \
+//            if(hub){    \
+//                setHub(hub);    \
+//                hub->addSharedObject(this); \
+//            }   \
+//            setPeerName(#class); \
+//        }
+//#else
+//#ifdef NORON_PEER
+//#   define N_CLASS_IMPL(class) \
+//        class::class(QObject *parent) : NoronPeer(parent) \
+//        {  \
+//            setPeerName(#class); \
+//        }    \
+//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
+//        {   \
+//            if(hub)    \
+//                setHub(hub);    \
+//            setPeerName(#class); \
+//        }
+//#else
+//#   error "No NORONSHAREDOBJECT_H nor NORONPEER_H are defined";
+//#endif
+//#endif
 
-//#ifdef Q_CC_CLANG
-//#   pragma clang diagnostic pop
-//#endif
-//#ifdef Q_CC_GNU
-//#   pragma GCC diagnostic pop
-//#endif
 QT_WARNING_POP
-
-#endif // SYNTAX_H

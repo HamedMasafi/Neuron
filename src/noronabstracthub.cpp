@@ -277,8 +277,13 @@ QString NoronAbstractHubPrivate::createValidateToken(QVariantMap &map)
     while (i.hasNext()) {
         i.next();
 
-        if (QString(i.value().typeName()).endsWith("*"))
+        QMetaType t(i.value().type());
+
+        bool ok;
+        if (t.flags() & QMetaType::PointerToQObject)
             s.append(i.key() + ": " + i.value().typeName() + "*");
+        else if (t.flags() & QMetaType::IsEnumeration)
+            s.append(i.key() + ": " + i.value().toInt(&ok) + "*");
         else
             s.append(i.key() + ": " + i.value().toString() + "*");
     }

@@ -26,7 +26,9 @@
 
 #include "noronglobal.h"
 #include "noronremotecall_p.h"
-#include "syntax/syntax.h"
+#ifndef NORON_SHARED_OBJECT
+#include "syntax/syntax_peer.h"
+#endif
 
 NORON_BEGIN_NAMESPACE
 

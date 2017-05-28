@@ -83,6 +83,10 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     __REMOTE_METHOD_IMPL_P2(class, VA_NARGS(__VA_ARGS__), VA_ODDEVEN(__VA_ARGS__), __VA_ARGS__)
 
 
+#ifdef NORON_SHARED_OBJECT
+//#error SHARED OBJECT __FILE__
+#endif
+
 //Property
 #define N_PROPERTY_DECL(type, name, read, write, notify) \
     private:        \

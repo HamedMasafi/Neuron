@@ -106,7 +106,6 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
             qWarning("Token validation was faild!");
             return;
         }
-
     QObject *target = 0;
 
     if(map[CLASS_NAME] == "") {
@@ -470,7 +469,7 @@ NoronAbstractHub::Status NoronAbstractHub::status() const
     return d->status;
 }
 
-void NoronAbstractHub::waitForConnected()
+void NoronAbstractHub::waitForConnected(int timeout)
 {
     Q_D(NoronAbstractHub);
     if (socket->state() == QAbstractSocket::ConnectedState)
@@ -478,8 +477,18 @@ void NoronAbstractHub::waitForConnected()
 
     QEventLoop loop;
     connect(this, &NoronAbstractHub::connected, &loop, &QEventLoop::quit);
-    QTimer::singleShot(10000, &loop, SLOT(quit()));
+    QTimer::singleShot(timeout, &loop, SLOT(quit()));
     loop.exec();
+}
+
+//TODO: move this method to D
+void NoronAbstractHub::flushSocket()
+{
+    Q_D(NoronAbstractHub);
+    socket->write(serializer()->serialize(d->buffer));
+    socket->flush();
+    d->buffer.clear();
+    d->isTransaction = false;
 }
 
 #ifdef QT_QML_LIB
@@ -626,10 +635,7 @@ void NoronAbstractHub::commit()
     if (!socket->isOpen())
         return;
 
-    socket->write(serializer()->serialize(d->buffer));
-    socket->flush();
-    d->buffer.clear();
-    d->isTransaction = false;
+    QMetaObject::invokeMethod(this, "flushSocket");
 }
 
 // TODO: remove val8, val9

@@ -42,6 +42,7 @@ NoronClientHubPrivate::NoronClientHubPrivate(NoronClientHub *parent) : q_ptr(par
 NoronClientHub::NoronClientHub(QObject *parent) : NoronAbstractHub(parent),
     d_ptr(new NoronClientHubPrivate(this))
 {
+    qRegisterMetaType<Status>();
     connect(this, &NoronAbstractHub::statusChanged, this, &NoronClientHub::onStatusChanged);
 }
 
@@ -51,6 +52,7 @@ NoronClientHub::NoronClientHub(QQmlEngine *qmlEngine, QJSEngine *engine, QObject
 {
     setJsEngine(engine);
     setQmlEngine(qmlEngine);
+    qRegisterMetaType<Status>();
     connect(this, &NoronAbstractHub::statusChanged, this, &NoronClientHub::onStatusChanged);
 }
 #endif
@@ -130,13 +132,11 @@ void NoronClientHub::connectToHost(QString address, int port, bool waitForConnec
     if(port)
         setPort(port);
 
-    qDebug() << "connectToHost";
     socket->connectToHost(this->serverAddress(), this->port());
 
     if(waitForConnected)
         this->waitForConnected();
 
-    qDebug() << "socket->state()"<<socket->state();
     if (socket->state() != QAbstractSocket::ConnectedState)
         qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
 }

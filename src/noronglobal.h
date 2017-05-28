@@ -53,19 +53,23 @@
 #   define NORON_EXPORT Q_DECL_EXPORT
 #endif
 
-
-#define NORON_OPERATORS_FOR_ENUM(ENUM) \
-    QDataStream& operator>> (QDataStream& s, ENUM& type) \
-    { \
-        int n; \
-        s >> n; \
-        type = (ENUM)n; \
-        return s; \
-    }; \
-    QDataStream& operator<< (QDataStream& s, const ENUM& type) \
-    { \
-        return (s << (int)type); \
-    };
-
+#ifdef QDATASTREAM_H
+#   define NORON_OPERATORS_FOR_ENUM(ENUM) \
+        QDataStream& operator>> (QDataStream& s, ENUM& type) \
+        { \
+            qint32 n; \
+            s >> n; \
+            type = (ENUM)n; \
+            return s; \
+        }; \
+        QDataStream& operator<< (QDataStream& s, const ENUM& type) \
+        { \
+            return (s << (qint32)type); \
+        };
+#else
+#   define NORON_OPERATORS_FOR_ENUM(ENUM) \
+        _Pragma("GCC error QDataStream not included")
+#endif
+QT_DEPRECATED
 #endif // NORONGLOBAL_H
 

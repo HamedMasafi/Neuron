@@ -78,29 +78,30 @@ QJSValue NoronRemoteCallBase::toJsValue(QVariant var)
     } else if (var.type() == QVariant::Map) {
        return toJsValue(var.toMap());
     } else {
-        if(QString(returnData.typeName()).endsWith("*")){
-            QObject *o = returnData.value<QObject*>();
+        if(QString(var.typeName()).endsWith("*")){
+            QObject *o = var.value<QObject*>();
             if(!o)
                 qWarning("Object is not valid");
             qmlEngine->setObjectOwnership(o, QQmlEngine::JavaScriptOwnership);
             return jsEngine->newQObject(o);
         }else{
-            switch(returnData.type()){
+            switch(var.type()){
             case QVariant::Int:
-                return QJSValue(returnData.toInt());
+                return QJSValue(var.toInt());
 
             case QVariant::Bool:
-                return QJSValue(returnData.toBool());
+                return QJSValue(var.toBool());
 
             case QVariant::UInt:
-                return QJSValue(returnData.toUInt());
+                return QJSValue(var.toUInt());
 
             case QVariant::Double:
-                return QJSValue(returnData.toDouble());
+                return QJSValue(var.toDouble());
 
             default:
-                return QJSValue(returnData.toString());
+                return QJSValue(var.toString());
             }
+
         }
     }
 }
@@ -111,7 +112,6 @@ QJSValue NoronRemoteCallBase::toJsValue(QVariantMap map)
     QMapIterator<QString, QVariant> i(map);
     while (i.hasNext()) {
         i.next();
-//        cout << i.key() << ": " << i.value() << endl;
         param1.setProperty(i.key(), toJsValue(i.value()));
     }
 

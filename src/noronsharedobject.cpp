@@ -101,7 +101,6 @@ bool NoronSharedObject::setAllHubsActiveExcept(NoronAbstractHub *hub)
 //    if (m_hub == hub)
 //        return;
 
-//    qDebug()<<"NoronSharedObject::setHub(NoronAbstractHub *hub)";
 //    m_hub = hub;
 //    emit hubChanged(hub);
 //    hub->addSharedObject(this);

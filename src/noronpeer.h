@@ -18,17 +18,19 @@
 **
 **************************************************************************/
 
+#ifndef NORON_SHARED_OBJECT
+#include "syntax/syntax_peer.h"
+#endif
+
 #ifndef NORONPEER_H
 #define NORONPEER_H
 
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
 
+#include "noronabstracthub.h"
 #include "noronglobal.h"
 #include "noronremotecall_p.h"
-#ifndef NORON_SHARED_OBJECT
-#include "syntax/syntax_peer.h"
-#endif
 
 NORON_BEGIN_NAMESPACE
 

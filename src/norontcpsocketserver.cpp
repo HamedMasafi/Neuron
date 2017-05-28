@@ -36,7 +36,6 @@ NoronTcpSocketServer::NoronTcpSocketServer(QObject *parent) : QTcpServer(parent)
 
 void NoronTcpSocketServer::incomingConnection(qintptr socketDescriptor)
 {
-    qDebug() << "NoronTcpSocketServer::incomingConnection";
     emit newIncomingConnection(socketDescriptor);
 }
 

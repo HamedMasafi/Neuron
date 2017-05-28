@@ -162,8 +162,6 @@ void NoronServer::hub_disconnected()
 {
     Q_D(NoronServer);
 
-    qDebug()<< "hub disconnected";
-
     NoronServerHub *hub = qobject_cast<NoronServerHub*>(sender());
 
     if(d->reconnectTimeout){
@@ -172,6 +170,7 @@ void NoronServer::hub_disconnected()
             return;
     }
 
+    emit peerDisconnected(hub->peer());
 //    QList<NoronSharedObject *> sharedObjects = hub->sharedObjects();
 //    foreach (NoronSharedObject *so, sharedObjects){
 //        hub->removeSharedObject(so);
@@ -187,7 +186,6 @@ void NoronServer::hub_disconnected()
         hub->serverThread()->exit();
     }
 
-    emit peerDisconnected(hub->peer());
 
 //    hub->peer()->deleteLater();
 }

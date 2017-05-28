@@ -88,7 +88,8 @@ public:
     QQmlEngine* qmlEngine() const;
 #endif
 
-    void waitForConnected();
+    void waitForConnected(int timeout = 4000);
+    Q_INVOKABLE void flushSocket();
 
 protected:
     QHash<qlonglong, NoronRemoteCallBase*> _calls;

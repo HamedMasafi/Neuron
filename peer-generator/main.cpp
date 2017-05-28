@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     ClassParser classParser;
     int len = fileContent.length();
     while(TextHelper::instance()->extractBlock("class", fileContent, firstLine, content)){
-//        qDebug() << firstLine << content;
+
         if(len == fileContent.length())
             qFatal("Len equal");
         firstLine = firstLine

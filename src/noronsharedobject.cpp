@@ -42,10 +42,10 @@ NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent), _acti
 
 NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent), _activeHub(0), _deactiveHub(0)
 {
-    addHub(hub);
+    attachHub(hub);
 }
 
-void NoronSharedObject::addHub(NoronAbstractHub *hub)
+void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 {    
     if(!hub->inherits(QT_STRINGIFY(NoronServer))){
         hubs.insert(hub);
@@ -55,14 +55,17 @@ void NoronSharedObject::addHub(NoronAbstractHub *hub)
     }
 }
 
-void NoronSharedObject::removeHub(NoronAbstractHub *hub)
+void NoronSharedObject::detachHub(NoronAbstractHub *hub)
 {
     if(hubs.remove(hub)){
         hubRemoved(hub);
+        hub->detachSharedObject(this);
 
-//        if(!hubs.count()){
-//            deleteLater();
-//        }
+        qDebug() << "NoronSharedObject::detachHub" << objectName() <<"; " << hub->objectName();
+        if(!hubs.count() && autoDelete()){
+            qDebug() << "Object" << objectName() <<"market for deletation";
+            deleteLater();
+        }
     }
 }
 
@@ -127,7 +130,7 @@ void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
     NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
 
     if(hub && status == NoronAbstractHub::Unconnected){
-        removeHub(hub);
+        detachHub(hub);
     }
 }
 

@@ -17,11 +17,11 @@
         }    \
         class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
         {   \
+            setPeerName(#class); \
             if(hub){    \
                 setHub(hub);    \
-                hub->addSharedObject(this); \
+                hub->attachSharedObject(this); \
             }   \
-            setPeerName(#class); \
         }
 
 #endif // SYNTAX_SHAREDOBJECT_H

@@ -109,8 +109,8 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     QObject *target = 0;
 
     if(map[CLASS_NAME] == "") {
-        qDebug() <<  map;
         qFatal("Error in data");
+        qDebug() <<  map;
     }
     if (map[CLASS_NAME] == THIS_HUB) {
         target = q;
@@ -428,20 +428,25 @@ NoronAbstractSerializer *NoronAbstractHub::serializer() const
     return d->serializer;
 }
 
-void NoronAbstractHub::addSharedObject(NoronSharedObject *o)
+void NoronAbstractHub::attachSharedObject(NoronSharedObject *o)
 {
     Q_D(NoronAbstractHub);
 
-    o->addHub(this);
-    d->sharedObjects.insert(o->peerName(), o);
+    if(!d->sharedObjects.contains(o->peerName())){
+        o->attachHub(this);
+        d->sharedObjects.insert(o->peerName(), o);
+//        qDebug() << "SharedObject" << o->objectName() << "attached to" << metaObject()->className() << objectName();
+    }
 }
 
-void NoronAbstractHub::removeSharedObject(NoronSharedObject *o)
+void NoronAbstractHub::detachSharedObject(NoronSharedObject *o)
 {
     Q_D(NoronAbstractHub);
 
-    if (d->sharedObjects.remove(o->peerName()))
-        o->removeHub(this);
+    if (d->sharedObjects.remove(o->peerName())) {
+        o->detachHub(this);
+//        qDebug() << "NoronAbstractHub::detachSharedObject" << o->objectName() << "; " << metaObject()->className() << objectName();
+    }
 }
 
 QList<NoronSharedObject *> NoronAbstractHub::sharedObjects() const

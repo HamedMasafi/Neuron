@@ -136,8 +136,8 @@ public slots:
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
 
-    void addSharedObject(NoronSharedObject *o);
-    void removeSharedObject(NoronSharedObject *o);
+    void attachSharedObject(NoronSharedObject *o);
+    void detachSharedObject(NoronSharedObject *o);
     void setPeer(NoronPeer* peer);
     void setValidateToken(QString validateToken);
     void setSerializer(NoronAbstractSerializer* serializer);

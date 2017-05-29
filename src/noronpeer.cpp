@@ -117,7 +117,7 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
     NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
 
     if(so)
-        hub->addSharedObject(so);
+        hub->attachSharedObject(so);
     else
         hub->setPeer(this);
 

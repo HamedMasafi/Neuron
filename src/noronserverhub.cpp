@@ -69,11 +69,11 @@ NoronServerHub::~NoronServerHub()
     while (i.hasNext()) {
         i.next();
 //        cout << i.key() << ": " << i.value() << endl;
-        qDebug() << "removing " << i.key();
-        removeSharedObject(i.value());
+        qDebug() << "removing " << i.key() << "from" << objectName();
+        detachSharedObject(i.value());
     }
 
-    delete d;
+    delete d_ptr;
 }
 
 NoronServerThread *NoronServerHub::serverThread() const

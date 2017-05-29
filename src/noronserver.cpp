@@ -20,6 +20,8 @@
 
 #include <QtCore/QThread>
 
+#include <NoronSharedObject>
+
 #include "noronserverhub.h"
 #include "noronpeer.h"
 #include "noronjsonbinaryserializer.h"
@@ -116,6 +118,8 @@ void NoronServer::hub_connected()
     Q_D(NoronServer);
 
     NoronServerHub *hub = qobject_cast<NoronServerHub*>(sender());
+    K_REG_OBJECT(hub);
+
     if(hub->hubId()){
         K_TRACE("is reconnect");
 
@@ -143,8 +147,10 @@ void NoronServer::hub_connected()
     //    hub->setPeer(peer);
     peer->setHub(hub);
 
-    foreach (NoronSharedObject *sharedObj, sharedObjects())
-        hub->addSharedObject(sharedObj);
+    foreach (NoronSharedObject *sharedObj, sharedObjects()){
+        hub->attachSharedObject(sharedObj);
+        qDebug() << "so" << sharedObj->objectName() << "added to new hub";
+    }
 
     if(d->hubId++ >= LONG_LONG_MAX - 1)
         d->hubId = 1;
@@ -171,6 +177,8 @@ void NoronServer::hub_disconnected()
     }
 
     emit peerDisconnected(hub->peer());
+    d->peers.remove(hub->peer());
+    d->hubs.remove(hub->hubId());
 //    QList<NoronSharedObject *> sharedObjects = hub->sharedObjects();
 //    foreach (NoronSharedObject *so, sharedObjects){
 //        hub->removeSharedObject(so);
@@ -184,10 +192,12 @@ void NoronServer::hub_disconnected()
 
     if(d->serverType == NoronServer::MultiThread && hub->serverThread()){
         hub->serverThread()->exit();
+    } else {
+        hub->deleteLater();
     }
 
 
-//    hub->peer()->deleteLater();
+    hub->peer()->deleteLater();
 }
 
 void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)

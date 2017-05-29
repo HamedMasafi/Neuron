@@ -17,9 +17,9 @@
         }    \
         class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
         {   \
+            setPeerName(#class); \
             if(hub)    \
                 setHub(hub);    \
-            setPeerName(#class); \
         }
 
 #endif // SYNTAX_PEER_H

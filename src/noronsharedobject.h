@@ -44,8 +44,8 @@ public:
     NoronSharedObject(QObject *parent = 0);
     NoronSharedObject(NoronAbstractHub *hub, QObject *parent = 0);
 
-    void addHub(NoronAbstractHub *hub);
-    void removeHub(NoronAbstractHub *hub);
+    void attachHub(NoronAbstractHub *hub);
+    void detachHub(NoronAbstractHub *hub);
     bool setActiveHub(NoronAbstractHub *hub);
     bool setAllHubsActiveExcept(NoronAbstractHub *hub);
 

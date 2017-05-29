@@ -11,7 +11,6 @@
 #   define METHOD_IMPL_P_SLOT_NONVOID(class, ret, name, count, sep, ...) \
         ret class::name##Slot(__NAMEVALUE(count, __VA_ARGS__)) \
         {   \
-    qDebug("%d %d", __PARAMNAME(count, __VA_ARGS__)); \
             ret r; \
             Q_EMIT name##Signal(__PARAMNAME(count, __VA_ARGS__) sep r); \
             return r; \

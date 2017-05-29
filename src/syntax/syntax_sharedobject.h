@@ -1,8 +1,13 @@
 #ifndef SYNTAX_SHAREDOBJECT_H
 #define SYNTAX_SHAREDOBJECT_H
 
-#include "method_slot_sharedobject.h"
-#include "decl_signal_sharedobject.h"
+#ifdef NORON_CLIENT
+#   include "method_slot_peer.h"
+#   include "decl_signal_peer.h"
+#else
+#   include "method_slot_sharedobject.h"
+#   include "decl_signal_sharedobject.h"
+#endif
 
 #include "syntax.h"
 

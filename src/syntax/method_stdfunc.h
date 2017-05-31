@@ -6,20 +6,20 @@
 #   define METHOD_IMPL_P_STD_FUNC_VOID(class, ret, name, count, sep, ...) \
     void class::name(__NAMEVALUE(count, __VA_ARGS__) sep std::function<void(ret)> callbackFunction) \
     {   \
-        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
-        if(id){ \
+        qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if (__call_id) { \
             NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);  \
-            addCall(id, call);  \
+            addCall(__call_id, call);  \
         }   \
     }
 
 #   define METHOD_IMPL_P_STD_FUNC_NONVOID(class, ret, name, count, sep, ...) \
     void class::name(__NAMEVALUE(count, __VA_ARGS__) sep std::function<void(ret)> callbackFunction) \
     {   \
-        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
-        if(id){ \
+        qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if (__call_id) { \
             NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(callbackFunction);  \
-            addCall(id, call);  \
+            addCall(__call_id, call);  \
         }   \
     }
 

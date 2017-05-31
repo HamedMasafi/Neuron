@@ -6,24 +6,24 @@
 #   define METHOD_IMPL_P_NORMAL_VOID(class, ret, name, count, sep, ...) \
     ret class::name(__NAMEVALUE(count, __VA_ARGS__)) \
     {   \
-        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
-        if(id){ \
+        qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if (__call_id) { \
             NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);    \
-            addCall(id, call);  \
+            addCall(__call_id, call);  \
             call->eventLoop->exec();    \
-            removeCall(id); \
+            removeCall(__call_id); \
         }   \
     }
 
 #   define METHOD_IMPL_P_NORMAL_NONVOID(class, ret, name, count, sep, ...) \
     ret class::name(__NAMEVALUE(count, __VA_ARGS__)) \
     {   \
-        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
-        if(id){ \
+        qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
+        if (__call_id) { \
             NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(NoronRemoteCallBase::EventLoop);    \
-            addCall(id, call);  \
+            addCall(__call_id, call);  \
             call->eventLoop->exec();    \
-            removeCall(id); \
+            removeCall(__call_id); \
             ret val = call->returnData.value<ret>(); \
             return val; \
         }   \

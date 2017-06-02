@@ -241,8 +241,12 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         hubIsValid = hub->setSocketDescriptor(socketDescriptor);
         K_REG_OBJECT(hub);
     }
+
     connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
     connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+
+    if (hub->status() == NoronAbstractHub::Connected)
+        emit hub->connected();
 
     /*
     hub = new NoronServerHub;

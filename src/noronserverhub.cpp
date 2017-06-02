@@ -99,7 +99,7 @@ qlonglong NoronServerHub::hi(qlonglong hubId)
     }
 
     initalizeMutex.unlock();
-//    setStatus(Connected);
+    setStatus(Connected);
     return this->hubId();
 }
 

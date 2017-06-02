@@ -117,15 +117,16 @@ void NoronServer::hub_connected()
 {
     Q_D(NoronServer);
 
+    K_TRACE_DEBUG;
     NoronServerHub *hub = qobject_cast<NoronServerHub*>(sender());
     K_REG_OBJECT(hub);
 
     if(hub->hubId()){
         K_TRACE("is reconnect");
 
-        NoronAbstractHub *hub = d->hubs[hub->hubId()];
+        NoronAbstractHub *hub2 = d->hubs[hub->hubId()];
 
-        if(!hub)
+        if(!hub2)
             qFatal("reconnecting to an invalid hub");
 
     }else{
@@ -203,6 +204,7 @@ void NoronServer::hub_disconnected()
 void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 {
     Q_D(NoronServer);
+    K_TRACE_DEBUG;
 
 //    const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
 //    QObject *o = metaObject->newInstance();

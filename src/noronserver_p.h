@@ -41,7 +41,7 @@ public:
     NoronAbstractSerializer* serializer;
     NoronServer::ServerType serverType;
     qlonglong hubId;
-    int reconnectTimeout;
+    quint32 reconnectTimeout;
 };
 
 NORON_END_NAMESPACE

@@ -109,8 +109,8 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     QObject *target = 0;
 
     if(map[CLASS_NAME] == "") {
-        qFatal("Error in data");
         qDebug() <<  map;
+        qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
         target = q;

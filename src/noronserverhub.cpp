@@ -121,11 +121,12 @@ void NoronServerHub::setServerThread(NoronServerThread *serverThread)
 
 void NoronServerHub::beginConnection()
 {
-    K_TRACE_DEBUG;
-    Q_D(NoronServerHub);
-    d->connectionEventLoop = new QEventLoop;
-    K_REG_OBJECT(d->connectionEventLoop);
-    d->connectionEventLoop->exec();
+    emit connected();
+//    K_TRACE_DEBUG;
+//    Q_D(NoronServerHub);
+//    d->connectionEventLoop = new QEventLoop;
+//    K_REG_OBJECT(d->connectionEventLoop);
+//    d->connectionEventLoop->exec();
 }
 
 NORON_END_NAMESPACE

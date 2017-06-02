@@ -29,6 +29,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
 
+#include <QMutex>
+
 class QTcpSocket;
 #ifdef QT_QML_LIB
 class QJSEngine;
@@ -96,6 +98,8 @@ protected:
     QTcpSocket *socket;
     qlonglong hubId() const;
     Q_INVOKABLE void setHubId(qlonglong id);
+
+    QMutex initalizeMutex;
 
 signals:
     void connected();

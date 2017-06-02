@@ -203,6 +203,8 @@ void NoronServer::hub_disconnected()
 
 void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 {
+    initalizeMutex.lock();
+
     Q_D(NoronServer);
     K_TRACE_DEBUG;
 
@@ -262,6 +264,8 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
     connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
     connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
     K_TRACE_DEBUG;
+
+    initalizeMutex.unlock();
 }
 
 void NoronServer::setTypeId(int typeId)

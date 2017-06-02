@@ -529,11 +529,12 @@ void NoronAbstractHub::setHubId(qlonglong id)
 
 void NoronAbstractHub::socket_connected()
 {
+    initalizeMutex.lock();
     K_TRACE_DEBUG;
-    emit connected();
-//    beginConnection();
+    beginConnection();
 
     //    setStatus(Connected);
+    initalizeMutex.unlock();
 }
 
 void NoronAbstractHub::socket_disconnected()

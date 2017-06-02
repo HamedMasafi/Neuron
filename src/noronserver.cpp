@@ -231,8 +231,8 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 
         hub = thread->hub();
         hub->setServerThread(thread);
-
         hub->setIsMultiThread(true);
+
         hubIsValid = (hub != 0);
 
         K_REG_OBJECT(thread);
@@ -241,6 +241,8 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         hubIsValid = hub->setSocketDescriptor(socketDescriptor);
         K_REG_OBJECT(hub);
     }
+    connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
+    connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
 
     /*
     hub = new NoronServerHub;
@@ -261,8 +263,6 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 
     hub->setSerializer(serializer());
     hub->setValidateToken(validateToken());
-    connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
-    connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
     K_TRACE_DEBUG;
 
     initalizeMutex.unlock();

@@ -40,6 +40,7 @@
 #   include "logger.h"
 #   include "objectprofiller.h"
 #else
+#   define K_TRACE_DEBUG
 #   define K_REG_OBJECT(x)
 #   define K_TRACE(...)
 #   define K_INFORMATION(...)

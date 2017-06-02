@@ -529,6 +529,7 @@ void NoronAbstractHub::setHubId(qlonglong id)
 
 void NoronAbstractHub::socket_connected()
 {
+    K_TRACE_DEBUG;
     beginConnection();
 
     //    setStatus(Connected);

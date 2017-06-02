@@ -90,6 +90,7 @@ qlonglong NoronServerHub::hi(qlonglong hubId)
     setHubId(hubId);
     emit connected();
 
+    K_TRACE_DEBUG;
 //    invokeOnPeer(THIS_HUB, "hi", hubId);
     if(d->connectionEventLoop){
         d->connectionEventLoop->quit();
@@ -120,6 +121,7 @@ void NoronServerHub::setServerThread(NoronServerThread *serverThread)
 
 void NoronServerHub::beginConnection()
 {
+    K_TRACE_DEBUG;
     Q_D(NoronServerHub);
     d->connectionEventLoop = new QEventLoop;
     K_REG_OBJECT(d->connectionEventLoop);

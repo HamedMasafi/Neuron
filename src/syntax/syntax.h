@@ -91,6 +91,7 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 #define N_PROPERTY_DECL(type, name, read, write, notify) \
     private:        \
     Q_PROPERTY(type name READ read WRITE write NOTIFY notify USER true)        \
+    protected: \
     type m_##name;\
     public:                                 \
         type read() const; \

@@ -92,7 +92,7 @@ qlonglong NoronServerHub::hi(qlonglong hubId)
 
     K_TRACE_DEBUG;
 //    invokeOnPeer(THIS_HUB, "hi", hubId);
-    if(d->connectionEventLoop){
+    if (d->connectionEventLoop) {
         d->connectionEventLoop->quit();
         d->connectionEventLoop->deleteLater();
     }

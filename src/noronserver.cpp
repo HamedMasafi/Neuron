@@ -261,6 +261,7 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
     hub->setValidateToken(validateToken());
     connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
     connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+    K_TRACE_DEBUG;
 }
 
 void NoronServer::setTypeId(int typeId)

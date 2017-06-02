@@ -85,6 +85,7 @@ NoronServerThread *NoronServerHub::serverThread() const
 
 qlonglong NoronServerHub::hi(qlonglong hubId)
 {
+    initalizeMutex.lock();
     Q_D(NoronServerHub);
 
     setHubId(hubId);
@@ -97,6 +98,7 @@ qlonglong NoronServerHub::hi(qlonglong hubId)
         d->connectionEventLoop->deleteLater();
     }
 
+    initalizeMutex.unlock();
 //    setStatus(Connected);
     return this->hubId();
 }
@@ -121,12 +123,11 @@ void NoronServerHub::setServerThread(NoronServerThread *serverThread)
 
 void NoronServerHub::beginConnection()
 {
-    emit connected();
-//    K_TRACE_DEBUG;
-//    Q_D(NoronServerHub);
-//    d->connectionEventLoop = new QEventLoop;
-//    K_REG_OBJECT(d->connectionEventLoop);
-//    d->connectionEventLoop->exec();
+    K_TRACE_DEBUG;
+    Q_D(NoronServerHub);
+    d->connectionEventLoop = new QEventLoop;
+    K_REG_OBJECT(d->connectionEventLoop);
+    d->connectionEventLoop->exec();
 }
 
 NORON_END_NAMESPACE

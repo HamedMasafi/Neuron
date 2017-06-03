@@ -157,6 +157,7 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
     }
 
     foreach (NoronAbstractHub *hub, tmpHubs) {
+        qDebug() << "invoking on" << hub->objectName() << hub->metaObject()->className();
         if(hub->isMultiThread())
             hub->metaObject()->invokeMethod(hub,
                                             QT_STRINGIFY(invokeOnPeer),

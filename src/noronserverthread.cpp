@@ -56,7 +56,6 @@ void NoronServerThread::run()
 
     exec();
 
-    _hub->deleteLater();
     K_TRACE_DEBUG;
 }
 

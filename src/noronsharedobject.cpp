@@ -57,7 +57,10 @@ void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 
 void NoronSharedObject::detachHub(NoronAbstractHub *hub)
 {
-    if(hubs.remove(hub)){
+    if (!hub)
+        return;
+
+    if (hubs.remove(hub)){
         hubRemoved(hub);
         hub->detachSharedObject(this);
 

@@ -433,8 +433,8 @@ void NoronAbstractHub::attachSharedObject(NoronSharedObject *o)
     Q_D(NoronAbstractHub);
 
     if(!d->sharedObjects.contains(o->peerName())){
-        o->attachHub(this);
         d->sharedObjects.insert(o->peerName(), o);
+        o->attachHub(this);
 //        qDebug() << "SharedObject" << o->objectName() << "attached to" << metaObject()->className() << objectName();
     }
 }

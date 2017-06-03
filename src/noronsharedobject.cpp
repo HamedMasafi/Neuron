@@ -47,12 +47,16 @@ NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : N
 
 void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 {    
+    if(hubs.contains(hub))
+        return;
+
     if(!hub->inherits(QT_STRINGIFY(NoronServer))){
         hubs.insert(hub);
         hubAdded(hub);
 
         connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
     }
+    hub->attachSharedObject(this);
 }
 
 void NoronSharedObject::detachHub(NoronAbstractHub *hub)

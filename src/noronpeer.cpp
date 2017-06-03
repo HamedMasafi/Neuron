@@ -58,7 +58,7 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
         return 0;
 
     if(hub()->status() != NoronAbstractHub::Connected)
-        return;
+        return 0;
 
     if(hub()->isMultiThread()){
 //        qlonglong ret;

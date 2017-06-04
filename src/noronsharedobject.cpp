@@ -47,13 +47,16 @@ NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : N
 
 void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 {    
-    if(hubs.contains(hub))
+    if(hubs.contains(hub)) {
+        qDebug() << "the hub" << hub << "alerty exists in" << peerName();
         return;
+    }
 
     if(!hub->inherits(QT_STRINGIFY(NoronServer))){
         hubs.insert(hub);
         hubAdded(hub);
 
+        qRegisterMetaType<NoronAbstractHub::Status>();
         connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
     }
     hub->attachSharedObject(this);

@@ -183,10 +183,12 @@ void NoronClientHub::setAutoReconnect(bool isAutoReconnect)
 
 void NoronClientHub::onStatusChanged(Status status)
 {
+    Q_D(NoronClientHub);
+
     if(status == Unconnected){
         if(isAutoReconnect()){
             connectToHost();
-//            d->reconnectTimerId = startTimer(500);
+            d->reconnectTimerId = startTimer(500);
             setStatus(Reconnecting);
         }else{
             setStatus(Unconnected);
@@ -198,7 +200,6 @@ void NoronClientHub::hi(qlonglong hubId)
 {
     Q_D(NoronClientHub);
 
-    qDebug() << "NoronClientHub::hi";
     setStatus(Connected);
     if(hubId == this->hubId()){
         //reconnected

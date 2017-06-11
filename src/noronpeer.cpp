@@ -19,6 +19,8 @@
 **************************************************************************/
 
 #include <QtCore/QMetaObject>
+#include <QtCore/QDebug>
+
 #include "noronpeer.h"
 #include "noronabstracthub.h"
 #include "noronsharedobject.h"
@@ -62,7 +64,7 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
 
     if(hub()->isMultiThread()){
 //        qlonglong ret;
-        hub()->metaObject()->invokeMethod(hub(),
+        bool ok = hub()->metaObject()->invokeMethod(hub(),
                                           QT_STRINGIFY(invokeOnPeer),
 //                                          Qt::DirectConnection,
 //                                          Q_RETURN_ARG(qlonglong, ret),
@@ -79,6 +81,9 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
                                                                         QGenericArgument(val8.typeName(), val8.data()),
                                                                         QGenericArgument(val9.typeName(), val9.data())*/);
 //        return ret;
+        if (!ok)
+            qWarning("Unable to invoke method: %s::%s",
+                     qPrintable(peerName()), qPrintable(methodName));
         return 0;
     }else{
         return hub()->invokeOnPeer(

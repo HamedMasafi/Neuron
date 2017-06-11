@@ -61,7 +61,6 @@ NoronServerHub::~NoronServerHub()
 //    }
 
 //    while(sharedObjects().count()){
-//        qDebug() << "removing " << sharedObjects().at(0);
 //        removeSharedObject(sharedObjects().at(0));
 //    }
     auto so = sharedObjectHash();
@@ -69,7 +68,6 @@ NoronServerHub::~NoronServerHub()
     while (i.hasNext()) {
         i.next();
 //        cout << i.key() << ": " << i.value() << endl;
-        qDebug() << "removing " << i.key() << "from" << objectName();
         detachSharedObject(i.value());
     }
 

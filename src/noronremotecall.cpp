@@ -73,7 +73,6 @@ NoronRemoteCallBase::NoronRemoteCallBase(QJSValue jsvalue, QQmlEngine *qmlEngine
 
 QJSValue NoronRemoteCallBase::toJsValue(QVariant var)
 {
-    qDebug() << "toJson" << var << var.type();
     if (var.type() == QVariant::List) {
        return toJsValue(var.toList());
     } else if (var.type() == QVariant::Map) {
@@ -108,7 +107,6 @@ QJSValue NoronRemoteCallBase::toJsValue(QVariant var)
 }
 QJSValue NoronRemoteCallBase::toJsValue(QVariantMap map)
 {
-    qDebug() << "decompiling map"<<map;
     QJSValue param1 = jsEngine->newObject();
 
     QMapIterator<QString, QVariant> i(map);

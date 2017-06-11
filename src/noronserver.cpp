@@ -150,7 +150,6 @@ void NoronServer::hub_connected()
 
     foreach (NoronSharedObject *sharedObj, sharedObjects()){
         hub->attachSharedObject(sharedObj);
-        qDebug() << "so" << sharedObj->objectName() << "added to new hub";
     }
 
     if(d->hubId++ >= LONG_LONG_MAX - 1)

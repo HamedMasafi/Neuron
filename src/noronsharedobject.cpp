@@ -48,7 +48,6 @@ NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : N
 void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 {    
     if(hubs.contains(hub)) {
-        qDebug() << "the hub" << hub << "alerty exists in" << peerName();
         return;
     }
 
@@ -71,9 +70,7 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
         hubRemoved(hub);
         hub->detachSharedObject(this);
 
-        qDebug() << "NoronSharedObject::detachHub" << objectName() <<"; " << hub->objectName();
         if(!hubs.count() && autoDelete()){
-            qDebug() << "Object" << objectName() <<"market for deletation";
             deleteLater();
         }
     }
@@ -160,7 +157,6 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
     }
 
     foreach (NoronAbstractHub *hub, tmpHubs) {
-        qDebug() << "invoking on" << hub->objectName() << hub->metaObject()->className();
         if(hub->isMultiThread())
             hub->metaObject()->invokeMethod(hub,
                                             QT_STRINGIFY(invokeOnPeer),

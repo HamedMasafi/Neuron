@@ -230,7 +230,6 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     if (!ok) {
         qWarning("Invoke %s on %s faild", qPrintable(method.name()),
                  qPrintable(map[CLASS_NAME].toString()));
-        qDebug()<<map;
     } else {
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
@@ -337,8 +336,6 @@ void NoronAbstractHubPrivate::sync()
 
         QString w = p.name();
         w[0] = w[0].toUpper();
-
-        qDebug() << "set" + w << p.read(peer);
 
         q->invokeOnPeer(peer->peerName(), "set" + w, p.read(peer));
     }
@@ -655,7 +652,6 @@ qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName,
                                          QVariant val8, QVariant val9)
 {
     Q_D(NoronAbstractHub);
-
     if (d->locks.contains(sender + "::" + methodName))
         return 0;
 

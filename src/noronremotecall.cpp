@@ -99,7 +99,9 @@ QJSValue NoronRemoteCallBase::toJsValue(QVariant var)
                 return QJSValue(var.toDouble());
 
             default:
-                return QJSValue(var.toString());
+                return jsEngine->toScriptValue(var);
+
+//                return QJSValue(var.toString());
             }
 
         }

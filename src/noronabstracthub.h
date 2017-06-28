@@ -28,6 +28,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
+#include <QAbstractSocket>
 
 #include <QMutex>
 
@@ -105,6 +106,7 @@ signals:
     void connected();
     void disconnected();
     void reconnected();
+    void error();
 
     void peerChanged(NoronPeer* peer);
     void validateTokenChanged(QString validateToken);
@@ -120,6 +122,7 @@ private slots:
     void socket_connected();
     void socket_disconnected();
     void socket_onReadyRead();
+    void socket_error(QAbstractSocket::SocketError socketError);
 
 public slots:
     void beginTransaction();

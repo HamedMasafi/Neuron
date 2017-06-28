@@ -115,6 +115,11 @@ void NoronPeer::setPeerName(const QString &name)
     _peerName = name;
 }
 
+void NoronPeer::hub_disconnected()
+{
+    m_hub = 0;
+}
+
 void NoronPeer::setHub(NoronAbstractHub *hub)
 {
     if (m_hub == hub)
@@ -122,14 +127,18 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
 
     m_hub = hub;
 
-    NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
+    if (hub) {
+        connect(hub, &NoronAbstractHub::disconnected, this, &NoronPeer::hub_disconnected);
 
-    if(so)
-        hub->attachSharedObject(so);
-    else
-        hub->setPeer(this);
+        NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
 
-    emit hubChanged(hub);
+        if(so)
+            hub->attachSharedObject(so);
+        else
+            hub->setPeer(this);
+
+        emit hubChanged(hub);
+    }
 }
 
 NORON_END_NAMESPACE

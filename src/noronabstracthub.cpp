@@ -24,6 +24,7 @@
 #include <QtCore/QSet>
 #include <QtCore/QVariant>
 #include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QAbstractSocket>
 
 #ifdef QT_QML_LIB
 #include <QtQml/QJSEngine>
@@ -52,8 +53,8 @@ NoronAbstractHubPrivate::NoronAbstractHubPrivate(NoronAbstractHub *parent)
       requestId(0), isTransaction(false), isMultiThread(false), hubId(0),
       status(NoronAbstractHub::Unconnected)
 #ifdef QT_QML_LIB
-      , jsEngine(0)
-      , qmlEngine(0)
+      ,
+      jsEngine(0), qmlEngine(0)
 #endif
 {
 }
@@ -108,8 +109,8 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
         }
     QObject *target = 0;
 
-    if(map[CLASS_NAME] == "") {
-        qDebug() <<  map;
+    if (map[CLASS_NAME] == "") {
+        qDebug() << map;
         qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
@@ -157,7 +158,7 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
                              qPrintable(method.typeName()));
             }
 
-            //TODO: why?
+            // TODO: why?
             /*if (q->peer())
                 if (map[CLASS_NAME].toString() != q->peer()->peerName()
                     && method.parameterCount() > 0)
@@ -182,15 +183,15 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
         const char *name = map["val" + indexString].typeName();
         args << QGenericArgument(name, data);
     }
-//FIXME: remove
-//    if (method.returnType() != QMetaType::Void) {
-//        const void *data = NULL;
-//        const char *name = QMetaType::typeName(method.returnType());
-//        args << QGenericArgument(name, data);
-//    }
+    // FIXME: remove
+    //    if (method.returnType() != QMetaType::Void) {
+    //        const void *data = NULL;
+    //        const char *name = QMetaType::typeName(method.returnType());
+    //        args << QGenericArgument(name, data);
+    //    }
 
     if (q->inherits("NoronServerHub") && target->inherits("NoronSharedObject"))
-        args.prepend(Q_ARG(NoronPeer*, peer));
+        args.prepend(Q_ARG(NoronPeer *, peer));
 
     QString lockName = map[CLASS_NAME].toString() + "::" + methodName;
 
@@ -351,12 +352,10 @@ NoronAbstractHub::NoronAbstractHub(QObject *parent)
     socket = new QTcpSocket(this);
     K_REG_OBJECT(socket);
 
-    connect(socket, &QIODevice::readyRead, this,
-            &NoronAbstractHub::socket_onReadyRead);
-    connect(socket, &QTcpSocket::disconnected, this,
-            &NoronAbstractHub::socket_disconnected);
-    connect(socket, &QTcpSocket::connected, this,
-            &NoronAbstractHub::socket_connected);
+    connect(socket, &QIODevice::readyRead, this, &NoronAbstractHub::socket_onReadyRead);
+    connect(socket, &QTcpSocket::disconnected, this, &NoronAbstractHub::socket_disconnected);
+    connect(socket, &QTcpSocket::connected, this, &NoronAbstractHub::socket_connected);
+//    connect(socket, &QTcpSocket::error, this, &NoronAbstractHub::socket_error);
 
     NoronAbstractSerializer *serializer = new NoronJsonBinarySerializer(this);
     K_REG_OBJECT(serializer);
@@ -429,10 +428,12 @@ void NoronAbstractHub::attachSharedObject(NoronSharedObject *o)
 {
     Q_D(NoronAbstractHub);
 
-    if(!d->sharedObjects.contains(o->peerName())){
+    if (!d->sharedObjects.contains(o->peerName())) {
         d->sharedObjects.insert(o->peerName(), o);
         o->attachHub(this);
-//        qDebug() << "SharedObject" << o->objectName() << "attached to" << metaObject()->className() << objectName();
+        d->sync();
+        //        qDebug() << "SharedObject" << o->objectName() << "attached to"
+        //        << metaObject()->className() << objectName();
     }
 }
 
@@ -442,7 +443,9 @@ void NoronAbstractHub::detachSharedObject(NoronSharedObject *o)
 
     if (d->sharedObjects.remove(o->peerName())) {
         o->detachHub(this);
-//        qDebug() << "NoronAbstractHub::detachSharedObject" << o->objectName() << "; " << metaObject()->className() << objectName();
+        //        qDebug() << "NoronAbstractHub::detachSharedObject" <<
+        //        o->objectName() << "; " << metaObject()->className() <<
+        //        objectName();
     }
 }
 
@@ -483,7 +486,7 @@ void NoronAbstractHub::waitForConnected(int timeout)
     loop.exec();
 }
 
-//TODO: move this method to D
+// TODO: move this method to D
 void NoronAbstractHub::flushSocket()
 {
     Q_D(NoronAbstractHub);
@@ -601,6 +604,12 @@ void NoronAbstractHub::socket_onReadyRead()
         //        foreach (QVariant map, list)
         //            d->procMap(map.toMap());
     }
+}
+
+void NoronAbstractHub::socket_error(QAbstractSocket::SocketError socketError)
+{
+    Q_UNUSED(socketError)
+    emit error();
 }
 
 void NoronAbstractHub::beginTransaction()

@@ -261,6 +261,7 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         qWarning("NoronServerHub creation faild");
         hub->deleteLater();
 //        peer->deleteLater();
+        initalizeMutex.unlock();
         return;
     }
 

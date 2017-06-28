@@ -137,8 +137,10 @@ void NoronClientHub::connectToHost(QString address, quint16 port, bool waitForCo
     if(waitForConnected)
         this->waitForConnected();
 
-    if (socket->state() != QAbstractSocket::ConnectedState)
+    if (socket->state() != QAbstractSocket::ConnectedState) {
         qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
+        emit disconnected();
+    }
 }
 
 void NoronClientHub::disconnectFromHost()

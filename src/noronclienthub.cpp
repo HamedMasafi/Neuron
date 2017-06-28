@@ -139,7 +139,7 @@ void NoronClientHub::connectToHost(QString address, quint16 port, bool waitForCo
 
     if (socket->state() != QAbstractSocket::ConnectedState) {
         qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
-        emit disconnected();
+        setStatus(Unconnected);
     }
 }
 
@@ -192,8 +192,6 @@ void NoronClientHub::onStatusChanged(Status status)
             connectToHost();
             d->reconnectTimerId = startTimer(500);
             setStatus(Reconnecting);
-        }else{
-            setStatus(Unconnected);
         }
     }
 }
@@ -206,9 +204,7 @@ void NoronClientHub::hi(qlonglong hubId)
     if(hubId == this->hubId()){
         //reconnected
         emit reconnected();
-        emit connected();
     }else{
-        emit connected();
     }
 
     if(d->connectionEventLoop){

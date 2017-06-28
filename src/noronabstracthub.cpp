@@ -540,7 +540,6 @@ void NoronAbstractHub::socket_connected()
 void NoronAbstractHub::socket_disconnected()
 {
     setStatus(Unconnected);
-    emit disconnected();
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();
@@ -777,6 +776,21 @@ void NoronAbstractHub::setStatus(NoronAbstractHub::Status status)
         return;
 
     d->status = status;
+
+    switch(status) {
+    case Connected:
+        emit connected();
+        break;
+
+    case Unconnected:
+        emit disconnected();
+        break;
+
+    case Reconnecting:
+        qt_noop();
+        break;
+    }
+
     emit statusChanged(status);
 }
 

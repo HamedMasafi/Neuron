@@ -136,9 +136,11 @@ void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
 {
     NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
 
-    if(hub && status == NoronAbstractHub::Unconnected){
+    if(hub && hub->status() == NoronAbstractHub::Unconnected){
         detachHub(hub);
+        hubRemoved(hub);
     }
+    qDebug() << "hub_statusChanged" << hub->objectName() << status;
 }
 
 qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)

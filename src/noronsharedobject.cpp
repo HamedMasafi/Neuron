@@ -53,13 +53,13 @@ void NoronSharedObject::attachHub(NoronAbstractHub *hub)
         return;
     }
 
-    if(!qobject_cast<NoronServer*>(hub)){
+//    if(!qobject_cast<NoronServer*>(hub)){
         hubs.insert(hub);
         hubAdded(hub);
 
         qRegisterMetaType<NoronAbstractHub::Status>();
         connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
-    }
+//    }
     hub->attachSharedObject(this);
 }
 

@@ -55,7 +55,7 @@ class NORON_EXPORT NoronAbstractHub : public QObject
     Q_PROPERTY(NoronPeer* peer READ peer WRITE setPeer NOTIFY peerChanged)
     Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(NoronAbstractSerializer* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
-    Q_PROPERTY(Status status READ status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(NoronAbstractHub::Status status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(qlonglong hubId READ hubId WRITE setHubId NOTIFY hubIdChanged)
 
 #ifdef QT_QML_LIB
@@ -85,7 +85,7 @@ public:
     QString validateToken() const;
 
     bool isMultiThread() const;
-    Status status() const;
+    NoronAbstractHub::Status status() const;
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine() const;
     QQmlEngine* qmlEngine() const;
@@ -111,7 +111,7 @@ signals:
     void peerChanged(NoronPeer* peer);
     void validateTokenChanged(QString validateToken);
     void serializerChanged(NoronAbstractSerializer* serializer);
-    void statusChanged(Status status);
+    void statusChanged(NoronAbstractHub::Status status);
 #ifdef QT_QML_LIB
     void jsEngineChanged(QJSEngine *jsEngine);
     void qmlEngineChanged(QQmlEngine* qmlEngine);
@@ -156,11 +156,13 @@ public slots:
 protected:
     virtual void beginConnection();
     void setIsMultiThread(bool isMultiThread);
-    void setStatus(Status status);
+    void setStatus(NoronAbstractHub::Status status);
 
     friend class NoronPeer;
     friend class NoronServer;
 };
+
+Q_DECLARE_METATYPE(NoronAbstractHub::Status)
 
 NORON_END_NAMESPACE
 

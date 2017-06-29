@@ -533,13 +533,15 @@ void NoronAbstractHub::socket_connected()
     K_TRACE_DEBUG;
     beginConnection();
 
-    //    setStatus(Connected);
+    setStatus(NoronAbstractHub::Connected);
     initalizeMutex.unlock();
 }
 
 void NoronAbstractHub::socket_disconnected()
 {
-    setStatus(Unconnected);
+    qDebug() << "NoronAbstractHub::socket_disconnected()";
+    setStatus(NoronAbstractHub::Unconnected);
+    qDebug() << "NoronAbstractHub::socket_disconnected(2)";
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();

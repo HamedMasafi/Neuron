@@ -59,10 +59,10 @@ public:
     virtual void hubRemoved(NoronAbstractHub *hub);
 
     bool autoDelete() const;
-    void setAutoDelete(bool autoDelete);
 
 private slots:
     void hub_statusChanged(NoronAbstractHub::Status status);
+    void setAutoDelete(bool autoDelete);
 
 protected:
     qlonglong invokeOnPeer(

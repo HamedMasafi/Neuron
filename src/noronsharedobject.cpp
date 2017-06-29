@@ -23,6 +23,8 @@
 
 #include <QtCore/QDebug>
 
+#include <NoronServer>
+
 NORON_BEGIN_NAMESPACE
 
 bool NoronSharedObject::autoDelete() const
@@ -51,7 +53,7 @@ void NoronSharedObject::attachHub(NoronAbstractHub *hub)
         return;
     }
 
-    if(!hub->inherits(QT_STRINGIFY(NoronServer))){
+    if(!qobject_cast<NoronServer*>(hub)){
         hubs.insert(hub);
         hubAdded(hub);
 

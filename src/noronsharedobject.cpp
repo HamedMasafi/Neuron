@@ -68,6 +68,9 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
     if (!hub)
         return;
 
+    if(!qobject_cast<NoronServer*>(hub))
+        return;
+
     if (hubs.remove(hub)){
         hubRemoved(hub);
         hub->detachSharedObject(this);

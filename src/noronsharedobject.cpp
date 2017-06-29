@@ -144,10 +144,9 @@ void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
     if (hub->inherits("NoronServer"))
         return;
 
-    if(hub && hub->status() == NoronAbstractHub::Unconnected){
+    if(hub && hub->status() == NoronAbstractHub::Unconnected)
         detachHub(hub);
-        hubRemoved(hub);
-    }
+
     qDebug() << "hub_statusChanged" << hub->objectName() << status;
 }
 

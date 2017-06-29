@@ -18,6 +18,7 @@
 **
 **************************************************************************/
 
+#include <NoronServer>
 #include <QTimer>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QJsonDocument>
@@ -440,6 +441,9 @@ void NoronAbstractHub::attachSharedObject(NoronSharedObject *o)
 void NoronAbstractHub::detachSharedObject(NoronSharedObject *o)
 {
     Q_D(NoronAbstractHub);
+
+    if(qobject_cast<NoronServer*>(this))
+        return;
 
     if (d->sharedObjects.remove(o->peerName())) {
         o->detachHub(this);

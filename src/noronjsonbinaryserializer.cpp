@@ -91,11 +91,12 @@ QVariantMap NoronJsonBinarySerializer::serializeQObject(QObject *obj)
 {
     QVariantMap map;
 
-    for(int i = 0; i < obj->metaObject()->propertyCount(); i++){
-        QMetaProperty property = obj->metaObject()->property(i);
-        if(property.isReadable() && property.isWritable())
-            map.insert(property.name(), property.read(obj).toString());
-    }
+    if (obj)
+        for(int i = 0; i < obj->metaObject()->propertyCount(); i++){
+            QMetaProperty property = obj->metaObject()->property(i);
+            if(property.isReadable() && property.isWritable())
+                map.insert(property.name(), property.read(obj).toString());
+        }
 
     return map;
 }

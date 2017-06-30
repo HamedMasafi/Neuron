@@ -68,8 +68,8 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
     if (!hub)
         return;
 
-    if(qobject_cast<NoronServer*>(hub))
-        return;
+//    if(qobject_cast<NoronServer*>(hub))
+//        return;
 
     if (hubs.remove(hub)){
         hubRemoved(hub);
@@ -140,7 +140,7 @@ void NoronSharedObject::hubRemoved(NoronAbstractHub *hub)
 void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
 {
     NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
-
+qDebug() << "hub" <<hub->objectName() << "status changed to" << status;
     if (hub->inherits("NoronServer"))
         return;
 

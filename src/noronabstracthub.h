@@ -93,11 +93,11 @@ public:
 
     void waitForConnected(int timeout = 4000);
     Q_INVOKABLE void flushSocket();
+    qlonglong hubId() const;
 
 protected:
     QHash<qlonglong, NoronRemoteCallBase*> _calls;
     QTcpSocket *socket;
-    qlonglong hubId() const;
     Q_INVOKABLE void setHubId(qlonglong id);
 
     QMutex initalizeMutex;

@@ -124,8 +124,9 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     }
 
     if (!target) {
-        qWarning("There are no '%s' service",
-                 map[CLASS_NAME].toString().toLatin1().data());
+        qWarning("There are no '%s' service for method %s",
+                 map[CLASS_NAME].toString().toLatin1().data(),
+                 map[METHOD_NAME].toString().toLatin1().data());
         return;
     }
 
@@ -537,7 +538,7 @@ void NoronAbstractHub::socket_connected()
     K_TRACE_DEBUG;
     beginConnection();
 
-    setStatus(NoronAbstractHub::Connected);
+//    setStatus(NoronAbstractHub::Connected);
     initalizeMutex.unlock();
 }
 

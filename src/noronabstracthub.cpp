@@ -105,14 +105,16 @@ void NoronAbstractHubPrivate::procMap(QVariantMap map)
     }
     if (!q->validateToken().isNull())
         if (!checkValidateToken(map)) {
-            qWarning("Token validation was faild!");
+            qWarning("Token validation was faild! %s::%s",
+                     qPrintable(map[CLASS_NAME].toString()),
+                     qPrintable(map[METHOD_NAME].toString()));
             return;
         }
     QObject *target = 0;
 
     if (map[CLASS_NAME] == "") {
         qDebug() << map;
-        qFatal("Error in data");
+//        qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
         target = q;
@@ -278,7 +280,7 @@ QString NoronAbstractHubPrivate::createValidateToken(QVariantMap &map)
     while (i.hasNext()) {
         i.next();
 
-        QMetaType t(i.value().type());
+        QMetaType t(i.value().userType());
 
         bool ok;
         if (t.flags() & QMetaType::PointerToQObject)

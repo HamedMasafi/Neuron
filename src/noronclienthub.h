@@ -53,7 +53,7 @@ public:
     virtual ~NoronClientHub();
 
     QString serverAddress() const;
-    int port() const;
+    quint16 port() const;
     bool isAutoReconnect() const;
 
 #ifdef QT_QML_LIB
@@ -66,10 +66,10 @@ protected:
 
 public slots:
     void connectToHost(bool waitForConnected);
-    void connectToHost(QString address = QString::null, int port = 0, bool waitForConnected = false);
+    void connectToHost(QString address = QString::null, quint16 port = 0, bool waitForConnected = false);
     void disconnectFromHost();
     void setServerAddress(QString serverAddress);
-    void setPort(int port);
+    void setPort(quint16 port);
     void setAutoReconnect(bool isAutoReconnect);
 
 private slots:

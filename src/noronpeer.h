@@ -74,6 +74,9 @@ protected:
 signals:
     void hubChanged(NoronAbstractHub* hub);
 
+private slots:
+    void hub_disconnected();
+
 public slots:
     void setHub(NoronAbstractHub* hub);
 };

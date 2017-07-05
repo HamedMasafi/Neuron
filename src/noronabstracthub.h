@@ -28,6 +28,9 @@
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
+#include <QAbstractSocket>
+
+#include <QMutex>
 
 class QTcpSocket;
 #ifdef QT_QML_LIB
@@ -52,7 +55,7 @@ class NORON_EXPORT NoronAbstractHub : public QObject
     Q_PROPERTY(NoronPeer* peer READ peer WRITE setPeer NOTIFY peerChanged)
     Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(NoronAbstractSerializer* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
-    Q_PROPERTY(Status status READ status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(NoronAbstractHub::Status status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(qlonglong hubId READ hubId WRITE setHubId NOTIFY hubIdChanged)
 
 #ifdef QT_QML_LIB
@@ -82,7 +85,7 @@ public:
     QString validateToken() const;
 
     bool isMultiThread() const;
-    Status status() const;
+    NoronAbstractHub::Status status() const;
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine() const;
     QQmlEngine* qmlEngine() const;
@@ -90,22 +93,25 @@ public:
 
     void waitForConnected(int timeout = 4000);
     Q_INVOKABLE void flushSocket();
+    qlonglong hubId() const;
 
 protected:
     QHash<qlonglong, NoronRemoteCallBase*> _calls;
     QTcpSocket *socket;
-    qlonglong hubId() const;
     Q_INVOKABLE void setHubId(qlonglong id);
+
+    QMutex initalizeMutex;
 
 signals:
     void connected();
     void disconnected();
     void reconnected();
+    void error();
 
     void peerChanged(NoronPeer* peer);
     void validateTokenChanged(QString validateToken);
     void serializerChanged(NoronAbstractSerializer* serializer);
-    void statusChanged(Status status);
+    void statusChanged(NoronAbstractHub::Status status);
 #ifdef QT_QML_LIB
     void jsEngineChanged(QJSEngine *jsEngine);
     void qmlEngineChanged(QQmlEngine* qmlEngine);
@@ -116,6 +122,7 @@ private slots:
     void socket_connected();
     void socket_disconnected();
     void socket_onReadyRead();
+    void socket_error(QAbstractSocket::SocketError socketError);
 
 public slots:
     void beginTransaction();
@@ -149,11 +156,13 @@ public slots:
 protected:
     virtual void beginConnection();
     void setIsMultiThread(bool isMultiThread);
-    void setStatus(Status status);
+    void setStatus(NoronAbstractHub::Status status);
 
     friend class NoronPeer;
     friend class NoronServer;
 };
+
+Q_DECLARE_METATYPE(NoronAbstractHub::Status)
 
 NORON_END_NAMESPACE
 

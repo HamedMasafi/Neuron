@@ -117,15 +117,16 @@ void NoronServer::hub_connected()
 {
     Q_D(NoronServer);
 
+    K_TRACE_DEBUG;
     NoronServerHub *hub = qobject_cast<NoronServerHub*>(sender());
     K_REG_OBJECT(hub);
 
     if(hub->hubId()){
         K_TRACE("is reconnect");
 
-        NoronAbstractHub *hub = d->hubs[hub->hubId()];
+        NoronAbstractHub *hub2 = d->hubs[hub->hubId()];
 
-        if(!hub)
+        if(!hub2)
             qFatal("reconnecting to an invalid hub");
 
     }else{
@@ -149,7 +150,6 @@ void NoronServer::hub_connected()
 
     foreach (NoronSharedObject *sharedObj, sharedObjects()){
         hub->attachSharedObject(sharedObj);
-        qDebug() << "so" << sharedObj->objectName() << "added to new hub";
     }
 
     if(d->hubId++ >= LONG_LONG_MAX - 1)
@@ -202,7 +202,10 @@ void NoronServer::hub_disconnected()
 
 void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 {
+    initalizeMutex.lock();
+
     Q_D(NoronServer);
+    K_TRACE_DEBUG;
 
 //    const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
 //    QObject *o = metaObject->newInstance();
@@ -227,8 +230,8 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
 
         hub = thread->hub();
         hub->setServerThread(thread);
-
         hub->setIsMultiThread(true);
+
         hubIsValid = (hub != 0);
 
         K_REG_OBJECT(thread);
@@ -237,6 +240,12 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         hubIsValid = hub->setSocketDescriptor(socketDescriptor);
         K_REG_OBJECT(hub);
     }
+
+    connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
+    connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+
+    if (hub->status() == NoronAbstractHub::Connected)
+        emit hub->connected();
 
     /*
     hub = new NoronServerHub;
@@ -252,13 +261,15 @@ void NoronServer::server_newIncomingConnection(qintptr socketDescriptor)
         qWarning("NoronServerHub creation faild");
         hub->deleteLater();
 //        peer->deleteLater();
+        initalizeMutex.unlock();
         return;
     }
 
     hub->setSerializer(serializer());
     hub->setValidateToken(validateToken());
-    connect(hub, &NoronAbstractHub::connected, this, &NoronServer::hub_connected);
-    connect(hub, &NoronAbstractHub::disconnected, this, &NoronServer::hub_disconnected);
+    K_TRACE_DEBUG;
+
+    initalizeMutex.unlock();
 }
 
 void NoronServer::setTypeId(int typeId)

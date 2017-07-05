@@ -69,7 +69,7 @@ QString NoronClientHub::serverAddress() const
     return d->serverAddress;
 }
 
-int NoronClientHub::port() const
+quint16 NoronClientHub::port() const
 {
     Q_D(const NoronClientHub);
     return d->port;
@@ -124,7 +124,7 @@ void NoronClientHub::connectToHost(bool waitForConnected)
     connectToHost(QString::null, 0, waitForConnected);
 }
 
-void NoronClientHub::connectToHost(QString address, int port, bool waitForConnected)
+void NoronClientHub::connectToHost(QString address, quint16 port, bool waitForConnected)
 {
     if(!address.isNull())
         setServerAddress(address);
@@ -137,12 +137,16 @@ void NoronClientHub::connectToHost(QString address, int port, bool waitForConnec
     if(waitForConnected)
         this->waitForConnected();
 
-    if (socket->state() != QAbstractSocket::ConnectedState)
+    if (socket->state() != QAbstractSocket::ConnectedState) {
         qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
+        setStatus(Unconnected);
+    }
 }
 
 void NoronClientHub::disconnectFromHost()
 {
+    Q_D(NoronClientHub);
+    d->isAutoReconnect = false;
     socket->disconnectFromHost();
 }
 
@@ -157,7 +161,7 @@ void NoronClientHub::setServerAddress(QString serverAddress)
     emit serverAddressChanged(serverAddress);
 }
 
-void NoronClientHub::setPort(int port)
+void NoronClientHub::setPort(quint16 port)
 {
     Q_D(NoronClientHub);
 
@@ -186,10 +190,8 @@ void NoronClientHub::onStatusChanged(Status status)
     if(status == Unconnected){
         if(isAutoReconnect()){
             connectToHost();
-//            d->reconnectTimerId = startTimer(500);
+            d->reconnectTimerId = startTimer(500);
             setStatus(Reconnecting);
-        }else{
-            setStatus(Unconnected);
         }
     }
 }
@@ -202,9 +204,7 @@ void NoronClientHub::hi(qlonglong hubId)
     if(hubId == this->hubId()){
         //reconnected
         emit reconnected();
-        emit connected();
     }else{
-        emit connected();
     }
 
     if(d->connectionEventLoop){

@@ -34,7 +34,7 @@ class NoronClientHubPrivate{
 public:
     NoronClientHubPrivate(NoronClientHub *parent);
 
-    qint16 port;               // port
+    quint16 port;               // port
     QString serverAddress;     // address of server
     bool isAutoReconnect;
     int reconnectTimerId;

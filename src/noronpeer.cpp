@@ -19,6 +19,8 @@
 **************************************************************************/
 
 #include <QtCore/QMetaObject>
+#include <QtCore/QDebug>
+
 #include "noronpeer.h"
 #include "noronabstracthub.h"
 #include "noronsharedobject.h"
@@ -57,9 +59,12 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
     if(!hub())
         return 0;
 
+    if(hub()->status() != NoronAbstractHub::Connected)
+        return 0;
+
     if(hub()->isMultiThread()){
 //        qlonglong ret;
-        hub()->metaObject()->invokeMethod(hub(),
+        bool ok = hub()->metaObject()->invokeMethod(hub(),
                                           QT_STRINGIFY(invokeOnPeer),
 //                                          Qt::DirectConnection,
 //                                          Q_RETURN_ARG(qlonglong, ret),
@@ -76,6 +81,9 @@ qlonglong NoronPeer::invokeOnPeer(QString methodName, QVariant val0, QVariant va
                                                                         QGenericArgument(val8.typeName(), val8.data()),
                                                                         QGenericArgument(val9.typeName(), val9.data())*/);
 //        return ret;
+        if (!ok)
+            qWarning("Unable to invoke method: %s::%s",
+                     qPrintable(peerName()), qPrintable(methodName));
         return 0;
     }else{
         return hub()->invokeOnPeer(
@@ -107,6 +115,11 @@ void NoronPeer::setPeerName(const QString &name)
     _peerName = name;
 }
 
+void NoronPeer::hub_disconnected()
+{
+    m_hub = 0;
+}
+
 void NoronPeer::setHub(NoronAbstractHub *hub)
 {
     if (m_hub == hub)
@@ -114,14 +127,18 @@ void NoronPeer::setHub(NoronAbstractHub *hub)
 
     m_hub = hub;
 
-    NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
+    if (hub) {
+        connect(hub, &NoronAbstractHub::disconnected, this, &NoronPeer::hub_disconnected);
 
-    if(so)
-        hub->attachSharedObject(so);
-    else
-        hub->setPeer(this);
+        NoronSharedObject *so = qobject_cast<NoronSharedObject*>(this);
 
-    emit hubChanged(hub);
+        if(so)
+            hub->attachSharedObject(so);
+        else
+            hub->setPeer(this);
+
+        emit hubChanged(hub);
+    }
 }
 
 NORON_END_NAMESPACE

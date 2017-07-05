@@ -44,6 +44,7 @@ bool NoronServerThread::isStarted() const
 
 void NoronServerThread::run()
 {
+    K_TRACE_DEBUG;
     //TODO: pass serializer to here!
     _hub = new NoronServerHub;
     _hub->setSocketDescriptor(this->socketDescriptor, false);
@@ -55,7 +56,7 @@ void NoronServerThread::run()
 
     exec();
 
-    _hub->deleteLater();
+    K_TRACE_DEBUG;
 }
 
 NoronServerHub *NoronServerThread::hub()

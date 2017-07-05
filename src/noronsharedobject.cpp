@@ -23,6 +23,8 @@
 
 #include <QtCore/QDebug>
 
+#include <NoronServer>
+
 NORON_BEGIN_NAMESPACE
 
 bool NoronSharedObject::autoDelete() const
@@ -47,23 +49,33 @@ NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : N
 
 void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 {    
-    if(!hub->inherits(QT_STRINGIFY(NoronServer))){
+    if(hubs.contains(hub)) {
+        return;
+    }
+
+//    if(!qobject_cast<NoronServer*>(hub)){
         hubs.insert(hub);
         hubAdded(hub);
 
+        qRegisterMetaType<NoronAbstractHub::Status>();
         connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
-    }
+//    }
+    hub->attachSharedObject(this);
 }
 
 void NoronSharedObject::detachHub(NoronAbstractHub *hub)
 {
-    if(hubs.remove(hub)){
+    if (!hub)
+        return;
+
+//    if(qobject_cast<NoronServer*>(hub))
+//        return;
+
+    if (hubs.remove(hub)){
         hubRemoved(hub);
         hub->detachSharedObject(this);
 
-        qDebug() << "NoronSharedObject::detachHub" << objectName() <<"; " << hub->objectName();
         if(!hubs.count() && autoDelete()){
-            qDebug() << "Object" << objectName() <<"market for deletation";
             deleteLater();
         }
     }
@@ -128,10 +140,14 @@ void NoronSharedObject::hubRemoved(NoronAbstractHub *hub)
 void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
 {
     NoronAbstractHub *hub = qobject_cast<NoronAbstractHub*>(sender());
+qDebug() << "hub" <<hub->objectName() << "status changed to" << status;
+    if (hub->inherits("NoronServer"))
+        return;
 
-    if(hub && status == NoronAbstractHub::Unconnected){
+    if(hub && hub->status() == NoronAbstractHub::Unconnected)
         detachHub(hub);
-    }
+
+    qDebug() << "hub_statusChanged" << hub->objectName() << status;
 }
 
 qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)

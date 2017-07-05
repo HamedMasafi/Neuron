@@ -61,7 +61,6 @@ NoronServerHub::~NoronServerHub()
 //    }
 
 //    while(sharedObjects().count()){
-//        qDebug() << "removing " << sharedObjects().at(0);
 //        removeSharedObject(sharedObjects().at(0));
 //    }
     auto so = sharedObjectHash();
@@ -69,7 +68,6 @@ NoronServerHub::~NoronServerHub()
     while (i.hasNext()) {
         i.next();
 //        cout << i.key() << ": " << i.value() << endl;
-        qDebug() << "removing " << i.key() << "from" << objectName();
         detachSharedObject(i.value());
     }
 
@@ -85,18 +83,21 @@ NoronServerThread *NoronServerHub::serverThread() const
 
 qlonglong NoronServerHub::hi(qlonglong hubId)
 {
+    initalizeMutex.lock();
     Q_D(NoronServerHub);
 
     setHubId(hubId);
     emit connected();
 
+    K_TRACE_DEBUG;
 //    invokeOnPeer(THIS_HUB, "hi", hubId);
-    if(d->connectionEventLoop){
+    if (d->connectionEventLoop) {
         d->connectionEventLoop->quit();
         d->connectionEventLoop->deleteLater();
     }
 
-//    setStatus(Connected);
+    initalizeMutex.unlock();
+    setStatus(Connected);
     return this->hubId();
 }
 
@@ -120,6 +121,7 @@ void NoronServerHub::setServerThread(NoronServerThread *serverThread)
 
 void NoronServerHub::beginConnection()
 {
+    K_TRACE_DEBUG;
     Q_D(NoronServerHub);
     d->connectionEventLoop = new QEventLoop;
     K_REG_OBJECT(d->connectionEventLoop);

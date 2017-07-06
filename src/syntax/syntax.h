@@ -115,36 +115,4 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     Q_INVOKABLE  class(QObject *parent = 0); \
     class(NoronAbstractHub *hub, QObject *parent = 0);
 
-//#ifdef NORON_SHARED_OBJECT
-//#   define N_CLASS_IMPL(class) \
-//        class::class(QObject *parent) : NoronSharedObject(parent) \
-//        {  \
-//            setPeerName(#class); \
-//        }    \
-//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
-//        {   \
-//            if(hub){    \
-//                setHub(hub);    \
-//                hub->addSharedObject(this); \
-//            }   \
-//            setPeerName(#class); \
-//        }
-//#else
-//#ifdef NORON_PEER
-//#   define N_CLASS_IMPL(class) \
-//        class::class(QObject *parent) : NoronPeer(parent) \
-//        {  \
-//            setPeerName(#class); \
-//        }    \
-//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
-//        {   \
-//            if(hub)    \
-//                setHub(hub);    \
-//            setPeerName(#class); \
-//        }
-//#else
-//#   error "No NORONSHAREDOBJECT_H nor NORONPEER_H are defined";
-//#endif
-//#endif
-
 QT_WARNING_POP

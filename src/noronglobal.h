@@ -69,7 +69,8 @@
         };
 #else
 #   define NORON_OPERATORS_FOR_ENUM(ENUM) \
-        _Pragma("GCC error QDataStream not included")
+        QT_DO_PRAGMA("GCC error QDataStream not included")
+
 #endif
 QT_DEPRECATED
 #endif // NORONGLOBAL_H

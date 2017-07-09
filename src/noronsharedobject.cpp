@@ -71,6 +71,7 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
 //    if(qobject_cast<NoronServer*>(hub))
 //        return;
 
+    //hubsLock.lock();
     if (hubs.remove(hub)){
         hubRemoved(hub);
         hub->detachSharedObject(this);
@@ -79,6 +80,7 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
             deleteLater();
         }
     }
+    //hubsLock.unlock();
 }
 
 bool NoronSharedObject::setActiveHub(NoronAbstractHub *hub)
@@ -152,6 +154,8 @@ qDebug() << "hub" <<hub->objectName() << "status changed to" << status;
 
 qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
+    //hubsLock.lock();
+
     QSet<NoronAbstractHub*> tmpHubs;;
 
     if(_activeHub){
@@ -166,7 +170,7 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
     }
 
     foreach (NoronAbstractHub *hub, tmpHubs) {
-        if(hub->isMultiThread())
+        if(hub->isMultiThread()) {
             hub->metaObject()->invokeMethod(hub,
                                             QT_STRINGIFY(invokeOnPeer),
                                             Q_ARG(QString, peerName()),
@@ -179,14 +183,18 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
                                             Q_ARG(QVariant, val5),
                                             Q_ARG(QVariant, val6),
                                             Q_ARG(QVariant, val7));
-        else
-            return hub->invokeOnPeer(
+        } else {
+            qlonglong v = hub->invokeOnPeer(
                         peerName(),
                         methodName,
                         val0, val1, val2, val3, val4,
                         val5, val6, val7, val8, val9);
+            if (tmpHubs.count() == 1)
+                return v;
+        }
     }
 
+    //hubsLock.unlock();
     return 0;
 }
 

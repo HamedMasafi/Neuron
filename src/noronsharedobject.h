@@ -21,6 +21,7 @@
 #ifndef NORONSHAREDOBJECT_H
 #define NORONSHAREDOBJECT_H
 
+#include <QtCore/QMutex>
 #include <QtCore/QSet>
 
 #define NORON_SHARED_OBJECT
@@ -39,6 +40,7 @@ class NORON_EXPORT NoronSharedObject : public NoronPeer
     NoronAbstractHub *_activeHub;
     NoronAbstractHub *_deactiveHub;
     bool _autoDelete;
+    QMutex hubsLock;
 
 public:
     NoronSharedObject(QObject *parent = 0);

@@ -1,3 +1,6 @@
+#ifndef NORONSYNTAX_H
+#define NORONSYNTAX_H
+
 #include <QtGlobal>
 
 QT_WARNING_PUSH
@@ -116,3 +119,5 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     class(NoronAbstractHub *hub, QObject *parent = 0);
 
 QT_WARNING_POP
+
+#endif // NORONSYNTAX_H

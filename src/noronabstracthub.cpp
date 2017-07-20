@@ -483,7 +483,6 @@ NoronAbstractHub::Status NoronAbstractHub::status() const
 
 void NoronAbstractHub::waitForConnected(int timeout)
 {
-    Q_D(NoronAbstractHub);
     if (socket->state() == QAbstractSocket::ConnectedState)
         return;
 

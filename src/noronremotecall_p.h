@@ -43,15 +43,6 @@ NORON_BEGIN_NAMESPACE
 
 class NoronRemoteCallBase{
 public:
-#if __cplusplus >= 201103L
-    std::function<void()> func;
-#endif
-#ifdef QT_QML_LIB
-    QJSValue jsvalue;
-    QJSEngine *jsEngine;
-    QQmlEngine *qmlEngine;
-#endif
-
     enum ReturnType{
         None,
 #if __cplusplus >= 201103L
@@ -65,10 +56,18 @@ public:
         MetaMethod
     };
 
+    ReturnType type;
+#if __cplusplus >= 201103L
+    std::function<void()> func;
+#endif
+#ifdef QT_QML_LIB
+    QQmlEngine *qmlEngine;
+    QJSEngine *jsEngine;
+    QJSValue jsvalue;
+#endif
     char *slotName;
     QEventLoop *eventLoop;
     QObject *obj;
-    ReturnType type;
     QMetaMethod *method;
     QVariant returnData;
 

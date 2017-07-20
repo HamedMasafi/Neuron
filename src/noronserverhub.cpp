@@ -52,8 +52,6 @@ NoronServerHub::NoronServerHub(QTcpSocket *socket, QObject *parent) : NoronAbstr
 
 NoronServerHub::~NoronServerHub()
 {
-    Q_D(NoronServerHub);
-
 //    QList<NoronSharedObject *> soList = sharedObjects();
 //    foreach (NoronSharedObject *so, soList) {
 //        if(so)

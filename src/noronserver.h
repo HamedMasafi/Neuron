@@ -38,7 +38,7 @@ class NORON_EXPORT NoronServer : public NoronAbstractHub
 
     Q_PROPERTY(int typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
     Q_PROPERTY(ServerType serverType READ serverType WRITE setServerType NOTIFY serverTypeChanged)
-    Q_PROPERTY(int reconnectTimeout READ reconnectTimeout WRITE setReconnectTimeout NOTIFY reconnectTimeoutChanged)
+    Q_PROPERTY(quint32 reconnectTimeout READ reconnectTimeout WRITE setReconnectTimeout NOTIFY reconnectTimeoutChanged)
 
 public:
     explicit NoronServer(QObject *parent = 0);
@@ -59,7 +59,7 @@ public:
     int typeId() const;
     ServerType serverType() const;
     void startServer(qint16 port);
-    int reconnectTimeout() const;
+    quint32 reconnectTimeout() const;
     bool isListening() const;
 
 signals:
@@ -68,7 +68,7 @@ signals:
     void typeIdChanged(int typeId);
     void serverTypeChanged(ServerType serverType);
 
-    void reconnectTimeoutChanged(int reconnectTimeout);
+    void reconnectTimeoutChanged(quint32 reconnectTimeout);
 
 private slots:
     void hub_connected();
@@ -78,7 +78,7 @@ private slots:
 public slots:
     void setTypeId(int typeId);
     void setServerType(ServerType serverType);
-    void setReconnectTimeout(int reconnectTimeout);
+    void setReconnectTimeout(quint32 reconnectTimeout);
 };
 
 NORON_END_NAMESPACE

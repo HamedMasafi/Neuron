@@ -1,3 +1,13 @@
+#ifdef METHOD_DECL_P_SLOT
+#   undef METHOD_DECL_P_SLOT
+#endif
+#ifdef METHOD_IMPL_P_SLOT_VOID
+#   undef METHOD_IMPL_P_SLOT_VOID
+#endif
+#ifdef METHOD_IMPL_P_SLOT_NONVOID
+#   undef METHOD_IMPL_P_SLOT_NONVOID
+#endif
+
 #ifndef NO_SLOT
 #   define METHOD_DECL_P_SLOT(ret, name, count, sep, ...) \
         virtual ret name##Slot(__NAMEVALUE(count, __VA_ARGS__));

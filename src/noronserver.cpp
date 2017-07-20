@@ -89,7 +89,7 @@ void NoronServer::startServer(qint16 port)
     }
 }
 
-int NoronServer::reconnectTimeout() const
+quint32 NoronServer::reconnectTimeout() const
 {
     Q_D(const NoronServer);
     return d->reconnectTimeout;
@@ -294,7 +294,7 @@ void NoronServer::setServerType(NoronServer::ServerType serverType)
     emit serverTypeChanged(serverType);
 }
 
-void NoronServer::setReconnectTimeout(int reconnectTimeout)
+void NoronServer::setReconnectTimeout(quint32 reconnectTimeout)
 {
     Q_D(NoronServer);
     if (d->reconnectTimeout == reconnectTimeout)

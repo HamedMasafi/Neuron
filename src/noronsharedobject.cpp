@@ -61,6 +61,10 @@ void NoronSharedObject::attachHub(NoronAbstractHub *hub)
         connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
 //    }
     hub->attachSharedObject(this);
+
+#ifdef NORON_SERVER
+    invokeOnPeer("attached");
+#endif
 }
 
 void NoronSharedObject::detachHub(NoronAbstractHub *hub)
@@ -79,6 +83,10 @@ void NoronSharedObject::detachHub(NoronAbstractHub *hub)
         if(!hubs.count() && autoDelete()){
             deleteLater();
         }
+
+#ifdef NORON_SERVER
+    invokeOnPeer("detached");
+#endif
     }
     //hubsLock.unlock();
 }

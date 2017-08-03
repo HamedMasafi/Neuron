@@ -81,6 +81,10 @@ protected:
             QVariant val9 = QVariant());
 
 signals:
+#ifdef NORON_CLIENT
+    void attached();
+    void detached();
+#endif
 };
 
 NORON_END_NAMESPACE

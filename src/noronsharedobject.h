@@ -80,6 +80,7 @@ protected:
             QVariant val8 = QVariant(),
             QVariant val9 = QVariant());
 
+    void sync(NoronAbstractHub *hub);
 signals:
 #ifdef NORON_CLIENT
     void attached();

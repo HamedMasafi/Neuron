@@ -37,12 +37,14 @@ void NoronSharedObject::setAutoDelete(bool autoDelete)
     _autoDelete = autoDelete;
 }
 
-NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent), _activeHub(0), _deactiveHub(0)
+NoronSharedObject::NoronSharedObject(QObject *parent) : NoronPeer(parent),
+    _activeHub(0), _deactiveHub(0)
 {
 
 }
 
-NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent), _activeHub(0), _deactiveHub(0)
+NoronSharedObject::NoronSharedObject(NoronAbstractHub *hub, QObject *parent) :
+    NoronPeer(parent), _activeHub(0), _deactiveHub(0)
 {
     attachHub(hub);
 }
@@ -56,9 +58,11 @@ void NoronSharedObject::attachHub(NoronAbstractHub *hub)
 //    if(!qobject_cast<NoronServer*>(hub)){
         hubs.insert(hub);
         hubAdded(hub);
+        sync(hub);
 
         qRegisterMetaType<NoronAbstractHub::Status>();
-        connect(hub, &NoronAbstractHub::statusChanged, this, &NoronSharedObject::hub_statusChanged);
+        connect(hub, &NoronAbstractHub::statusChanged,
+                this, &NoronSharedObject::hub_statusChanged);
 //    }
     hub->attachSharedObject(this);
 
@@ -159,7 +163,12 @@ void NoronSharedObject::hub_statusChanged(NoronAbstractHub::Status status)
         detachHub(hub);
 }
 
-qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
+qlonglong NoronSharedObject::invokeOnPeer(QString methodName,
+                                          QVariant val0, QVariant val1,
+                                          QVariant val2, QVariant val3,
+                                          QVariant val4, QVariant val5,
+                                          QVariant val6, QVariant val7,
+                                          QVariant val8, QVariant val9)
 {
     //hubsLock.lock();
 
@@ -203,6 +212,28 @@ qlonglong NoronSharedObject::invokeOnPeer(QString methodName, QVariant val0, QVa
 
     //hubsLock.unlock();
     return 0;
+}
+
+void NoronSharedObject::sync(NoronAbstractHub *hub)
+{
+    if (hub->status() != NoronAbstractHub::Connected)
+        return;
+
+    hub->beginTransaction();
+
+    int pcount = metaObject()->propertyCount();
+    for (int i = 0; i < pcount; i++) {
+        QMetaProperty p = metaObject()->property(i);
+
+        if (!p.isUser())
+            continue;
+
+        QString w = p.name();
+        w[0] = w[0].toUpper();
+
+        hub->invokeOnPeer(peerName(), "set" + w, p.read(this));
+    }
+    QMetaObject::invokeMethod(hub, "commit", Qt::QueuedConnection);
 }
 
 NORON_END_NAMESPACE

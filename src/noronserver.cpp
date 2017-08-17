@@ -73,9 +73,9 @@ NoronServer::~NoronServer()
     delete d;
 }
 
-QSet<NoronPeer *> NoronServer::peers()
+QSet<NoronPeer *> NoronServer::peers() const
 {
-    Q_D(NoronServer);
+    Q_D(const NoronServer);
     return d->peers;
 }
 

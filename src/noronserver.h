@@ -55,7 +55,7 @@ public:
         setTypeId(qRegisterMetaType<T>());
     }
 
-    QSet<NoronPeer *> peers();
+    QSet<NoronPeer *> peers() const;
     int typeId() const;
     ServerType serverType() const;
     void startServer(qint16 port);

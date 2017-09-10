@@ -52,11 +52,11 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 
 #define __REMOTE_METHOD_DECL_P3(ret, name, count, oe, ...) \
     public: \
-    METHOD_DECL_P_NORMAL        (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_META_METHOD   (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_QML_CALLBACK  (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_STD_FUNC      (ret, name, count, __SEP(count), __VA_ARGS__) \
     public Q_SLOTS: \
+    METHOD_DECL_P_NORMAL        (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_ASYNC         (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_SLOT          (ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_DECL_P_SLOT_CALLBACK (ret, name, count, __SEP(count), __VA_ARGS__) \

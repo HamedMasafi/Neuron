@@ -101,6 +101,7 @@ protected:
     Q_INVOKABLE void setHubId(qlonglong id);
 
     QMutex initalizeMutex;
+    QMutex bufferMutex;
 
 signals:
     void connected();

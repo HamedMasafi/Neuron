@@ -496,9 +496,11 @@ void NoronAbstractHub::waitForConnected(int timeout)
 void NoronAbstractHub::flushSocket()
 {
     Q_D(NoronAbstractHub);
+    bufferMutex.lock();
     socket->write(serializer()->serialize(d->buffer));
     socket->flush();
     d->buffer.clear();
+    bufferMutex.unlock();
     d->isTransaction = false;
 }
 
@@ -638,7 +640,9 @@ void NoronAbstractHub::rollback()
     if (!d->isTransaction)
         return;
 
+    bufferMutex.lock();
     d->buffer.clear();
+    bufferMutex.unlock();
     d->isTransaction = false;
 }
 
@@ -700,7 +704,9 @@ qlonglong NoronAbstractHub::invokeOnPeer(QString sender, QString methodName,
         d->addValidateToken(map);
 
     if (d->isTransaction) {
+        bufferMutex.lock();
         d->buffer.append(map);
+        bufferMutex.unlock();
         return 0;
     } else {
         qint64 res = socket->write(serializer()->serialize(map));

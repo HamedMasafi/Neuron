@@ -26,6 +26,7 @@
 #include <QMutex>
 
 #include "neuronabstracthub.h"
+#include "neuronabstractdataencoder.h"
 
 #define ID                  "_id"
 #define CLASS_NAME          "_c"
@@ -63,6 +64,7 @@ public:
     bool isMultiThread;
     qlonglong hubId;
     NeuronAbstractHub::Status status;
+    NeuronAbstractDataEncoder *encoder;
 
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine;

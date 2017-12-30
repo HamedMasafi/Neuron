@@ -103,6 +103,13 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
         }
         return;
     }
+
+    if (!encoder->decrypt(map)) {
+        qWarning("Token validation was faild! %s::%s",
+                 qPrintable(map[CLASS_NAME].toString()),
+                 qPrintable(map[METHOD_NAME].toString()));
+        return;
+    }
     if (!q->validateToken().isNull())
         if (!checkValidateToken(map)) {
             qWarning("Token validation was faild! %s::%s",
@@ -700,6 +707,7 @@ qlonglong NeuronAbstractHub::invokeOnPeer(QString sender, QString methodName,
     d->addToMap(&map, val8, 8);
     d->addToMap(&map, val9, 9);
 
+    d->encoder->encrypt(map);
     if (!validateToken().isNull())
         d->addValidateToken(map);
 
@@ -808,4 +816,20 @@ void NeuronAbstractHub::setStatus(NeuronAbstractHub::Status status)
     emit statusChanged(status);
 }
 
+NeuronAbstractDataEncoder *NeuronAbstractHub::encoder() const
+{
+    Q_D(const NeuronAbstractHub);
+    return d->encoder;
+}
+
+void NeuronAbstractHub::setEncoder(NeuronAbstractDataEncoder *encoder)
+{
+    Q_D(NeuronAbstractHub);
+
+    if (d->encoder == encoder)
+        return;
+
+    d->encoder = encoder;
+    emit encoderChanged(d->encoder);
+}
 NEURON_END_NAMESPACE

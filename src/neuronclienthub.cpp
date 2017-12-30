@@ -219,7 +219,7 @@ void NeuronClientHub::beginConnection()
     qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", QVariant::fromValue(hubId()));
 
     if(__call_id){
-        NeuronRemoteCall<qlonglong> *call = new NeuronRemoteCall<qlonglong>(this, "hi");
+        NeuronRemoteCall<qlonglong> *call = new NeuronRemoteCall<qlonglong>(this, (char*)"hi");
        // addCall(__call_id, call);
         _calls.insert(__call_id, call);
     }

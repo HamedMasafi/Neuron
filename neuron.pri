@@ -31,7 +31,9 @@ HEADERS += \
     $$PWD/src/syntax/method_slot_sharedobject.h \
     $$PWD/src/syntax/method_slot_peer.h \
     $$PWD/src/syntax/decl_signal_peer.h \
-    $$PWD/src/syntax/decl_signal_sharedobject.h
+    $$PWD/src/syntax/decl_signal_sharedobject.h \
+    $$PWD/src/neuronabstractdataencoder.h \
+    $$PWD/src/neuronsimpletokenvalidator.h
 
 SOURCES += \
     $$PWD/src/neuronabstracthub.cpp \
@@ -44,4 +46,6 @@ SOURCES += \
     $$PWD/src/neurontcpsocketserver.cpp \
     $$PWD/src/neuronsharedobject.cpp \
     $$PWD/src/neuronpeer.cpp \
-    $$PWD/src/neuronserverthread.cpp
+    $$PWD/src/neuronserverthread.cpp \
+    $$PWD/src/neuronabstractdataencoder.cpp \
+    $$PWD/src/neuronsimpletokenvalidator.cpp

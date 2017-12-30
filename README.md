@@ -1,10 +1,10 @@
-# Noron
+# Neuron
 
 Qt Remote object sharing
 
-This tool implements remote object sharing (Object Oriented RPC) in Qt. From a technical point of view it can compare with Java RMI or similar technologies. Noron has an advanced signaling mechanism. A property change on a peer (server or client) will immediately signal a change on other peers. It can transfer every QVariant type (even QPixmap and complex types). 
+This tool implements remote object sharing (Object Oriented RPC) in Qt. From a technical point of view it can compare with Java RMI or similar technologies. Neuron has an advanced signaling mechanism. A property change on a peer (server or client) will immediately signal a change on other peers. It can transfer every QVariant type (even QPixmap and complex types). 
 
-The Noron project is a framework that performs remote method invocation on client/server shared objects, the object-oriented equivalent of remote procedure calls (RPC). With support for direct transfer of serialized c++ types and QObject based objects.
+The Neuron project is a framework that performs remote method invocation on client/server shared objects, the object-oriented equivalent of remote procedure calls (RPC). With support for direct transfer of serialized c++ types and QObject based objects.
 
 ## Features
 - Simple to use
@@ -30,7 +30,7 @@ There no document right now. Have a look at examples for an example on how to ge
 First create a template document put your peer class code like that:
 
 ```c++
-class User : public NoronPeer {
+class User : public NeuronPeer {
 	Q_PROPERTY(quint32 id)
 	Q_PROPERTY(QString displayName)
 	Q_PROPERTY(QImage avatar)
@@ -48,13 +48,13 @@ Use peer-generator tool for creating User.cpp & User.h
 ```c++
 User *p = new User(this);
 p->connectToHost("127.0.0.1", 8010);
-p->sendMessage("Hello Noron");
+p->sendMessage("Hello Neuron");
 ```
 ##### Server code
 ```c++
-NoronServer *serverManager = new NoronServer(8010, this);
+NeuronServer *serverManager = new NeuronServer(8010, this);
 serverManager->registerType<User*>();
-connect(serverManager, &NoronServer::peerConnected, this, [this] (NoronPeer *p) {
+connect(serverManager, &NeuronServer::peerConnected, this, [this] (NeuronPeer *p) {
     User *user = qobject_cast<User*>(p);
     qDebug() << "New player connected to server";
 

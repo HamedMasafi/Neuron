@@ -12,12 +12,12 @@
 #   include <QJSValue>
 #endif
 
-#include <NoronAbstractHub>
+#include <NeuronAbstractHub>
 <includes>
 #include <<IncludeName/>>
 </includes>
 
-NORON_BEGIN_NAMESPACE
+NEURON_BEGIN_NAMESPACE
 
 class <ClassName/> : public <BaseType/>
 {
@@ -26,7 +26,7 @@ class <ClassName/> : public <BaseType/>
 
 public:
     Q_INVOKABLE <ClassName/>(QObject *parent = 0);
-    <ClassName/>(NoronAbstractHub *hub, QObject *parent = 0);
+    <ClassName/>(NeuronAbstractHub *hub, QObject *parent = 0);
 
 <methods>
 <group/>
@@ -45,6 +45,6 @@ public:
 
 };
 
-NORON_END_NAMESPACE
+NEURON_END_NAMESPACE
 
 #endif // %3_H

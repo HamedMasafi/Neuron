@@ -1,5 +1,5 @@
-#ifndef NORONSYNTAX_H
-#define NORONSYNTAX_H
+#ifndef NEURONSYNTAX_H
+#define NEURONSYNTAX_H
 
 #include <QtGlobal>
 
@@ -36,10 +36,10 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 #include "method_jscallback.h"
 #include "method_slotcallback.h"
 #include "method_stdfunc.h"
-#ifdef NORON_SHARED_OBJECT
+#ifdef NEURON_SHARED_OBJECT
 //#error "sahred object"
 #endif
-#ifdef NORON_PEER
+#ifdef NEURON_PEER
 //#error "peer"
 #endif
 //signals:
@@ -86,7 +86,7 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     __REMOTE_METHOD_IMPL_P2(class, VA_NARGS(__VA_ARGS__), VA_ODDEVEN(__VA_ARGS__), __VA_ARGS__)
 
 
-#ifdef NORON_SHARED_OBJECT
+#ifdef NEURON_SHARED_OBJECT
 //#error SHARED OBJECT __FILE__
 #endif
 
@@ -116,8 +116,8 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 //Constructors
 #define N_CLASS_DECLARE(class) \
     Q_INVOKABLE  class(QObject *parent = 0); \
-    class(NoronAbstractHub *hub, QObject *parent = 0);
+    class(NeuronAbstractHub *hub, QObject *parent = 0);
 
 QT_WARNING_POP
 
-#endif // NORONSYNTAX_H
+#endif // NEURONSYNTAX_H

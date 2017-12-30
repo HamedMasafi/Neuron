@@ -46,7 +46,7 @@ QString Class::headerCode() const
     /*foreach (QString t, usedTypes) {
         if(t.startsWith("Q"))
             includeBlock.append("#include <" + t + ">" LB);
-        else if(!TextHelper::instance()->hasOperatorEqual(t) && t != "void" && !t.startsWith("Noron"))
+        else if(!TextHelper::instance()->hasOperatorEqual(t) && t != "void" && !t.startsWith("Neuron"))
             includeBlock.append("#include \"" + t + "\"" LB);
     }*/
 

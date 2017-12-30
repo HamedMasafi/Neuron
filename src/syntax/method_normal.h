@@ -8,7 +8,7 @@
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
         if (__call_id) { \
-            NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);    \
+            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);    \
             addCall(__call_id, call);  \
             call->eventLoop->exec();    \
             removeCall(__call_id); \
@@ -20,7 +20,7 @@
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
         if (__call_id) { \
-            NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(NoronRemoteCallBase::EventLoop);    \
+            NeuronRemoteCall<ret> *call = new NeuronRemoteCall<ret>(NeuronRemoteCallBase::EventLoop);    \
             addCall(__call_id, call);  \
             call->eventLoop->exec();    \
             removeCall(__call_id); \

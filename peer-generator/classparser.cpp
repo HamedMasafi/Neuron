@@ -20,7 +20,7 @@
 #define METHOD_BYJSVALUE        6
 #define METHOD_SIGNAL           7
 
-#define NORON_PEER "NoronPeer"
+#define NEURON_PEER "NeuronPeer"
 
 ClassParser::ClassParser(QObject *parent) : QObject(parent)
 {
@@ -62,7 +62,7 @@ QList<Class *> ClassParser::classes()
 
 Class *ClassParser::parse(QString baseType, QString className, QString templateCode)
 {
-    //    if(baseType == "NoronData")
+    //    if(baseType == "NeuronData")
     //        return parseData(className, templateCode);
     //    else
     return parsePeer(baseType, className, templateCode);
@@ -109,8 +109,8 @@ void ClassParser::procLine(Class *cls, QString line)
     setMethodCode(methodsList[METHOD_BYMETAMETHOD], "method_bymetamethod");
     setMethodCode(methodsList[METHOD_BYSIGNAL],     "method_bysignal");
     setMethodCode(methodsList[METHOD_FRESH],        "method_fresh");
-    if(cls->baseType() != NORON_PEER){
-        methodsList[METHOD_SLOT]->setSignature("NoronPeer *senderPeer" + sep + params);
+    if(cls->baseType() != NEURON_PEER){
+        methodsList[METHOD_SLOT]->setSignature("NeuronPeer *senderPeer" + sep + params);
         setMethodCode(methodsList[METHOD_SLOT],         "method_slot_shared");
     }else{
         setMethodCode(methodsList[METHOD_SLOT],         "method_slot");
@@ -145,17 +145,17 @@ void ClassParser::procLine(Class *cls, QString line)
                                               .arg(" = new " + returnType.replace("*", "")));
         }else{
 //            methodsList[METHOD_SIGNAL]->setSignature(params);
-//            if(cls->baseType() != NORON_PEER)
-//                methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer " + sep + params + ", " + returnType + " *returnValue");
+//            if(cls->baseType() != NEURON_PEER)
+//                methodsList[METHOD_SIGNAL]->setSignature("NeuronPeer *senderPeer " + sep + params + ", " + returnType + " *returnValue");
 //            else
         }
     }
 
-    if(cls->baseType() != NORON_PEER){
+    if(cls->baseType() != NEURON_PEER){
         if(methodsList[METHOD_SIGNAL]->signature().isEmpty())
-            methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer");
+            methodsList[METHOD_SIGNAL]->setSignature("NeuronPeer *senderPeer");
         else
-            methodsList[METHOD_SIGNAL]->setSignature("NoronPeer *senderPeer, " + methodsList[METHOD_SIGNAL]->signature());
+            methodsList[METHOD_SIGNAL]->setSignature("NeuronPeer *senderPeer, " + methodsList[METHOD_SIGNAL]->signature());
     }
 
     //usedTypes.insert(returnType);
@@ -425,7 +425,7 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
 
     cls->addInclude("functional", true, true, "if __cplusplus >= 201103L");
     cls->addInclude("QJSValue", true, true, "ifdef QT_QML_LIB");
-    cls->addInclude("NoronAbstractHub");
+    cls->addInclude("NeuronAbstractHub");
 
     QString firstLine;
     QString content;
@@ -471,11 +471,11 @@ Class *ClassParser::parsePeer(QString baseType, QString className, QString templ
 
         Method *constructor2 = new Method(cls);
         constructor2->setName(cls->name());
-        constructor2->setSignature("NoronAbstractHub *hub, QObject *parent = 0");
+        constructor2->setSignature("NeuronAbstractHub *hub, QObject *parent = 0");
         constructor2->setReturnType("");
         constructor2->setDeclType("public");
 
-        if(baseType == NORON_PEER)
+        if(baseType == NEURON_PEER)
             constructor2->setCode("if(hub)" LB
                                   "setHub(hub);");
         else
@@ -519,7 +519,7 @@ Class *ClassParser::parseData(QString className, QString templateCode)
 
     cls->addInclude("functional", true, true, "if __cplusplus >= 201103L");
     cls->addInclude("QJSValue", true, true, "ifdef QT_QML_LIB");
-    cls->addInclude("NoronAbstractHub");
+    cls->addInclude("NeuronAbstractHub");
     cls->addInclude("QVariantMap");
 
     QStringList lines = templateCode.split("\n");

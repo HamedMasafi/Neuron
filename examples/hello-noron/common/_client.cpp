@@ -3,14 +3,14 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-NORON_BEGIN_NAMESPACE
+NEURON_BEGIN_NAMESPACE
 
-Client::Client(QObject *parent) : NoronPeer(parent)
+Client::Client(QObject *parent) : NeuronPeer(parent)
 {
 
 }
 
-Client::Client(NoronHub *hub, QObject *parent) : NoronPeer(parent)
+Client::Client(NeuronHub *hub, QObject *parent) : NeuronPeer(parent)
 {
     if(hub)
         setHub(hub);
@@ -21,7 +21,7 @@ int Client::getRandomNumber(const QObject *obj, const QMetaMethod *callbackMetho
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -33,7 +33,7 @@ int Client::getRandomNumber(std::function<void(int)> callbackFunction)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(callbackFunction);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -45,7 +45,7 @@ int Client::getRandomNumber(const QObject *obj, char *callbackSlot)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -56,7 +56,7 @@ int Client::getRandomNumber()
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);
+        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
         addCall(id, call);
         call->eventLoop->exec();
         int ret = call->returnData.value<int>();
@@ -73,7 +73,7 @@ int Client::getRandomNumber(QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(callbackFunction);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -84,7 +84,7 @@ int Client::getRandomNumberAsync()
 {
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);
+        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
         addCall(id, call);
     }
     
@@ -103,7 +103,7 @@ int Client::getRandomNumberWithTimeout(int timeout, const QObject *obj, char *ca
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -114,7 +114,7 @@ int Client::getRandomNumberWithTimeout(int timeout)
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);
+        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
         addCall(id, call);
         call->eventLoop->exec();
         int ret = call->returnData.value<int>();
@@ -130,7 +130,7 @@ int Client::getRandomNumberWithTimeout(int timeout, const QObject *obj, const QM
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -142,7 +142,7 @@ int Client::getRandomNumberWithTimeout(int timeout, std::function<void(int)> cal
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(callbackFunction);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -155,7 +155,7 @@ int Client::getRandomNumberWithTimeout(int timeout, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     
     if(id){
-        NoronRemoteCall<int> *call = new NoronRemoteCall<int>(callbackFunction);
+        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -166,7 +166,7 @@ int Client::getRandomNumberWithTimeoutAsync(int timeout)
 {
     qlonglong id = invokeOnPeer("getRandomNumberWithTimeoutSlot", timeout);
     if(id){
-        NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);
+        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
         addCall(id, call);
     }
     
@@ -181,4 +181,4 @@ int Client::getRandomNumberWithTimeoutSlot(int timeout)
 }
 
 
-NORON_END_NAMESPACE
+NEURON_END_NAMESPACE

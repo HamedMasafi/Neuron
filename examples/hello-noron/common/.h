@@ -1,7 +1,7 @@
 #ifndef CLIENT
 #define CLIENT
 
-class Client : public NoronHub
+class Client : public NeuronHub
 {
 
 

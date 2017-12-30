@@ -12,15 +12,15 @@
 #   include <QJSValue>
 #endif
 
-#include <NoronAbstractHub>
-#include <NoronPeer>
+#include <NeuronAbstractHub>
+#include <NeuronPeer>
 #include <QPixmap>
 #include <QString>
 
 
-NORON_BEGIN_NAMESPACE
+NEURON_BEGIN_NAMESPACE
 
-class User : public NoronPeer
+class User : public NeuronPeer
 {
     Q_OBJECT
     Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged USER true)
@@ -32,7 +32,7 @@ class User : public NoronPeer
 
 public:
     Q_INVOKABLE User(QObject *parent = 0);
-    User(NoronAbstractHub *hub, QObject *parent = 0);
+    User(NeuronAbstractHub *hub, QObject *parent = 0);
     QPixmap avator();
     QString username();
 
@@ -82,6 +82,6 @@ signals:
 
 };
 
-NORON_END_NAMESPACE
+NEURON_END_NAMESPACE
 
 #endif // USER_H

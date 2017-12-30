@@ -3,14 +3,14 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 %4
-NORON_BEGIN_NAMESPACE
+NEURON_BEGIN_NAMESPACE
 
 %1::%1(QObject *parent) : %6(parent)
 {
 
 }
 
-%1::%1(NoronAbstractHub *hub, QObject *parent) : %6(parent)
+%1::%1(NeuronAbstractHub *hub, QObject *parent) : %6(parent)
 {
     if(hub){
         setHub(hub);
@@ -19,4 +19,4 @@ NORON_BEGIN_NAMESPACE
 }
 
 %2
-NORON_END_NAMESPACE
+NEURON_END_NAMESPACE

@@ -8,13 +8,13 @@
 #define NO_SLOT_CALLBACK
 #define NO_STD_FUNC
 #define NO_SLOT
-#define NORONPEER_H
+#define NEURONPEER_H
 
 #define QObject int
-#define NoronPeer
+#define NeuronPeer
 #include "../src/syntax/syntax.h"
 
-class Test : public NoronPeer
+class Test : public NeuronPeer
 {
     N_CLASS_DECLARE(Test)
 

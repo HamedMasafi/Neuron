@@ -1,10 +1,10 @@
 #ifndef CLIENT
 #define CLIENT
 
-#include <NoronPeer>
+#include <NeuronPeer>
 
 
-class Client : public NoronPeer
+class Client : public NeuronPeer
 {
     Q_OBJECT
     Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged USER true)
@@ -15,7 +15,7 @@ class Client : public NoronPeer
 
 public:
     Client(QObject *parent);
-    Client(NoronAbstractHub *hub, QObject *parent);
+    Client(NeuronAbstractHub *hub, QObject *parent);
 
 public slots:
 #ifdef QT_QML_LIB

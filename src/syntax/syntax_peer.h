@@ -11,11 +11,11 @@
 #endif
 
 #define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NoronPeer(parent) \
+        class::class(QObject *parent) : NeuronPeer(parent) \
         {  \
             setPeerName(#class); \
         }    \
-        class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
+        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronPeer(parent)    \
         {   \
             setPeerName(#class); \
             if(hub)    \

@@ -12,16 +12,16 @@
 #   include <QJSValue>
 #endif
 
-#include <NoronAbstractHub>
-#include <NoronSharedObject>
+#include <NeuronAbstractHub>
+#include <NeuronSharedObject>
 #include <QPixmap>
 #include <QVariantList>
 #include <QString>
 
 
-NORON_BEGIN_NAMESPACE
+NEURON_BEGIN_NAMESPACE
 
-class Server : public NoronSharedObject
+class Server : public NeuronSharedObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList users READ users WRITE setUsers NOTIFY usersChanged USER true)
@@ -31,7 +31,7 @@ class Server : public NoronSharedObject
 
 public:
     Q_INVOKABLE Server(QObject *parent = 0);
-    Server(NoronAbstractHub *hub, QObject *parent = 0);
+    Server(NeuronAbstractHub *hub, QObject *parent = 0);
     QVariantList users();
 
 public slots:
@@ -90,6 +90,6 @@ signals:
 
 };
 
-NORON_END_NAMESPACE
+NEURON_END_NAMESPACE
 
 #endif // SERVER_H

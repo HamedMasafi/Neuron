@@ -5,7 +5,7 @@
 
 #include "defines.h"
 
-#include <NoronClientHub>
+#include <NeuronClientHub>
 
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -16,10 +16,10 @@ ClientWindow::ClientWindow(QWidget *parent) :
     QMainWindow(parent), _resourceId(0)
 {
 
-    hub = new NoronClientHub(this);
+    hub = new NeuronClientHub(this);
     hub->setObjectName("hub");
     hub->setAutoReconnect(true);
-    hub->setValidateToken(NORON_VALIDATE_TOKEN);
+    hub->setValidateToken(NEURON_VALIDATE_TOKEN);
 
     server = new Server(hub, this);
     server->setObjectName("server");

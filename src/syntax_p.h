@@ -199,7 +199,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);    \
+//            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);    \
 //            addCall(id, call);  \
 //            call->eventLoop->exec();    \
 //            removeCall(id); \
@@ -212,7 +212,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            NoronRemoteCall<ret> *call = new NoronRemoteCall<ret>(NoronRemoteCallBase::EventLoop);    \
+//            NeuronRemoteCall<ret> *call = new NeuronRemoteCall<ret>(NeuronRemoteCallBase::EventLoop);    \
 //            addCall(id, call);  \
 //            call->eventLoop->exec();    \
 //            removeCall(id); \
@@ -239,7 +239,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            NoronRemoteCallBase *call = new NoronRemoteCallBase(NoronRemoteCallBase::EventLoop);    \
+//            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);    \
 //            addCall(id, call);  \
 //        }   \
 //    }
@@ -258,7 +258,7 @@
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
 //            QObject *target = const_cast<QObject *>(obj);   \
-//            NoronRemoteCallBase *call = new NoronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod)); \
+//            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod)); \
 //            addCall(id, call);  \
 //        }   \
 //    }
@@ -277,7 +277,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());   \
+//            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());   \
 //            addCall(id, call);  \
 //        }   \
 //    }
@@ -296,7 +296,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            NoronRemoteCallBase *call = new NoronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);  \
+//            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);  \
 //            addCall(id, call);  \
 //        }   \
 //    }
@@ -314,7 +314,7 @@
 //    {   \
 //        qlonglong id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
 //        if(id){ \
-//            /*NoronRemoteCallBase *call = new NoronRemoteCallBase(callbackFunction);  \
+//            /*NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);  \
 //            addCall(id, call);*/  \
 //        }   \
 //    }
@@ -325,12 +325,12 @@
 
 
 //#ifndef NO_SLOT
-//#ifdef NORONSHAREDOBJECT_H
+//#ifdef NEURONSHAREDOBJECT_H
 //#   define METHOD_DECL_P_SLOT(ret, name, count, sep, ...) \
-//        virtual void name##Slot(NoronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__));
+//        virtual void name##Slot(NeuronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__));
 
 //#   define METHOD_IMPL_P_SLOT(class, ret, name, count, sep, ...) \
-//    void class::name##Slot(NoronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__)) \
+//    void class::name##Slot(NeuronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__)) \
 //    {   \
 //        Q_EMIT name##Signal(senderPeer sep __PARAMNAME(count, __VA_ARGS__)); \
 //    }
@@ -355,9 +355,9 @@
 
 ////signals:
 ////  void callNumberSignal(int number);
-//#ifdef NORONSHAREDOBJECT_H
+//#ifdef NEURONSHAREDOBJECT_H
 //#   define METHOD_DECL_P_SIGNAL(ret, name, count, sep, ...) \
-//        void name##Signal(NoronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__));
+//        void name##Signal(NeuronPeer *senderPeer sep __NAMEVALUE(count, __VA_ARGS__));
 
 //#else
 //#   define METHOD_DECL_P_SIGNAL(ret, name, count, sep, ...) \
@@ -425,13 +425,13 @@
 ////Constructors
 //#define N_CLASS_DECLARE(class) \
 //    Q_INVOKABLE  class(QObject *parent = 0); \
-//    class(NoronAbstractHub *hub, QObject *parent = 0);
+//    class(NeuronAbstractHub *hub, QObject *parent = 0);
 
-//#ifdef NORONSHAREDOBJECT_H
+//#ifdef NEURONSHAREDOBJECT_H
 //#   define N_CLASS_IMPL(class) \
-//        class::class(QObject *parent) : NoronSharedObject(parent) \
+//        class::class(QObject *parent) : NeuronSharedObject(parent) \
 //        {    }    \
-//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
+//        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronSharedObject(parent)    \
 //        {   \
 //            if(hub){    \
 //                setHub(hub);    \
@@ -439,17 +439,17 @@
 //            }   \
 //        }
 //#else
-//#ifdef NORONPEER_H
+//#ifdef NEURONPEER_H
 //#   define N_CLASS_IMPL(class) \
-//        class::class(QObject *parent) : NoronPeer(parent) \
+//        class::class(QObject *parent) : NeuronPeer(parent) \
 //        {    }    \
-//        class::class(NoronAbstractHub *hub, QObject *parent) : NoronPeer(parent)    \
+//        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronPeer(parent)    \
 //        {   \
 //            if(hub)    \
 //                setHub(hub);    \
 //        }
 //#else
-//#   error "No NORONSHAREDOBJECT_H nor NORONPEER_H are defined";
+//#   error "No NEURONSHAREDOBJECT_H nor NEURONPEER_H are defined";
 //#endif
 //#endif
 

@@ -1,7 +1,7 @@
 #ifndef SYNTAX_SHAREDOBJECT_H
 #define SYNTAX_SHAREDOBJECT_H
 
-#ifdef NORON_CLIENT
+#ifdef NEURON_CLIENT
 #   include "method_slot_peer.h"
 #   include "decl_signal_peer.h"
 #else
@@ -16,11 +16,11 @@
 #endif
 
 #define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NoronSharedObject(parent) \
+        class::class(QObject *parent) : NeuronSharedObject(parent) \
         {  \
             setPeerName(#class); \
         }    \
-        class::class(NoronAbstractHub *hub, QObject *parent) : NoronSharedObject(parent)    \
+        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronSharedObject(parent)    \
         {   \
             setPeerName(#class); \
             if(hub){    \

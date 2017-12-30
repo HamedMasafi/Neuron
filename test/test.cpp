@@ -1,4 +1,4 @@
-//#define NORONPEER_H
+//#define NEURONPEER_H
 //#include "../src/syntax/syntax.h"
 #include "test.h"
 

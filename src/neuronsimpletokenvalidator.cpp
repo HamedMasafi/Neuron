@@ -1,8 +1,30 @@
+/**************************************************************************
+**
+** This file is part of Neuron.
+** https://github.com/HamedMasafi/Neuron
+**
+** Neuron is free software: you can redistribute it and/or modify
+** it under the terms of the GNU Lesser General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** Neuron is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU Lesser General Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with Neuron.  If not, see <http://www.gnu.org/licenses/>.
+**
+**************************************************************************/
+
 #include "neuronsimpletokenvalidator.h"
 
 #include <QCryptographicHash>
 
 #define MAP_TOKEN_ITEM      "_token"
+
+NEURON_BEGIN_NAMESPACE
 
 NeuronSimpleTokenValidator::NeuronSimpleTokenValidator(QObject *parent)
     : NeuronAbstractDataEncoder(parent), _validateToken(QString())
@@ -59,3 +81,5 @@ QString NeuronSimpleTokenValidator::createValidateToken(QVariantMap &map)
     return QString(QCryptographicHash::hash(data.toLocal8Bit(),
                                     QCryptographicHash::Md5).toHex());
 }
+
+NEURON_END_NAMESPACE

@@ -1,6 +1,6 @@
 QT += network
 
-DEFINES += neuron_SERVER
+DEFINES += NEURON_SERVER
 INCLUDEPATH += $$PWD/include
 
 HEADERS += \

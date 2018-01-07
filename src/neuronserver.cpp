@@ -47,6 +47,7 @@ NeuronServer::NeuronServer(QObject *parent) : NeuronAbstractHub(parent),
 
     K_REG_OBJECT(d->serverSocket);
 
+    qRegisterMetaType<NEURON_WRAP_NAMESPACE(NeuronAbstractHub::Status)>("NeuronAbstractHub::Status");
     connect(d->serverSocket, &NeuronTcpSocketServer::newIncomingConnection,
             this, &NeuronServer::server_newIncomingConnection);
 }
@@ -61,6 +62,7 @@ NeuronServer::NeuronServer(qint16 port, QObject *parent) : NeuronAbstractHub(par
 
     K_REG_OBJECT(d->serverSocket);
 
+    qRegisterMetaType<NEURON_WRAP_NAMESPACE(NeuronAbstractHub::Status)>("NeuronAbstractHub::Status");
     connect(d->serverSocket, &NeuronTcpSocketServer::newIncomingConnection,
             this, &NeuronServer::server_newIncomingConnection);
 

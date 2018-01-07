@@ -8,7 +8,7 @@
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
         if (__call_id) { \
-            NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);  \
+            NEURON_WRAP_NAMESPACE(NeuronRemoteCallBase) *call = new NEURON_WRAP_NAMESPACE(NeuronRemoteCallBase)(callbackFunction);  \
             addCall(__call_id, call);  \
         }   \
     }
@@ -18,7 +18,7 @@
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
         if (__call_id) { \
-            NeuronRemoteCall<ret> *call = new NeuronRemoteCall<ret>(callbackFunction);  \
+            NEURON_WRAP_NAMESPACE(NeuronRemoteCall)<ret> *call = new NEURON_WRAP_NAMESPACE(NeuronRemoteCall)<ret>(callbackFunction);  \
             addCall(__call_id, call);  \
         }   \
     }

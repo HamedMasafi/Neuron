@@ -201,7 +201,7 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
     if (q->inherits("NeuronServerHub") && target->inherits("NeuronSharedObject")) {
         so = qobject_cast<NeuronSharedObject*>(target);
         so->registerSender(target->thread(), peer);
-        args.prepend(Q_ARG(NeuronPeer *, peer));
+//        args.prepend(Q_ARG(NeuronPeer *, peer));
     }
 
     QString lockName = map[CLASS_NAME].toString() + "::" + methodName;

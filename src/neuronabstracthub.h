@@ -167,8 +167,8 @@ protected:
     friend class NeuronServer;
 };
 
-Q_DECLARE_METATYPE(NeuronAbstractHub::Status)
-
 NEURON_END_NAMESPACE
+
+Q_DECLARE_METATYPE(NEURON_WRAP_NAMESPACE(NeuronAbstractHub::Status))
 
 #endif // NEURONABSTRACTHUB_H

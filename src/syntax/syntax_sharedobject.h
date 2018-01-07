@@ -16,11 +16,11 @@
 #endif
 
 #define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NeuronSharedObject(parent) \
+        class::class(QObject *parent) : NEURON_WRAP_NAMESPACE(NeuronSharedObject)(parent) \
         {  \
             setPeerName(#class); \
         }    \
-        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronSharedObject(parent)    \
+        class::class(NEURON_WRAP_NAMESPACE(NeuronAbstractHub) *hub, QObject *parent) : NEURON_WRAP_NAMESPACE(NeuronSharedObject)(parent)    \
         {   \
             setPeerName(#class); \
             if(hub){    \

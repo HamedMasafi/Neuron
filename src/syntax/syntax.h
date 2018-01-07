@@ -116,7 +116,7 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 //Constructors
 #define N_CLASS_DECLARE(class) \
     Q_INVOKABLE  class(QObject *parent = 0); \
-    class(NEURON_NAMESPACE::NeuronAbstractHub *hub, QObject *parent = 0);
+    class(NEURON_WRAP_NAMESPACE(NeuronAbstractHub) *hub, QObject *parent = 0);
 
 QT_WARNING_POP
 

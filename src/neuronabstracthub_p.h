@@ -24,6 +24,7 @@
 #include <QtCore/QSet>
 
 #include <QMutex>
+#include <cstdint>
 
 #include "neuronabstracthub.h"
 #include "neuronabstractdataencoder.h"
@@ -54,17 +55,16 @@ public:
     QVariantList buffer;
     QByteArray readBuffer;
     QHash<const QString, NeuronSharedObject*> sharedObjects;
-    QMutex socketReadMutes;
+    QMutex socketReadMutex;
 
     NeuronPeer* peer;
-    QString validateToken;
     NeuronAbstractSerializer* serializer;
+    NeuronAbstractDataEncoder *encoder;
     qlonglong requestId;
     bool isTransaction;
     bool isMultiThread;
     qlonglong hubId;
     NeuronAbstractHub::Status status;
-    NeuronAbstractDataEncoder *encoder;
 
 #ifdef QT_QML_LIB
     QJSEngine *jsEngine;
@@ -75,9 +75,6 @@ public:
     void procMap(QVariantList list);
     void procMap(QVariantMap map);
     bool response(const qlonglong &id, const QString &senderName, const QVariant &returnValue);
-    QString createValidateToken(QVariantMap &map);
-    void addValidateToken(QVariantMap &map);
-    bool checkValidateToken(QVariantMap &map);
     QString MD5(const QString &text);
     QString MD5(QByteArray text);
     void sync();

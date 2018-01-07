@@ -22,6 +22,7 @@
 #include "neuronsharedobject.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QThread>
 
 #include <NeuronServer>
 
@@ -35,6 +36,21 @@ bool NeuronSharedObject::autoDelete() const
 void NeuronSharedObject::setAutoDelete(bool autoDelete)
 {
     _autoDelete = autoDelete;
+}
+
+void NeuronSharedObject::registerSender(QThread *t, NeuronPeer *peer)
+{
+    senderPeers.insert(t, peer);
+}
+
+void NeuronSharedObject::unregisterSender(QThread *t)
+{
+    senderPeers.remove(t);
+}
+
+NeuronPeer *NeuronSharedObject::senderPeer() const
+{
+    return senderPeers.value(QThread::currentThread());
 }
 
 NeuronSharedObject::NeuronSharedObject(QObject *parent) : NeuronPeer(parent),

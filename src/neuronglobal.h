@@ -72,6 +72,6 @@
         QT_DO_PRAGMA("GCC error QDataStream not included")
 
 #endif
-QT_DEPRECATED
+
 #endif // NEURONGLOBAL_H
 

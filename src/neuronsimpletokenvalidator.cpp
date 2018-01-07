@@ -4,7 +4,8 @@
 
 #define MAP_TOKEN_ITEM      "_token"
 
-NeuronSimpleTokenValidator::NeuronSimpleTokenValidator() : _validateToken(QString())
+NeuronSimpleTokenValidator::NeuronSimpleTokenValidator(QObject *parent)
+    : NeuronAbstractDataEncoder(parent), _validateToken(QString())
 {
 
 }

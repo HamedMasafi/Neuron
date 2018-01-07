@@ -63,6 +63,12 @@ public:
     bool autoDelete() const;
     void setAutoDelete(bool autoDelete);
 
+//private:
+    QMap<QThread*, NeuronPeer*> senderPeers;
+    void registerSender(QThread *t, NeuronPeer *peer);
+    void unregisterSender(QThread *t);
+    NeuronPeer *senderPeer() const;
+
 private slots:
     void hub_statusChanged(NeuronAbstractHub::Status status);
 
@@ -86,6 +92,8 @@ signals:
     void attached();
     void detached();
 #endif
+
+    friend class NeuronAbstractHub;
 };
 
 NEURON_END_NAMESPACE

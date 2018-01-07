@@ -54,7 +54,6 @@ class NEURON_EXPORT NeuronAbstractHub : public QObject
     Q_DECLARE_PRIVATE(NeuronAbstractHub)
 
     Q_PROPERTY(NeuronPeer* peer READ peer WRITE setPeer NOTIFY peerChanged)
-    Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     Q_PROPERTY(NeuronAbstractSerializer* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
     Q_PROPERTY(NeuronAbstractHub::Status status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(qlonglong hubId READ hubId WRITE setHubId NOTIFY hubIdChanged)
@@ -84,7 +83,6 @@ public:
 
     NeuronPeer* peer() const;
     bool isConnected() const;
-    QString validateToken() const;
     NeuronAbstractDataEncoder *encoder() const;
 
     bool isMultiThread() const;
@@ -97,7 +95,6 @@ public:
     void waitForConnected(int timeout = 4000);
     Q_INVOKABLE void flushSocket();
     qlonglong hubId() const;
-
 
 protected:
     QHash<qlonglong, NeuronRemoteCallBase*> _calls;
@@ -114,7 +111,6 @@ signals:
     void error();
 
     void peerChanged(NeuronPeer* peer);
-    void validateTokenChanged(QString validateToken);
     void serializerChanged(NeuronAbstractSerializer* serializer);
     void statusChanged(NeuronAbstractHub::Status status);
 #ifdef QT_QML_LIB
@@ -153,7 +149,6 @@ public slots:
     void attachSharedObject(NeuronSharedObject *o);
     void detachSharedObject(NeuronSharedObject *o);
     void setPeer(NeuronPeer* peer);
-    void setValidateToken(QString validateToken);
     void setSerializer(NeuronAbstractSerializer* serializer);
     void setEncoder(NeuronAbstractDataEncoder *encoder);
 

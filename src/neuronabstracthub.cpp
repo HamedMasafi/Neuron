@@ -23,6 +23,7 @@
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QSet>
+#include <QtCore/QThread>
 #include <QtCore/QVariant>
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QAbstractSocket>
@@ -38,6 +39,7 @@
 #include "neuronremotecall_p.h"
 #include "neuronsharedobject.h"
 #include "neuronjsonbinaryserializer.h"
+#include "neuronsimpletokenvalidator.h"
 
 #ifdef LONG_LONG_MAX
 #define MAX LONG_LONG_MAX
@@ -50,7 +52,7 @@
 NEURON_BEGIN_NAMESPACE
 
 NeuronAbstractHubPrivate::NeuronAbstractHubPrivate(NeuronAbstractHub *parent)
-    : q_ptr(parent), peer(0), validateToken(QString::null), serializer(0),
+    : q_ptr(parent), peer(0), serializer(0),
       requestId(0), isTransaction(false), isMultiThread(false), hubId(0),
       status(NeuronAbstractHub::Unconnected)
 #ifdef QT_QML_LIB
@@ -110,13 +112,7 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
                  qPrintable(map[METHOD_NAME].toString()));
         return;
     }
-    if (!q->validateToken().isNull())
-        if (!checkValidateToken(map)) {
-            qWarning("Token validation was faild! %s::%s",
-                     qPrintable(map[CLASS_NAME].toString()),
-                     qPrintable(map[METHOD_NAME].toString()));
-            return;
-        }
+
     QObject *target = 0;
 
     if (map[CLASS_NAME] == "") {
@@ -201,8 +197,12 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
     //        args << QGenericArgument(name, data);
     //    }
 
-    if (q->inherits("NeuronServerHub") && target->inherits("NeuronSharedObject"))
+    NeuronSharedObject *so = 0;
+    if (q->inherits("NeuronServerHub") && target->inherits("NeuronSharedObject")) {
+        so = qobject_cast<NeuronSharedObject*>(target);
+        so->registerSender(target->thread(), peer);
         args.prepend(Q_ARG(NeuronPeer *, peer));
+    }
 
     QString lockName = map[CLASS_NAME].toString() + "::" + methodName;
 
@@ -211,6 +211,7 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
     Qt::ConnectionType connectionType = Qt::DirectConnection;
     if (target->thread() != q->thread())
         connectionType = Qt::BlockingQueuedConnection;
+
 
     if (returnData.type() == QVariant::Invalid)
         ok = QMetaObject::invokeMethod(target, methodName.constData(),
@@ -238,6 +239,9 @@ void NeuronAbstractHubPrivate::procMap(QVariantMap map)
                                        args.value(7, QGenericArgument()),
                                        args.value(8, QGenericArgument()),
                                        args.value(9, QGenericArgument()));
+
+    if (so)
+        so->unregisterSender(target->thread());
 
     if (!ok) {
         qWarning("Invoke %s on %s faild", qPrintable(method.name()),
@@ -276,56 +280,6 @@ bool NeuronAbstractHubPrivate::response(const qlonglong &id,
     int res = q->socket->write(q->serializer()->serialize(map));
 
     return 0 != res;
-}
-
-QString NeuronAbstractHubPrivate::createValidateToken(QVariantMap &map)
-{
-    Q_Q(NeuronAbstractHub);
-
-    QString s = "";
-    QMapIterator<QString, QVariant> i(map);
-    while (i.hasNext()) {
-        i.next();
-
-        QMetaType t(i.value().userType());
-
-        bool ok;
-        if (t.flags() & QMetaType::PointerToQObject)
-            s.append(i.key() + ": " + i.value().typeName() + "*");
-        else if (t.flags() & QMetaType::IsEnumeration)
-            s.append(i.key() + ": " + i.value().toInt(&ok) + "*");
-        else
-            s.append(i.key() + ": " + i.value().toString() + "*");
-    }
-
-    return MD5(s + q->validateToken());
-}
-
-void NeuronAbstractHubPrivate::addValidateToken(QVariantMap &map)
-{
-    map.insert(MAP_TOKEN_ITEM, QVariant(""));
-    map.insert(MAP_TOKEN_ITEM, createValidateToken(map));
-}
-
-bool NeuronAbstractHubPrivate::checkValidateToken(QVariantMap &map)
-{
-    QString token = map.value(MAP_TOKEN_ITEM).toString();
-    map.insert(MAP_TOKEN_ITEM, QVariant(""));
-
-    QString validateToken = createValidateToken(map);
-
-    return token == validateToken;
-}
-
-QString NeuronAbstractHubPrivate::MD5(const QString &text)
-{
-    return MD5(text.toLocal8Bit());
-}
-
-QString NeuronAbstractHubPrivate::MD5(QByteArray text)
-{
-    return QString(
-        QCryptographicHash::hash(text, QCryptographicHash::Md5).toHex());
 }
 
 void NeuronAbstractHubPrivate::sync()
@@ -421,12 +375,6 @@ bool NeuronAbstractHub::isConnected() const
 {
     Q_D(const NeuronAbstractHub);
     return d->status == Connected;
-}
-
-QString NeuronAbstractHub::validateToken() const
-{
-    Q_D(const NeuronAbstractHub);
-    return d->validateToken;
 }
 
 NeuronAbstractSerializer *NeuronAbstractHub::serializer() const
@@ -708,8 +656,6 @@ qlonglong NeuronAbstractHub::invokeOnPeer(QString sender, QString methodName,
     d->addToMap(&map, val9, 9);
 
     d->encoder->encrypt(map);
-    if (!validateToken().isNull())
-        d->addValidateToken(map);
 
     if (d->isTransaction) {
         bufferMutex.lock();
@@ -732,17 +678,6 @@ void NeuronAbstractHub::setPeer(NeuronPeer *peer)
     d->peer = peer;
     d->sync();
     emit peerChanged(peer);
-}
-
-void NeuronAbstractHub::setValidateToken(QString validateToken)
-{
-    Q_D(NeuronAbstractHub);
-
-    if (d->validateToken == validateToken)
-        return;
-
-    d->validateToken = validateToken;
-    emit validateTokenChanged(validateToken);
 }
 
 void NeuronAbstractHub::setSerializer(NeuronAbstractSerializer *serializer)

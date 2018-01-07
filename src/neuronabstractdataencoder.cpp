@@ -1,6 +1,6 @@
 #include "neuronabstractdataencoder.h"
 
-NeuronAbstractDataEncoder::NeuronAbstractDataEncoder()
+NeuronAbstractDataEncoder::NeuronAbstractDataEncoder(QObject *parent) : QObject(parent)
 {
 
 }

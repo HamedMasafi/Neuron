@@ -266,7 +266,7 @@ void NeuronServer::server_newIncomingConnection(qintptr socketDescriptor)
     }
 
     hub->setSerializer(serializer());
-    hub->setValidateToken(validateToken());
+    hub->setEncoder(encoder());
     K_TRACE_DEBUG;
 
     initalizeMutex.unlock();

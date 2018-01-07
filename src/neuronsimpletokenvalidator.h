@@ -5,9 +5,11 @@
 
 class NeuronSimpleTokenValidator : public NeuronAbstractDataEncoder
 {
+    Q_OBJECT
+
     QString _validateToken;
 public:
-    NeuronSimpleTokenValidator();
+    NeuronSimpleTokenValidator(QObject *parent = Q_NULLPTR);
 
 public:
     void encrypt(QVariantMap &map);

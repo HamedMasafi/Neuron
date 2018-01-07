@@ -76,7 +76,7 @@ void NeuronSharedObject::attachHub(NeuronAbstractHub *hub)
         hubAdded(hub);
         sync(hub);
 
-        qRegisterMetaType<NEURON_WRAP_NAMESPACE(NeuronAbstractHub::Status)>();
+        qRegisterMetaType<NEURON_WRAP_NAMESPACE(NeuronAbstractHub::Status)>("NeuronAbstractHub::Status");
         connect(hub, &NeuronAbstractHub::statusChanged,
                 this, &NeuronSharedObject::hub_statusChanged);
 //    }

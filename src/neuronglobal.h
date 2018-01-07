@@ -28,7 +28,7 @@
 #define NEURON_VERSION 0x000100
 #define NEURON_VERSION_STR "0.1.0"
 
-//#define NEURON_NAMESPACE Neuron
+#define NEURON_NAMESPACE Neuron
 #ifdef NEURON_NAMESPACE
 #   define NEURON_BEGIN_NAMESPACE     namespace NEURON_NAMESPACE {
 #   define NEURON_END_NAMESPACE       }

@@ -312,7 +312,7 @@ void NeuronAbstractHubPrivate::sync()
 NeuronAbstractHub::NeuronAbstractHub(QObject *parent)
     : QObject(parent), d_ptr(new NeuronAbstractHubPrivate(this))
 {
-    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
+    qRegisterMetaType<Status>("Neuron::NeuronAbstractHub::Status");
 
     socket = new QTcpSocket(this);
     K_REG_OBJECT(socket);
@@ -332,7 +332,7 @@ NeuronAbstractHub::NeuronAbstractHub(NeuronAbstractSerializer *serializer,
                                    QObject *parent)
     : QObject(parent), d_ptr(new NeuronAbstractHubPrivate(this))
 {
-    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
+    qRegisterMetaType<Status>("Neuron::NeuronAbstractHub::Status");
 
     socket = new QTcpSocket(this);
     K_REG_OBJECT(socket);

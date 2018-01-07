@@ -42,7 +42,7 @@ NeuronClientHubPrivate::NeuronClientHubPrivate(NeuronClientHub *parent) : q_ptr(
 NeuronClientHub::NeuronClientHub(QObject *parent) : NeuronAbstractHub(parent),
     d_ptr(new NeuronClientHubPrivate(this))
 {
-    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
+//    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
     connect(this, &NeuronAbstractHub::statusChanged, this, &NeuronClientHub::onStatusChanged);
 }
 
@@ -52,7 +52,7 @@ NeuronClientHub::NeuronClientHub(QQmlEngine *qmlEngine, QJSEngine *engine, QObje
 {
     setJsEngine(engine);
     setQmlEngine(qmlEngine);
-    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
+//    qRegisterMetaType<Status>("NeuronAbstractHub::Status");
     connect(this, &NeuronAbstractHub::statusChanged, this, &NeuronClientHub::onStatusChanged);
 }
 #endif

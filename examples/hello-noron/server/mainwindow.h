@@ -3,14 +3,14 @@
 
 #include "ui_mainwindow.h"
 
-class NeuronServer;
-class NeuronPeer;
+class Server;
+class Peer;
 class Client;
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
-    NeuronServer *serverManager;
+    Server *serverManager;
     Client *client;
 
 public:
@@ -20,8 +20,8 @@ protected:
     void changeEvent(QEvent *e);
 
 public slots:
-    void on_serverManager_peerConnected(NeuronPeer *peer);
-    void on_serverManager_peerDisconnected(NeuronPeer *peer);
+    void on_serverManager_peerConnected(Peer *peer);
+    void on_serverManager_peerDisconnected(Peer *peer);
 
 };
 

@@ -5,8 +5,8 @@
 # 1 "<command-line>" 2
 # 1 "test.h"
 # 13 "test.h"
-# 1 "../include/neuron.h" 1
+# 1 "../include/.h" 1
 
-# 1 "../include/../src/neuronjsonbinaryserializer.h" 1
-# 24 "../include/../src/neuronjsonbinaryserializer.h"
-# 1 "../include/../src/neuronglobal.h" 1
+# 1 "../include/../src/jsonbinaryserializer.h" 1
+# 24 "../include/../src/jsonbinaryserializer.h"
+# 1 "../include/../src/global.h" 1

@@ -12,8 +12,8 @@
 #   include <QJSValue>
 #endif
 
-#include <NeuronAbstractHub>
-#include <NeuronSharedObject>
+#include <AbstractHub>
+#include <SharedObject>
 #include <QPixmap>
 #include <QVariantList>
 #include <QString>
@@ -21,7 +21,7 @@
 
 NEURON_BEGIN_NAMESPACE
 
-class Server : public NeuronSharedObject
+class Server : public SharedObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList users READ users WRITE setUsers NOTIFY usersChanged USER true)
@@ -31,7 +31,7 @@ class Server : public NeuronSharedObject
 
 public:
     Q_INVOKABLE Server(QObject *parent = 0);
-    Server(NeuronAbstractHub *hub, QObject *parent = 0);
+    Server(AbstractHub *hub, QObject *parent = 0);
     QVariantList users();
 
 public slots:

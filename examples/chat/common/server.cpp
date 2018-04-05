@@ -5,12 +5,12 @@
 
 NEURON_BEGIN_NAMESPACE
 
-Server::Server(QObject *parent) : NeuronSharedObject(parent)
+Server::Server(QObject *parent) : SharedObject(parent)
 {
 
 }
 
-Server::Server(NeuronAbstractHub *hub, QObject *parent) : NeuronSharedObject(hub, parent)
+Server::Server(AbstractHub *hub, QObject *parent) : SharedObject(hub, parent)
 {
     setHub(hub);
     hub->addSharedObject(this);
@@ -27,7 +27,7 @@ void Server::broadcastMessage(QString message, const QObject *obj, char *callbac
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -39,7 +39,7 @@ void Server::broadcastMessage(QString message, const QObject *obj, const QMetaMe
     
     if(id){
         QObject *target = const_cast<QObject *>(obj);
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -51,7 +51,7 @@ void Server::broadcastMessage(QString message, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -64,7 +64,7 @@ void Server::broadcastMessage(QString message, std::function<void(void)> callbac
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
         addCall(id, call);
     }
     
@@ -76,7 +76,7 @@ void Server::broadcastMessage(QString message)
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-    	NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
     	addCall(id, call);
     	call->eventLoop->exec();
     	removeCall(id);
@@ -89,7 +89,7 @@ void Server::broadcastMessageAsync(QString message)
     qlonglong id = invokeOnPeer("broadcastMessageSlot", message);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
     }
     
@@ -107,7 +107,7 @@ void Server::imageSent(QString username, QPixmap image, QJSValue callbackFunctio
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -119,7 +119,7 @@ void Server::imageSent(QString username, QPixmap image, const QObject *obj, char
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -130,7 +130,7 @@ void Server::imageSent(QString username, QPixmap image)
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-    	NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
     	addCall(id, call);
     	call->eventLoop->exec();
     	removeCall(id);
@@ -144,7 +144,7 @@ void Server::imageSent(QString username, QPixmap image, const QObject *obj, cons
     
     if(id){
         QObject *target = const_cast<QObject *>(obj);
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -156,7 +156,7 @@ void Server::imageSent(QString username, QPixmap image, std::function<void(void)
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
         addCall(id, call);
     }
     
@@ -168,7 +168,7 @@ void Server::imageSentAsync(QString username, QPixmap image)
     qlonglong id = invokeOnPeer("imageSentSlot", username,image);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
     }
     
@@ -194,7 +194,7 @@ void Server::userJoined(QString username, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -206,7 +206,7 @@ void Server::userJoined(QString username, const QObject *obj, char *callbackSlot
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -218,7 +218,7 @@ void Server::userJoined(QString username, const QObject *obj, const QMetaMethod 
     
     if(id){
         QObject *target = const_cast<QObject *>(obj);
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -229,7 +229,7 @@ void Server::userJoined(QString username)
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-    	NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
     	addCall(id, call);
     	call->eventLoop->exec();
     	removeCall(id);
@@ -243,7 +243,7 @@ void Server::userJoined(QString username, std::function<void(void)> callbackFunc
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
         addCall(id, call);
     }
     
@@ -255,7 +255,7 @@ void Server::userJoinedAsync(QString username)
     qlonglong id = invokeOnPeer("userJoinedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
     }
     
@@ -273,7 +273,7 @@ void Server::userLeaved(QString username, std::function<void(void)> callbackFunc
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction);
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction);
         addCall(id, call);
     }
     
@@ -286,7 +286,7 @@ void Server::userLeaved(QString username, QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
+        RemoteCallBase *call = new RemoteCallBase(callbackFunction, hub()->qmlEngine(), hub()->jsEngine());
         addCall(id, call);
     }
     
@@ -299,7 +299,7 @@ void Server::userLeaved(QString username, const QObject *obj, const QMetaMethod 
     
     if(id){
         QObject *target = const_cast<QObject *>(obj);
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -310,7 +310,7 @@ void Server::userLeaved(QString username, const QObject *obj, char *callbackSlot
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
+        RemoteCallBase *call = new RemoteCallBase(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -321,7 +321,7 @@ void Server::userLeaved(QString username)
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-    	NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+    	RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
     	addCall(id, call);
     	call->eventLoop->exec();
     	removeCall(id);
@@ -334,7 +334,7 @@ void Server::userLeavedAsync(QString username)
     qlonglong id = invokeOnPeer("userLeavedSlot", username);
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
     }
     

@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QtQml>
 
-#include <NeuronClientHub>
-#include <NeuronPeer>
+#include <ClientHub>
+#include <Peer>
 
 #include "user.h"
 #include "server.h"
@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    qmlRegisterType<NeuronClientHub>("Tooj.RPC", 1, 0, "Hub");
-    qmlRegisterType<NeuronPeer>("Tooj.RPC", 1, 0, "Peer");
+    qmlRegisterType<ClientHub>("Tooj.RPC", 1, 0, "Hub");
+    qmlRegisterType<Peer>("Tooj.RPC", 1, 0, "Peer");
     qmlRegisterType<User>("Tooj.RPC", 1, 0, "User");
     qmlRegisterType<Server>("Tooj.RPC", 1, 0, "Server");
     qmlRegisterType<Pixmap>("Tooj.RPC", 1, 0, "Pixmap");

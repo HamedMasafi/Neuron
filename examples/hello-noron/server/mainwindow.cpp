@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
-#include <NeuronPeer>
-#include <NeuronServer>
+#include <Peer>
+#include <Server>
 
 #include "client.h"
 #include "defines.h"
@@ -9,11 +9,11 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    serverManager = new NeuronServer(PORT, this);
+    serverManager = new Server(PORT, this);
     serverManager->setObjectName("serverManager");
     serverManager->registerType<Client*>();
 //    serverManager->setValidateToken(NEURON_VALIDATE_TOKEN);
-    serverManager->setServerType(NeuronServer::SingleThread);
+    serverManager->setServerType(Server::SingleThread);
 
     setupUi(this);
 }
@@ -30,7 +30,7 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
-void MainWindow::on_serverManager_peerConnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerConnected(Peer *peer)
 {
     Client *client = qobject_cast<Client*>(peer);
 
@@ -39,15 +39,15 @@ void MainWindow::on_serverManager_peerConnected(NeuronPeer *peer)
     });
 
     listWidgetOnlineUsers->clear();
-    foreach (NeuronPeer *p, serverManager->peers())
+    foreach (Peer *p, serverManager->peers())
         listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
 }
 
-void MainWindow::on_serverManager_peerDisconnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerDisconnected(Peer *peer)
 {
     Q_UNUSED(peer);
 
     listWidgetOnlineUsers->clear();
-    foreach (NeuronPeer *p, serverManager->peers())
+    foreach (Peer *p, serverManager->peers())
         listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
 }

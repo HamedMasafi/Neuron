@@ -37,6 +37,6 @@ win32:{
 
 DESTDIR     = $$PWD/lib/$$PLATFORM$$ARCH/$${BUILD}
 
-include(neuron.pri)
+include(.pri)
 
 DISTFILES +=

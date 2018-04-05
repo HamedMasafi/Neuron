@@ -2,7 +2,7 @@ import qbs
 
 Product {
     type: "staticlibrary"
-    name: "neuron"
+    name: ""
     property string peerType: ""
     Depends { name: "cpp" }
     Depends { name: "Qt.core" }
@@ -25,18 +25,18 @@ Product {
     }
 
     files: [
-        "src/neuronabstracthub.cpp",
-        "src/neuronabstractserializer.cpp",
-        "src/neuronjsonbinaryserializer.cpp",
-        "src/neuronremotecall.cpp",
-        "src/neuronclienthub.cpp",
-        "src/neuronserverhub.cpp",
-        "src/neuronserver.cpp",
-        "src/neurontcpsocketserver.cpp",
-        "src/neuronsharedobject.cpp",
-        "src/neuronpeer.cpp",
-        "src/neuronserverthread.cpp",
-        "src/neuronabstractdataencoder.cpp",
-        "src/neuronsimpletokenvalidator.cpp"
+        "src/abstracthub.cpp",
+        "src/abstractserializer.cpp",
+        "src/jsonbinaryserializer.cpp",
+        "src/remotecall.cpp",
+        "src/clienthub.cpp",
+        "src/serverhub.cpp",
+        "src/server.cpp",
+        "src/tcpsocketserver.cpp",
+        "src/sharedobject.cpp",
+        "src/peer.cpp",
+        "src/serverthread.cpp",
+        "src/abstractdataencoder.cpp",
+        "src/simpletokenvalidator.cpp"
     ]
 }

@@ -12,7 +12,7 @@
 #   include <QJSValue>
 #endif
 
-#include <NeuronAbstractHub>
+#include <AbstractHub>
 #include <%6>
 %4
 
@@ -25,7 +25,7 @@ class %1 : public %6
 
 public:
     Q_INVOKABLE %1(QObject *parent = 0);
-    %1(NeuronAbstractHub *hub, QObject *parent = 0);
+    %1(AbstractHub *hub, QObject *parent = 0);
 %2
 };
 

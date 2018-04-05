@@ -5,14 +5,14 @@
 
 class User;
 class Server;
-class NeuronClientHub;
+class ClientHub;
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
     User *user;
     Server *server;
-    NeuronClientHub *hub;
+    ClientHub *hub;
     qint32 _resourceId;
 
 public:

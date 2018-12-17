@@ -31,6 +31,7 @@
 #include "abstracthub.h"
 #include "global.h"
 #include "remotecall_p.h"
+#include "call.h"
 
 NEURON_BEGIN_NAMESPACE
 

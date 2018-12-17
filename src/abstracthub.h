@@ -44,7 +44,7 @@ class Peer;
 class AbstractHubPrivate;
 class AbstractSerializer;
 class SharedObject;
-class RemoteCallBase;
+class AbstractCall;
 class AbstractDataEncoder;
 class NEURON_EXPORT AbstractHub : public QObject
 {
@@ -97,7 +97,7 @@ public:
     qlonglong hubId() const;
 
 protected:
-    QHash<qlonglong, RemoteCallBase*> _calls;
+    QHash<qlonglong, AbstractCall*> _calls;
     QTcpSocket *socket;
     Q_INVOKABLE void setHubId(qlonglong id);
 

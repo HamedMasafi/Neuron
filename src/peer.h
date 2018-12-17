@@ -30,13 +30,13 @@
 
 #include "abstracthub.h"
 #include "global.h"
-#include "remotecall_p.h"
 #include "call.h"
 
 NEURON_BEGIN_NAMESPACE
 
 class AbstractHub;
 class RemoteCallBase;
+class AbstractCall;
 class NEURON_EXPORT Peer : public QObject
 {
     Q_OBJECT
@@ -68,7 +68,7 @@ public:
 
 protected:
     AbstractHub* m_hub;
-    void addCall(qlonglong id, RemoteCallBase *call);
+    void addCall(qlonglong id, AbstractCall *call);
     void removeCall(qlonglong id);
     void setPeerName(const QString &name);
 

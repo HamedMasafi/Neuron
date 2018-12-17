@@ -96,7 +96,7 @@ const QString Peer::peerName() const
     return _peerName;
 }
 
-void Peer::addCall(qlonglong id, RemoteCallBase *call)
+void Peer::addCall(qlonglong id, AbstractCall *call)
 {
     hub()->_calls.insert(id, call);
 }
@@ -122,11 +122,15 @@ void Peer::setHub(AbstractHub *hub)
     if (m_hub == hub)
         return;
 
+    if (m_hub) {
+        disconnect(m_hub, &AbstractHub::disconnected,
+                   this, &Peer::hub_disconnected);
+    }
     m_hub = hub;
 
     if (hub) {
-        connect(hub, &AbstractHub::disconnected, this,
-                &Peer::hub_disconnected);
+        connect(hub, &AbstractHub::disconnected,
+                this, &Peer::hub_disconnected);
 
         SharedObject *so = qobject_cast<SharedObject *>(this);
 

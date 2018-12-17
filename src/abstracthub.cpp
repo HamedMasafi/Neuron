@@ -20,6 +20,7 @@
 
 #include <Server>
 #include <QTimer>
+#include <QMetaMethod>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QSet>
@@ -36,7 +37,7 @@
 #include "abstracthub_p.h"
 #include "abstracthub.h"
 #include "abstractserializer.h"
-#include "remotecall_p.h"
+#include "call.h"
 #include "sharedobject.h"
 #include "jsonbinaryserializer.h"
 #include "simpletokenvalidator.h"
@@ -97,8 +98,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 
     if (map[MAP_TYPE] == MAP_TYPE_RESPONSE) {
         if (q->_calls[id]) {
-            q->_calls[id]->returnData = map[MAP_RETURN_VALUE];
-            q->_calls[id]->returnToCaller();
+            q->_calls[id]->value = map[MAP_RETURN_VALUE];
+            q->_calls[id]->finish();
             // TODO flowing two lines must be test
             delete q->_calls[id];
             q->_calls.remove(id);

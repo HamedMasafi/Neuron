@@ -24,6 +24,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QThread>
 
+#include <QMetaProperty>
 #include <Server>
 
 NEURON_BEGIN_NAMESPACE

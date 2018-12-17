@@ -52,10 +52,10 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 
 #define __REMOTE_METHOD_DECL_P3(ret, name, count, oe, ...) \
     public Q_SLOTS: \
-    METHOD_DECL_P_NORMAL        (ret, name, count, __SEP(count), __VA_ARGS__) \
+    NEURON_WRAP_NAMESPACE(Call)<ret> *name(__NAMEVALUE(count, __VA_ARGS__)); \
     METHOD_DECL_P_SLOT          (ret, name, count, __SEP(count), __VA_ARGS__) \
     Q_SIGNALS: \
-    METHOD_DECL_P_SIGNAL_##oe   (ret, name, count, __SEP(count), __VA_ARGS__) \
+    METHOD_DECL_P_SIGNAL_##oe   (ret, name, count, __SEP(count), __VA_ARGS__)
 //    public: \
 //    METHOD_DECL_P_META_METHOD   (ret, name, count, __SEP(count), __VA_ARGS__) \
 //    METHOD_DECL_P_QML_CALLBACK  (ret, name, count, __SEP(count), __VA_ARGS__) \

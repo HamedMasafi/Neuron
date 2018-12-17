@@ -216,11 +216,25 @@ void ClientHub::hi(qlonglong hubId)
 
 void ClientHub::beginConnection()
 {
+    Q_D(ClientHub);
     qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", QVariant::fromValue(hubId()));
 
     if(__call_id){
-        RemoteCall<qlonglong> *call = new RemoteCall<qlonglong>(this, (char*)"hi");
-       // addCall(__call_id, call);
+        Call<qlonglong> *call = new Call<qlonglong>(this);
+        call->then([=](qlonglong hubId){
+            setStatus(Connected);
+            if (hubId == this->hubId()){
+                //reconnected
+                emit reconnected();
+            }else{
+            }
+
+            if(d->connectionEventLoop){
+                d->connectionEventLoop->exit();
+                d->connectionEventLoop->deleteLater();
+            }
+        });
+//        addCall(__call_id, call);
         _calls.insert(__call_id, call);
     }
 }

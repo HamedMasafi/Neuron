@@ -29,11 +29,14 @@
 #define NEURON_VERSION_STR "0.1.0"
 
 #define NEURON_NAMESPACE Neuron
+
 #ifdef NEURON_NAMESPACE
+#   define NEURON_NAMESPACE_STR QT_STRINGIFY(NEURON_NAMESPACE)
 #   define NEURON_BEGIN_NAMESPACE     namespace NEURON_NAMESPACE {
 #   define NEURON_END_NAMESPACE       }
 #   define NEURON_WRAP_NAMESPACE(x)   NEURON_NAMESPACE::x
 #else
+#   define NEURON_NAMESPACE_STR
 #   define NEURON_BEGIN_NAMESPACE
 #   define NEURON_END_NAMESPACE
 #   define NEURON_WRAP_NAMESPACE(x)   x
@@ -63,7 +66,7 @@
         { \
             qint32 n; \
             s >> n; \
-            type = (ENUM)n; \
+            type = static_cast<ENUM>(n); \
             return s; \
         }; \
         QDataStream& operator<< (QDataStream& s, const ENUM& type) \

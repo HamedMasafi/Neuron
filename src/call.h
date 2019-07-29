@@ -2,6 +2,7 @@
 #define CALL_H
 
 #include "abstractcall.h"
+#include <QDebug>
 
 NEURON_BEGIN_NAMESPACE
 
@@ -35,8 +36,17 @@ protected:
             callbackFunction(value.value<T>());
 
 #ifdef QT_QML_LIB
-        if (jsvalue.isCallable())
-            jsvalue.call();
+        if (jsvalue.isCallable()) {
+            qDebug() << "Value is" << value;
+            QJSValueList args;
+            args.append(toJsValue(value));
+            QJSValue callResult = jsvalue.call(args);
+            if(callResult.isError())
+                qWarning("Uncaught exception at line n; message = %s",
+    //                         //qPrintable(callResult.property("fileName").toString()),
+    //                         callResult.property("lineNumber").toInt(),
+                         qPrintable(callResult.toString()));
+        }
 #endif
     }
 };
@@ -72,16 +82,9 @@ protected:
             callbackFunction();
 
 #ifdef QT_QML_LIB
-        if (jsvalue.isCallable()) {
-            QJSValueList args;
-            args.append(toJsValue(value));
-            QJSValue callResult = jsvalue.call(args);
-            if(callResult.isError())
-                qWarning("Uncaught exception at line n; message = %s",
-    //                         //qPrintable(callResult.property("fileName").toString()),
-    //                         callResult.property("lineNumber").toInt(),
-                         qPrintable(callResult.toString()));
-        }
+
+        if (jsvalue.isCallable())
+            jsvalue.call();
 #endif
     }
 };

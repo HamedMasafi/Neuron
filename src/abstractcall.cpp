@@ -2,8 +2,8 @@
 
 NEURON_BEGIN_NAMESPACE
 
-AbstractCall::AbstractCall(QObject *parent)// : QObject(parent)
-  : eventLoop(nullptr)
+AbstractCall::AbstractCall(QObject *parent) : QObject(parent)
+  , eventLoop(nullptr)
 {
 
 }
@@ -78,7 +78,7 @@ QJSValue AbstractCall::toJsValue(QVariantList list)
 {
     QJSValue param1 = jsEngine->newArray(list.length());
 
-    int i = 0;
+    quint32 i = 0;
     foreach (QVariant var, list)
         param1.setProperty(i++, toJsValue(var));
 

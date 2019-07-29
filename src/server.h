@@ -41,8 +41,8 @@ class NEURON_EXPORT Server : public AbstractHub
     Q_PROPERTY(quint32 reconnectTimeout READ reconnectTimeout WRITE setReconnectTimeout NOTIFY reconnectTimeoutChanged)
 
 public:
-    explicit Server(QObject *parent = 0);
-    explicit Server(qint16 port, QObject *parent = 0);
+    explicit Server(QObject *parent = nullptr);
+    explicit Server(qint16 port, QObject *parent = nullptr);
     virtual ~Server();
 
     enum ServerType{

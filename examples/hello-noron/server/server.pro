@@ -1,20 +1,23 @@
 TEMPLATE = app
 QT += widgets
 INCLUDEPATH += $$PWD/../common
+INCLUDEPATH += ../../../include
 
 CONFIG += C++11
-include(../../../noron.pri)
+include(../../../neuron.pri)
+
+DEFINES += NEURON_SERVER
 
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    ../common/client.cpp
+    ../common/abstractclient.cpp
 
 FORMS += \
     mainwindow.ui
 
 HEADERS += \
     mainwindow.h \
-    ../common/client.h \
+    ../common/abstractclient.h \
     ../common/defines.h
 

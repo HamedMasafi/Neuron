@@ -98,10 +98,15 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 
     if (map[MAP_TYPE] == MAP_TYPE_RESPONSE) {
         if (q->_calls[id]) {
-            q->_calls[id]->value = map[MAP_RETURN_VALUE];
-            q->_calls[id]->finish();
+            AbstractCall *call = q->_calls[id];
+            call->value = map[MAP_RETURN_VALUE];
+#ifdef QT_QML_LIB
+            call->jsEngine = q->jsEngine();
+            call->qmlEngine = q->qmlEngine();
+#endif
+            call->finish();
             // TODO flowing two lines must be test
-            delete q->_calls[id];
+            call->deleteLater();
             q->_calls.remove(id);
         }
         return;
@@ -114,7 +119,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
         return;
     }
 
-    QObject *target = 0;
+    QObject *target = nullptr;
 
     if (map[CLASS_NAME] == "") {
         qDebug() << map;
@@ -125,6 +130,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     } else {
         target = sharedObjects.value(map[CLASS_NAME].toString());
 
+        qDebug() << ":::" << peer << target << map[CLASS_NAME] << peer->peerName();
         if (peer && !target && map[CLASS_NAME] == peer->peerName())
             target = peer;
     }
@@ -200,11 +206,11 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 
     SharedObject *so = 0;
     qDebug() << "*******"
-             << q->inherits("ServerHub")
-             << target->inherits("SharedObject")
+             << q->inherits(NEURON_NAMESPACE_STR "::ServerHub")
+             << target->inherits(NEURON_NAMESPACE_STR "::SharedObject")
              << q << target;
 
-    if (q->inherits("::ServerHub") && target->inherits("::SharedObject")) {
+    if (q->inherits(NEURON_NAMESPACE_STR "::ServerHub") && target->inherits(NEURON_NAMESPACE_STR "::SharedObject")) {
         so = qobject_cast<SharedObject*>(target);
         so->registerSender(target->thread(), peer);
 //        args.prepend(Q_ARG(Peer *, peer));

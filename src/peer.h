@@ -45,8 +45,8 @@ class NEURON_EXPORT Peer : public QObject
     QString _peerName;
 
 public:
-    explicit Peer(QObject *parent = 0);
-    Peer(AbstractHub *hub, QObject *parent = 0);
+    explicit Peer(QObject *parent = nullptr);
+    Peer(AbstractHub *hub, QObject *parent = nullptr);
     virtual ~Peer();
 
     AbstractHub* hub() const;

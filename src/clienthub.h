@@ -45,7 +45,7 @@ class NEURON_EXPORT ClientHub : public AbstractHub
     Q_PROPERTY(bool isAutoReconnect READ isAutoReconnect WRITE setAutoReconnect NOTIFY isAutoReconnectChanged)
 
 public:
-    ClientHub(QObject *parent = 0);
+    ClientHub(QObject *parent = nullptr);
 #ifdef QT_QML_LIB
     ClientHub(QQmlEngine *qmlEngine, QJSEngine *jsEngine, QObject *parent = 0);
 #endif
@@ -66,7 +66,7 @@ protected:
 
 public slots:
     void connectToHost(bool waitForConnected);
-    void connectToHost(QString address = QString::null, quint16 port = 0, bool waitForConnected = false);
+    void connectToHost(QString address = QString(), quint16 port = 0, bool waitForConnected = false);
     void disconnectFromHost();
     void setServerAddress(QString serverAddress);
     void setPort(quint16 port);

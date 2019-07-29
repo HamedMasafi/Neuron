@@ -32,6 +32,12 @@ SimpleTokenValidator::SimpleTokenValidator(QObject *parent)
 
 }
 
+SimpleTokenValidator::SimpleTokenValidator(const QString &token, QObject *parent)
+    : AbstractDataEncoder(parent), _validateToken(token)
+{
+
+}
+
 QString SimpleTokenValidator::validateToken() const
 {
     return _validateToken;

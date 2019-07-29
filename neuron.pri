@@ -8,7 +8,8 @@ HEADERS += \
     $$PWD/src/abstracthub_p.h \
     $$PWD/src/abstractserializer.h \
     $$PWD/src/jsonbinaryserializer.h \
-    $$PWD/src/remotecall_p.h \
+    $$PWD/src/call.h \
+    $$PWD/src/abstractcall.h \
     $$PWD/src/clienthub.h \
     $$PWD/src/clienthub_p.h \
     $$PWD/src/serverhub.h \
@@ -39,7 +40,8 @@ SOURCES += \
     $$PWD/src/abstracthub.cpp \
     $$PWD/src/abstractserializer.cpp \
     $$PWD/src/jsonbinaryserializer.cpp \
-    $$PWD/src/remotecall.cpp \
+    $$PWD/src/call.cpp \
+    $$PWD/src/abstractcall.cpp \
     $$PWD/src/clienthub.cpp \
     $$PWD/src/serverhub.cpp \
     $$PWD/src/server.cpp \

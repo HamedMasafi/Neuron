@@ -2,19 +2,24 @@
 
 #include <Peer>
 #include <Server>
+#include <SimpleTokenValidator>
 
-#include "client.h"
+#include "abstractclient.h"
 #include "defines.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    serverManager = new Server(PORT, this);
+    qRegisterMetaType<AbstractClient*>();
+    serverManager = new Neuron::Server(this);
     serverManager->setObjectName("serverManager");
-    serverManager->registerType<Client*>();
-//    serverManager->setValidateToken(NEURON_VALIDATE_TOKEN);
-    serverManager->setServerType(Server::SingleThread);
+    serverManager->registerType<AbstractClient*>();
+    serverManager->setEncoder(new Neuron::SimpleTokenValidator(NEURON_VALIDATE_TOKEN));
+    serverManager->setServerType(Neuron::Server::MultiThread);
 
+    serverManager->startServer(PORT);
+
+    connect(serverManager, &Neuron::Server::peerConnected, this, &MainWindow::on_serverManager_peerConnected);
     setupUi(this);
 }
 
@@ -30,24 +35,26 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
-void MainWindow::on_serverManager_peerConnected(Peer *peer)
+void MainWindow::on_serverManager_peerConnected(Neuron::Peer *peer)
 {
-    Client *client = qobject_cast<Client*>(peer);
+    qDebug() << Q_FUNC_INFO;
+    AbstractClient *client = qobject_cast<AbstractClient*>(peer);
 
-    connect(client, &Client::getRandomNumberSignal, [=] {
-
+    connect(client, &AbstractClient::getRandomNumberSignal, [=] (int &r){
+        r = 4;
     });
 
     listWidgetOnlineUsers->clear();
-    foreach (Peer *p, serverManager->peers())
-        listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
+    foreach (Neuron::Peer *p, serverManager->peers())
+        listWidgetOnlineUsers->addItem(qobject_cast<AbstractClient*>(p)->username());
 }
 
-void MainWindow::on_serverManager_peerDisconnected(Peer *peer)
+void MainWindow::on_serverManager_peerDisconnected(Neuron::Peer *peer)
 {
+    qDebug() << Q_FUNC_INFO;
     Q_UNUSED(peer);
 
     listWidgetOnlineUsers->clear();
-    foreach (Peer *p, serverManager->peers())
-        listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
+    foreach (Neuron::Peer *p, serverManager->peers())
+        listWidgetOnlineUsers->addItem(qobject_cast<AbstractClient*>(p)->username());
 }

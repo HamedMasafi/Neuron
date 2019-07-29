@@ -14,9 +14,9 @@
 
 NEURON_BEGIN_NAMESPACE
 
-class AbstractCall //: public QObject
+class AbstractCall : public QObject
 {
-    Q_GADGET
+    Q_OBJECT
     QEventLoop *eventLoop;
 
 public:
@@ -26,7 +26,9 @@ public:
     void finish();
 protected:
     QVariant value;
-    virtual void returnToCaller() = 0;
+    virtual void returnToCaller()
+    {}
+
 #ifdef QT_QML_LIB
     QQmlEngine *qmlEngine;
     QJSEngine *jsEngine;
@@ -35,13 +37,19 @@ protected:
     QJSValue toJsValue(QVariant v);
     QJSValue toJsValue(QVariantMap map);
     QJSValue toJsValue(QVariantList list);
+public slots:
+    Neuron::AbstractCall *then(QJSValue callback)
+    {
+        jsvalue = callback;
+        return this;
+    }
 #endif
 
     friend class AbstractHubPrivate;
 };
 
-
-
 NEURON_END_NAMESPACE
+
+Q_DECLARE_METATYPE(Neuron::AbstractCall*)
 
 #endif // ABSTRACTCALL_H

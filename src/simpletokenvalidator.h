@@ -31,7 +31,8 @@ class NEURON_EXPORT SimpleTokenValidator : public AbstractDataEncoder
 
     QString _validateToken;
 public:
-    SimpleTokenValidator(QObject *parent = Q_NULLPTR);
+    SimpleTokenValidator(QObject *parent = nullptr);
+    SimpleTokenValidator(const QString &token, QObject *parent = nullptr);
 
 public:
     void encrypt(QVariantMap &map);

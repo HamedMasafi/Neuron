@@ -72,8 +72,8 @@ public:
     };
     Q_ENUM(Status)
 
-    explicit AbstractHub(QObject *parent = 0);
-    explicit AbstractHub(AbstractSerializer *serializer, QObject *parent = 0);
+    explicit AbstractHub(QObject *parent = nullptr);
+    explicit AbstractHub(AbstractSerializer *serializer, QObject *parent = nullptr);
     virtual ~AbstractHub();
 
     QHash<const QString, SharedObject*> sharedObjectHash() const;

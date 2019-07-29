@@ -3,14 +3,16 @@
 
 #include "ui_clientwindow.h"
 
-class Client;
-class ClientHub;
+namespace Neuron {
+    class ClientHub;
+}
+class AbstractClient;
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
-    Client *client;
-    ClientHub *hub;
+    AbstractClient *client;
+    Neuron::ClientHub *hub;
 
 public:
     explicit ClientWindow(QWidget *parent = 0);

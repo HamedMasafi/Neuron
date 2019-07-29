@@ -118,7 +118,7 @@ Server::ServerType Server::serverType() const
 void Server::hub_connected()
 {
     Q_D(Server);
-
+qDebug()<<Q_FUNC_INFO;
     K_TRACE_DEBUG;
     ServerHub *hub = qobject_cast<ServerHub*>(sender());
     K_REG_OBJECT(hub);
@@ -137,12 +137,13 @@ void Server::hub_connected()
 
     //TODO: delete peerNewCreatedObject
     const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
-    QObject *peerNewCreatedObject = metaObject->newInstance();
+    QObject *peerNewCreatedObject = metaObject->newInstance(Q_ARG(QObject*, this));
+
     Peer *peer = qobject_cast<Peer*>(peerNewCreatedObject);
     K_REG_OBJECT(peerNewCreatedObject);
 
     if(!peer){
-        qWarning("Peer object is incorrect! Use peer-generator tool for peer generation.");
+        qWarning("Unable to instancticate %s.", metaObject->className());
         peerNewCreatedObject->deleteLater();
         return;
     }
@@ -208,6 +209,7 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
 
     Q_D(Server);
     K_TRACE_DEBUG;
+    qDebug() << Q_FUNC_INFO;
 
 //    const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
 //    QObject *o = metaObject->newInstance();
@@ -234,7 +236,7 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
         hub->setServerThread(thread);
         hub->setIsMultiThread(true);
 
-        hubIsValid = (hub != 0);
+        hubIsValid = (hub != nullptr);
 
         K_REG_OBJECT(thread);
     }else{

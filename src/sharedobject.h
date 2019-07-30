@@ -43,8 +43,8 @@ class NEURON_EXPORT SharedObject : public Peer
     QMutex hubsLock;
 
 public:
-    SharedObject(QObject *parent = 0);
-    SharedObject(AbstractHub *hub, QObject *parent = 0);
+    SharedObject(QObject *parent = nullptr);
+    SharedObject(AbstractHub *hub, QObject *parent = nullptr);
 
     void attachHub(AbstractHub *hub);
     void detachHub(AbstractHub *hub);

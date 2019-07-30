@@ -53,9 +53,9 @@
 NEURON_BEGIN_NAMESPACE
 
 AbstractHubPrivate::AbstractHubPrivate(AbstractHub *parent)
-    : q_ptr(parent), peer(0), serializer(0),
-      requestId(0), isTransaction(false), isMultiThread(false), hubId(0),
-      status(AbstractHub::Unconnected), encoder(Q_NULLPTR)
+    : q_ptr(parent), peer(nullptr), serializer(nullptr),
+      encoder(nullptr), requestId(0), isTransaction(false),
+      isMultiThread(false), hubId(0), status(AbstractHub::Unconnected)
 #ifdef QT_QML_LIB
       ,
       jsEngine(0), qmlEngine(0)
@@ -89,10 +89,17 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     QList<QGenericArgument> args;
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
-
+qDebug() << map;
     if (!ok) {
-        qWarning("An injection detected. The id '%s' is not numeric",
+        qWarning("The id '%s' is not numeric",
                  map[ID].toString().toLatin1().data());
+        return;
+    }
+
+    if (encoder && !encoder->decrypt(map)) {
+        qWarning("Token validation was faild! %s::%s",
+                 qPrintable(map[CLASS_NAME].toString()),
+                 qPrintable(map[METHOD_NAME].toString()));
         return;
     }
 
@@ -108,14 +115,9 @@ void AbstractHubPrivate::procMap(QVariantMap map)
             // TODO flowing two lines must be test
             call->deleteLater();
             q->_calls.remove(id);
+        } else {
+            qDebug() << "No call fount";
         }
-        return;
-    }
-
-    if (encoder && !encoder->decrypt(map)) {
-        qWarning("Token validation was faild! %s::%s",
-                 qPrintable(map[CLASS_NAME].toString()),
-                 qPrintable(map[METHOD_NAME].toString()));
         return;
     }
 
@@ -204,7 +206,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     //        args << QGenericArgument(name, data);
     //    }
 
-    SharedObject *so = 0;
+    SharedObject *so = nullptr;
     qDebug() << "*******"
              << q->inherits(NEURON_NAMESPACE_STR "::ServerHub")
              << target->inherits(NEURON_NAMESPACE_STR "::SharedObject")
@@ -259,6 +261,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
         qWarning("Invoke %s on %s faild", qPrintable(method.name()),
                  qPrintable(map[CLASS_NAME].toString()));
     } else {
+        qDebug() << "returning" << returnData;
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
@@ -273,8 +276,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 }
 
 bool AbstractHubPrivate::response(const qlonglong &id,
-                                       const QString &senderName,
-                                       const QVariant &returnValue)
+                                  const QString &senderName,
+                                  const QVariant &returnValue)
 {
     Q_Q(AbstractHub);
 
@@ -289,8 +292,14 @@ bool AbstractHubPrivate::response(const qlonglong &id,
     if (returnValue != QVariant())
         map[MAP_RETURN_VALUE] = returnValue;
 
-    int res = q->socket->write(q->serializer()->serialize(map));
+    if (encoder)
+        encoder->encrypt(map);
 
+    qint64 res = q->socket->write(q->serializer()->serialize(map));
+    q->socket->flush();
+
+    if (res == 0)
+        qDebug() << "unable to response";
     return 0 != res;
 }
 
@@ -530,13 +539,15 @@ void AbstractHub::socket_disconnected()
 void AbstractHub::socket_onReadyRead()
 {
     Q_D(AbstractHub);
-
+qDebug() << Q_FUNC_INFO;
     //    d->socketReadMutes.lock();
 
     d->readBuffer.append(socket->readAll());
 
-    if (!d->readBuffer.size())
+    if (!d->readBuffer.size()) {
+        qDebug() << "Invalid buffer size";
         return;
+    }
 
     QString bufferString = d->readBuffer;
 
@@ -555,6 +566,7 @@ void AbstractHub::socket_onReadyRead()
         if (bufferString.count('{') != bufferString.count('}'))
             return;
     } else {
+        qDebug() << "Invalid data recived";
         return;
     }
 

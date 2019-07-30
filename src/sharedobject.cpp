@@ -57,13 +57,13 @@ Peer *SharedObject::senderPeer() const
 }
 
 SharedObject::SharedObject(QObject *parent) : Peer(parent),
-    _activeHub(0), _deactiveHub(0)
+    _activeHub(nullptr), _deactiveHub(nullptr)
 {
 
 }
 
 SharedObject::SharedObject(AbstractHub *hub, QObject *parent) :
-    Peer(parent), _activeHub(0), _deactiveHub(0)
+    Peer(parent), _activeHub(nullptr), _deactiveHub(nullptr)
 {
     attachHub(hub);
 }
@@ -117,13 +117,13 @@ void SharedObject::detachHub(AbstractHub *hub)
 bool SharedObject::setActiveHub(AbstractHub *hub)
 {
     if(!hub){
-        _activeHub = 0;
+        _activeHub = nullptr;
         return true;
     }
 
     if(hubs.contains(hub)){
         _activeHub = hub;
-        _deactiveHub = 0;
+        _deactiveHub = nullptr;
         return true;
     }
     return false;
@@ -132,13 +132,13 @@ bool SharedObject::setActiveHub(AbstractHub *hub)
 bool SharedObject::setAllHubsActiveExcept(AbstractHub *hub)
 {
     if(!hub){
-        _deactiveHub = 0;
+        _deactiveHub = nullptr;
         return true;
     }
 
     if(hubs.contains(hub)){
         _deactiveHub = hub;
-        _activeHub = 0;
+        _activeHub = nullptr;
         return true;
     }
     return false;

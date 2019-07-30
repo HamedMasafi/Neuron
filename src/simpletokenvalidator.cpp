@@ -74,11 +74,10 @@ QString SimpleTokenValidator::createValidateToken(QVariantMap &map)
 
         QMetaType t(i.value().userType());
 
-        bool ok;
         if (t.flags() & QMetaType::PointerToQObject)
             s.append(i.key() + ": " + i.value().typeName() + "*");
         else if (t.flags() & QMetaType::IsEnumeration)
-            s.append(i.key() + ": " + i.value().toInt(&ok) + "*");
+            s.append(i.key() + ": " + QString::number(i.value().toInt()) + "*");
         else
             s.append(i.key() + ": " + i.value().toString() + "*");
     }

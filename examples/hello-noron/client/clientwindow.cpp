@@ -26,6 +26,8 @@ ClientWindow::ClientWindow(QWidget *parent) :
 
     hub->connectToHost("localhost", PORT, true);
 
+    qDebug() << hub->status();
+
     setupUi(this);
 }
 
@@ -65,12 +67,16 @@ void ClientWindow::on_hub_isConnectedChanged(bool isConnected)
 
 void ClientWindow::on_pushButtonGetRandomNumberWithTimeout_clicked()
 {
-    client->getRandomNumber()->then([=](int n){
+    client->getRandomNumber()->then([this](int n){
+        qDebug() << "Data recived: " << n;
         labelResult->setText(QString::number(n));
     });
 }
 
 void ClientWindow::on_pushButtonGetRandomNumber_clicked()
 {
-    client->getRandomNumber()->wait();
+    client->getRandomNumber()->then([this](int n){
+        qDebug() << "Data recived: " << n;
+        labelResult->setText(QString::number(n));
+    });
 }

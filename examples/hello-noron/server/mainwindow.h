@@ -26,6 +26,8 @@ public slots:
     void on_serverManager_peerConnected(Neuron::Peer *peer);
     void on_serverManager_peerDisconnected(Neuron::Peer *peer);
 
+private slots:
+    void on_pushButtonSendBroadcast_clicked();
 };
 
 #endif // MAINWINDOW_H

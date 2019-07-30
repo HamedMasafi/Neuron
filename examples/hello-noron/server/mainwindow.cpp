@@ -58,3 +58,9 @@ void MainWindow::on_serverManager_peerDisconnected(Neuron::Peer *peer)
     foreach (Neuron::Peer *p, serverManager->peers())
         listWidgetOnlineUsers->addItem(qobject_cast<AbstractClient*>(p)->username());
 }
+
+void MainWindow::on_pushButtonSendBroadcast_clicked()
+{
+//    foreach (Neuron::Peer *p, serverManager->peers())
+//qobject_cast<AbstractClient*>(p)->
+}

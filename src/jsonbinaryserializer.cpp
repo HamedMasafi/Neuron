@@ -51,7 +51,7 @@ QByteArray JsonBinarySerializer::serialize(QVariant v)
 
     doc.setObject(val.toObject());
 
-    return doc.toJson();
+    return doc.toJson(QJsonDocument::Compact) + "\n";
 }
 
 QByteArray JsonBinarySerializer::serialize(QVariantList list)
@@ -61,7 +61,7 @@ QByteArray JsonBinarySerializer::serialize(QVariantList list)
 
     doc.setObject(val.toObject());
 
-    return doc.toJson();
+    return doc.toJson(QJsonDocument::Compact) + "\n";
 }
 
 QByteArray JsonBinarySerializer::serialize(QVariantMap map)
@@ -71,7 +71,7 @@ QByteArray JsonBinarySerializer::serialize(QVariantMap map)
 
     doc.setObject(val.toObject());
 
-    return doc.toJson();
+    return doc.toJson(QJsonDocument::Compact) + "\n";
 }
 
 QVariant JsonBinarySerializer::deserialize(QByteArray bytes)

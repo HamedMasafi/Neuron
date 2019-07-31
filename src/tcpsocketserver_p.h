@@ -32,7 +32,7 @@ class TcpSocketServer : public QTcpServer
     Q_OBJECT
 
 public:
-    TcpSocketServer(QObject *parent = 0);
+    TcpSocketServer(QObject *parent = nullptr);
 
 protected:
     void incomingConnection(qintptr socketDescriptor);

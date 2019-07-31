@@ -85,7 +85,7 @@ qlonglong ServerHub::hi(qlonglong hubId)
     Q_D(ServerHub);
 
     setHubId(hubId);
-    emit connected();
+//    emit connected();
 
     K_TRACE_DEBUG;
 //    invokeOnPeer(THIS_HUB, "hi", hubId);

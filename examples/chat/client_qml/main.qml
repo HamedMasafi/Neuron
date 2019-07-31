@@ -23,7 +23,7 @@ ApplicationWindow {
         onAccepted: {
             imageToSend.load(imageSelector.fileUrl)
 
-            user.sendImage(imageToSend.pixmap, function(){
+            User.sendImage(imageToSend.pixmap).then(function(){
                 console.log(sent)
             })
         }
@@ -34,26 +34,63 @@ ApplicationWindow {
 
         onAccepted: {
             userAvator.load(avatorChanger.fileUrl)
-            user.avator = userAvator.pixmap
+            User.avator = userAvator.pixmap
         }
     }
     Pixmap{
         id: imageToSend
         visible: false
     }
-
+/*
+    SimpleTokenValidator{
+        id: tokenValidator
+        validateToken: RPC_TOKEN
+    }
     Hub{
         id: hub
-        validateToken: RPC_TOKEN
+        encoder: tokenValidator
         isAutoReconnect: true
     }
     User{
         id: user
         hub: hub
 
+//        onMessageRecivedSignal: {
+//            var s = '<b><font color=' +
+//                    (username == user.username ? "red" : "blue") +
+//                    '>' +
+//                    username +
+//                    ' :</font></b> ' +
+//                    message;
+//            messages.append(s)
+//        }
+    }
+    ServerInstance{
+        id: server
+        hub: hub
+
+//        onBroadcastMessageSignal: {
+//            messageBox.text = message
+//            messageBox.open()
+//        }
+
+//        onImageSentSignal: {
+//            var s = '<b>' + username + ' sent an image, but image show is not supported in qml version</b> ';
+
+//            messages.append(s)
+//        }
+    }
+
+    Component.onCompleted: {
+        User.hub = hub
+        server.hub = hub
+    }*/
+
+    Connections{
+        target: User
         onMessageRecivedSignal: {
             var s = '<b><font color=' +
-                    (username == user.username ? "red" : "blue") +
+                    (username === User.username ? "red" : "blue") +
                     '>' +
                     username +
                     ' :</font></b> ' +
@@ -61,9 +98,8 @@ ApplicationWindow {
             messages.append(s)
         }
     }
-    Server{
-        id: server
-        hub: hub
+    Connections{
+        target: Server
 
         onBroadcastMessageSignal: {
             messageBox.text = message
@@ -75,11 +111,6 @@ ApplicationWindow {
 
             messages.append(s)
         }
-    }
-
-    Component.onCompleted: {
-        user.hub = hub
-        server.hub = hub
     }
 
     Flipable {
@@ -123,10 +154,10 @@ ApplicationWindow {
                 Button{
                     text: "Login"
                     onClicked: {
-                        hub.serverAddress = serverAddress.text
-                        hub.port = PORT
-                        hub.connectToHost(true)
-                        user.username = username.text
+                        Hub.serverAddress = serverAddress.text
+//                        hub.port = PORT
+                        Hub.connectToHost(true)
+                        User.username = username.text
                         flipable.flipped = true
                     }
                 }
@@ -149,7 +180,7 @@ ApplicationWindow {
                     }
                     ColumnLayout{
                         Text {
-                            text: user.username
+                            text: User.username
                         }
                         Button{
                             text: "Change avator"
@@ -176,16 +207,16 @@ ApplicationWindow {
                         clip: true
                         ListView{
                             clip: true
-                            model: server.users
+                            model: Server.users
                             anchors.fill: parent
                             delegate: RowLayout{
                                 Pixmap{
-                                    pixmapVariant: server.users[index].avator
+                                    pixmapVariant: Server.users[index].avator
                                     height: 35
                                     width: 35
                                 }
                                 Text {
-                                    text: server.users[index].username
+                                    text: Server.users[index].username
                                 }
                             }
                         }
@@ -206,7 +237,7 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignTop
 
                             onClicked: {
-                                user.sendMessage(userMessage.text)
+                                User.sendMessage(userMessage.text)
                                 userMessage.text = ''
                             }
                         }
@@ -255,7 +286,7 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             Label {
-                text: hub.isConnected ? "Connected" : "Disconnected"
+                text: Hub.isConnected ? "Connected" : "Disconnected"
             }
         }
     }

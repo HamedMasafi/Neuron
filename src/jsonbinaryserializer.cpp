@@ -19,6 +19,7 @@
 **************************************************************************/
 
 #include <QtCore/QBuffer>
+#include <QtCore/QCryptographicHash>
 #include <QtCore/QDataStream>
 #include <QtCore/QDebug>
 #include <QtCore/QJsonArray>
@@ -29,22 +30,20 @@
 #include <QtCore/QVariant>
 #include <QtCore/QList>
 
-#include <Peer>
-
+#include "peer.h"
 #include "jsonbinaryserializer.h"
 
 #define VARIANT_TYPE "_type"
 #define VARIANT_VALUE "_value"
 #define CLASS_NAME(x) QString(#x)
+#define MAP_TOKEN_ITEM      "_token"
 
 NEURON_BEGIN_NAMESPACE
 
 JsonBinarySerializer::JsonBinarySerializer(QObject *parent) : AbstractSerializer(parent)
-{
+{ }
 
-}
-
-QByteArray JsonBinarySerializer::serialize(QVariant v)
+QByteArray JsonBinarySerializer::serialize(QVariant v, bool *ok)
 {
     QJsonValue val = toJson(v);
     QJsonDocument doc;
@@ -74,7 +73,7 @@ QByteArray JsonBinarySerializer::serialize(QVariantMap map)
     return doc.toJson(QJsonDocument::Compact) + "\n";
 }
 
-QVariant JsonBinarySerializer::deserialize(QByteArray bytes)
+QVariant JsonBinarySerializer::deserialize(QByteArray bytes, bool *ok)
 {
     QJsonDocument doc = QJsonDocument::fromJson(bytes);
     if(doc.isArray())
@@ -108,6 +107,42 @@ void JsonBinarySerializer::deserializeQObject(QObject *obj, QVariantMap map)
         if(property.isReadable() && property.isWritable())
             property.write(obj, map[property.name()].toString());
     }
+}
+
+QString JsonBinarySerializer::validateToken() const
+{
+    return m_validateToken;
+}
+
+void JsonBinarySerializer::setValidateToken(QString validateToken)
+{
+    if (m_validateToken == validateToken)
+        return;
+
+    m_validateToken = validateToken;
+    emit validateTokenChanged(m_validateToken);
+}
+
+QString JsonBinarySerializer::createValidateToken(QVariantMap &map)
+{
+    QString s = "";
+    QMapIterator<QString, QVariant> i(map);
+    while (i.hasNext()) {
+        i.next();
+
+        QMetaType t(i.value().userType());
+
+        if (t.flags() & QMetaType::PointerToQObject)
+            s.append(i.key() + ": " + i.value().typeName() + "*");
+        else if (t.flags() & QMetaType::IsEnumeration)
+            s.append(i.key() + ": " + QString::number(i.value().toInt()) + "*");
+        else
+            s.append(i.key() + ": " + i.value().toString() + "*");
+    }
+
+    QString data = s + m_validateToken;
+    return QString(QCryptographicHash::hash(data.toLocal8Bit(),
+                                    QCryptographicHash::Md5).toHex());
 }
 
 QJsonObject JsonBinarySerializer::toJson(QVariant v)

@@ -30,16 +30,10 @@ class AbstractSerializer : public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractSerializer(QObject *parent = 0);
+    explicit AbstractSerializer(QObject *parent = nullptr);
 
-    virtual QByteArray serialize(QVariant v) = 0;
-    virtual QByteArray serialize(QVariantList list) = 0;
-    virtual QByteArray serialize(QVariantMap map) = 0;
-
-    virtual QVariant deserialize(QByteArray bytes) = 0;
-signals:
-
-public slots:
+    virtual QByteArray serialize(QVariantMap v, bool *ok = nullptr) = 0;
+    virtual QVariantMap deserialize(QByteArray bytes, bool *ok = nullptr) = 0;
 };
 
 NEURON_END_NAMESPACE

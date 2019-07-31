@@ -31,14 +31,18 @@ NEURON_BEGIN_NAMESPACE
 class NEURON_EXPORT JsonBinarySerializer : public AbstractSerializer
 {
     Q_OBJECT
-public:
-    explicit JsonBinarySerializer(QObject *parent = 0);
+    Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
 
-    QByteArray serialize(QVariant v);
+    QString m_validateToken;
+
+public:
+    explicit JsonBinarySerializer(QObject *parent = nullptr);
+
+    QByteArray serialize(QVariant v, bool *ok = nullptr) override;
     QByteArray serialize(QVariantList list);
     QByteArray serialize(QVariantMap map);
 
-    QVariant deserialize(QByteArray bytes);
+    QVariant deserialize(QByteArray bytes, bool *ok = nullptr) override;
 
     QJsonObject toJson(QVariant v);
     QJsonObject toJson(QVariantList list);
@@ -50,7 +54,16 @@ public:
 
     QVariantMap serializeQObject(QObject *obj);
     void deserializeQObject(QObject *obj, QVariantMap jsonObject);
+    QString validateToken() const;
+
 public slots:
+    void setValidateToken(QString validateToken);
+
+signals:
+    void validateTokenChanged(QString validateToken);
+
+private:
+    QString createValidateToken(QVariantMap &map);
 };
 
 NEURON_END_NAMESPACE

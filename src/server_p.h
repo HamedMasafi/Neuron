@@ -25,6 +25,7 @@
 
 NEURON_BEGIN_NAMESPACE
 
+class TcpSocketServer;
 class ServerPrivate{
     Server *q_ptr;
     Q_DECLARE_PUBLIC(Server)

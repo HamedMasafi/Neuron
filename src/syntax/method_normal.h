@@ -31,11 +31,11 @@
     }
 
 #   define METHOD_IMPL_P_NORMAL(class, ret, name, count, sep, ...) \
-    NEURON_WRAP_NAMESPACE(Call)<ret> *class::name(__NAMEVALUE(count, __VA_ARGS__)) \
+    CALL(ret) *class::name(__NAMEVALUE(count, __VA_ARGS__)) \
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep __PARAMNAME(count, __VA_ARGS__));  \
         if (__call_id) { \
-            NEURON_WRAP_NAMESPACE(Call)<ret> *call = new NEURON_WRAP_NAMESPACE(Call)<ret>();    \
+            CALL(ret) *call = new NEURON_WRAP_NAMESPACE(Call)<ret>();    \
             addCall(__call_id, call);  \
             return call; \
         }   \

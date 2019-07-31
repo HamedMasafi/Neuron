@@ -38,6 +38,12 @@ SimpleTokenValidator::SimpleTokenValidator(const QString &token, QObject *parent
 
 }
 
+SimpleTokenValidator::SimpleTokenValidator(const SimpleTokenValidator &other)
+{
+    _validateToken = other.validateToken();
+    setParent(other.parent());
+}
+
 QString SimpleTokenValidator::validateToken() const
 {
     return _validateToken;
@@ -45,7 +51,10 @@ QString SimpleTokenValidator::validateToken() const
 
 void SimpleTokenValidator::setValidateToken(const QString &validateToken)
 {
-    _validateToken = validateToken;
+    if (_validateToken != validateToken) {
+        _validateToken = validateToken;
+        emit validateTokenChanged(validateToken);
+    }
 }
 
 void SimpleTokenValidator::encrypt(QVariantMap &map)

@@ -80,3 +80,8 @@ void ClientWindow::on_pushButtonGetRandomNumber_clicked()
         labelResult->setText(QString::number(n));
     });
 }
+
+void ClientWindow::on_lineEdit_textChanged(const QString &arg1)
+{
+    client->setUsername(arg1);
+}

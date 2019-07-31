@@ -1,3 +1,6 @@
+#ifndef NEURON_SYNTAX_P_SHARE
+#define NEURON_SYNTAX_P_SHARE
+
 #define __NAMEVALUE2(...)
 #define __NAMEVALUE4(a, b)                                                    a b
 #define __NAMEVALUE6(a, b, c, d)                                              __NAMEVALUE4(a, b), c d
@@ -148,3 +151,5 @@
 #define __PARAMS(count, name, ...)          __PARAMS ## count(__VA_ARGS__)
 #define __FUNCNAME(count, ...)              __FUNCNAME ## count(__VA_ARGS__)
 #define __RETTYPE(oddeven, ...)             __RETTYPE_ ## oddeven(__VA_ARGS__)
+
+#endif // NEURON_SYNTAX_P_SHARE

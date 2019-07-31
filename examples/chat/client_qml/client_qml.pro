@@ -3,16 +3,16 @@ TEMPLATE = app
 QT += qml quick widgets
 INCLUDEPATH += $$PWD/../common
 
-include(../../../noron.pri)
+include(../../../neuron.pri)
 
 SOURCES += main.cpp\
     ../common/user.cpp \
-    ../common/server.cpp \
+    ../common/serverinstance.cpp \
     pixmap.cpp
 
 HEADERS += \
     ../common/user.h \
-    ../common/server.h \
+    ../common/serverinstance.h \
     ../common/defines.h \
     pixmap.h
 

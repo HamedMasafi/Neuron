@@ -3,16 +3,19 @@
 
 #include "ui_clientwindow.h"
 
+#include <AbstractHub>
 class User;
-class Server;
-class ClientHub;
+class ServerInstance;
+namespace Neuron {
+    class ClientHub;
+}
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
     User *user;
-    Server *server;
-    ClientHub *hub;
+    ServerInstance *server;
+    Neuron::ClientHub *hub;
     qint32 _resourceId;
 
 public:
@@ -23,7 +26,7 @@ protected:
     void keyPressEvent(QKeyEvent *);
 
 private slots:
-    void on_hub_isConnectedChanged(bool isConnected);
+    void on_hub_statusChanged(Neuron::AbstractHub::Status status);
 
     void on_server_userJoinedSignal(QString username);
     void on_server_userLeavedSignal(QString username);
@@ -32,8 +35,6 @@ private slots:
     void on_server_usersChanged(QVariantList users);
 
     void on_user_messageRecivedSignal(QString username, QString message);
-
-    void imageSent();
 
     void on_pushButtonLogin_clicked();
     void on_pushButtonSend_clicked();

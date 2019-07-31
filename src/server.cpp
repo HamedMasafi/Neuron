@@ -33,7 +33,7 @@
 NEURON_BEGIN_NAMESPACE
 
 ServerPrivate::ServerPrivate(Server *parent) : q_ptr(parent),
-    serverSocket(0), typeId(0), serverType(Server::SingleThread), hubId(0), reconnectTimeout(0)
+    serverSocket(nullptr), typeId(0), serverType(Server::SingleThread), hubId(0), reconnectTimeout(0)
 {
 }
 
@@ -248,8 +248,8 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
     connect(hub, &AbstractHub::connected, this, &Server::hub_connected);
     connect(hub, &AbstractHub::disconnected, this, &Server::hub_disconnected);
 
-    if (hub->status() == AbstractHub::Connected)
-        emit hub->connected();
+//    if (hub->status() == AbstractHub::Connected)
+//        emit hub->connected();
 
     /*
     hub = new ServerHub;

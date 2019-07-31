@@ -29,10 +29,13 @@ class NEURON_EXPORT SimpleTokenValidator : public AbstractDataEncoder
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString validateToken READ validateToken WRITE setValidateToken NOTIFY validateTokenChanged)
     QString _validateToken;
+
 public:
     SimpleTokenValidator(QObject *parent = nullptr);
     SimpleTokenValidator(const QString &token, QObject *parent = nullptr);
+    SimpleTokenValidator(const SimpleTokenValidator& other);
 
 public:
     void encrypt(QVariantMap &map);
@@ -41,10 +44,16 @@ public:
     QString validateToken() const;
     void setValidateToken(const QString &validateToken);
 
+signals:
+    void validateTokenChanged(QString validateToken);
+
 private:
     QString createValidateToken(QVariantMap &map);
 };
 
 NEURON_END_NAMESPACE
+
+Q_DECLARE_METATYPE(Neuron::SimpleTokenValidator)
+Q_DECLARE_METATYPE(Neuron::SimpleTokenValidator*)
 
 #endif // NEURONSIMPLETOKENVALIDATOR_H

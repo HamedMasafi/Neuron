@@ -29,6 +29,12 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
  * NO_SLOT
  */
 
+#ifdef QT_QML_LIB
+#define CALL(t) NEURON_WRAP_NAMESPACE(AbstractCall)
+#else
+#define CALL(t) NEURON_WRAP_NAMESPACE(Call)<t>
+#endif
+
 #include "p_share.h"
 #include "method_normal.h"
 #include "method_async.h"
@@ -45,15 +51,13 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 //signals:
 //  void callNumberSignal(int number);
 
-
 #define REMOTE_METHOD_DECL_P(ret, name, count, oe, ...) \
     ret name(__NAMEVALUE(count, __VA_ARGS__)); \
     ret name ## Callback(__NAMEVALUE(count, __VA_ARGS__));
 
 #define __REMOTE_METHOD_DECL_P3(ret, name, count, oe, ...) \
-    public: \
-    NEURON_WRAP_NAMESPACE(Call)<ret> *name(__NAMEVALUE(count, __VA_ARGS__)); \
     public Q_SLOTS: \
+    CALL(ret) *name(__NAMEVALUE(count, __VA_ARGS__)); \
     METHOD_DECL_P_SLOT          (ret, name, count, __SEP(count), __VA_ARGS__) \
     Q_SIGNALS: \
     METHOD_DECL_P_SIGNAL_##oe   (ret, name, count, __SEP(count), __VA_ARGS__)
@@ -107,6 +111,11 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 #define N_CLASS_DECLARE(class) \
     Q_INVOKABLE  class(QObject *parent = nullptr); \
     class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent = 0);
+
+#define N_CLASS_DECL(class) \
+    Q_INVOKABLE  class(QObject *parent = nullptr); \
+    class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent = nullptr); \
+    void initalize();
 
 #define NEURON_SEND_TO_PEER(...) invokeOnPeer(__func__ "Slot", __VA_ARGS__)
 

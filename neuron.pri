@@ -51,3 +51,11 @@ SOURCES += \
     $$PWD/src/serverthread.cpp \
     $$PWD/src/abstractdataencoder.cpp \
     $$PWD/src/simpletokenvalidator.cpp
+
+equals(NEURON_TYPE, server) {
+    DEFINES += NEURON_SERVER
+}
+
+equals(NEURON_TYPE, client) {
+    DEFINES += NEURON_CLIENT
+}

@@ -18,7 +18,7 @@ class Pixmap : public QQuickPaintedItem
     QVariant m_pixmapVariant;
 
 public:
-    Pixmap(QQuickItem *parent = 0);
+    Pixmap(QQuickItem *parent = nullptr);
 
     void paint(QPainter *painter);
 

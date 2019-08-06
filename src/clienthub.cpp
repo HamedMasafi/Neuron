@@ -33,14 +33,14 @@
 
 NEURON_BEGIN_NAMESPACE
 
-ClientHubPrivate::ClientHubPrivate(ClientHub *parent) : q_ptr(parent),
-    port(0), serverAddress(QString::null), isAutoReconnect(false), connectionEventLoop(0)
+ClientHubPrivate::ClientHubPrivate() :
+    port(0), isAutoReconnect(false), connectionEventLoop(nullptr)
 {
 
 }
 
 ClientHub::ClientHub(QObject *parent) : AbstractHub(parent),
-    d_ptr(new ClientHubPrivate(this))
+    d(new ClientHubPrivate)
 {
     qRegisterMetaType<Status>("AbstractHub::Status");
     connect(this, &AbstractHub::statusChanged, this, &ClientHub::onStatusChanged);
@@ -48,7 +48,7 @@ ClientHub::ClientHub(QObject *parent) : AbstractHub(parent),
 
 #ifdef QT_QML_LIB
 ClientHub::ClientHub(QQmlEngine *qmlEngine, QJSEngine *engine, QObject *parent) : AbstractHub(parent),
-    d_ptr(new ClientHubPrivate(this))
+    d(new ClientHubPrivate)
 {
     setJsEngine(engine);
     setQmlEngine(qmlEngine);
@@ -59,25 +59,20 @@ ClientHub::ClientHub(QQmlEngine *qmlEngine, QJSEngine *engine, QObject *parent) 
 
 ClientHub::~ClientHub()
 {
-    Q_D(ClientHub);
-    delete d;
 }
 
 QString ClientHub::serverAddress() const
 {
-    Q_D(const ClientHub);
     return d->serverAddress;
 }
 
 quint16 ClientHub::port() const
 {
-    Q_D(const ClientHub);
     return d->port;
 }
 
 bool ClientHub::isAutoReconnect() const
 {
-    Q_D(const ClientHub);
     return d->isAutoReconnect;
 }
 
@@ -106,8 +101,6 @@ int ClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versi
 
 void ClientHub::timerEvent(QTimerEvent *)
 {
-    Q_D(ClientHub);
-
     if(socket->state() == QAbstractSocket::UnconnectedState){
         connectToHost();
         setStatus(Reconnecting);
@@ -146,15 +139,12 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
 
 void ClientHub::disconnectFromHost()
 {
-    Q_D(ClientHub);
     d->isAutoReconnect = false;
     socket->disconnectFromHost();
 }
 
 void ClientHub::setServerAddress(QString serverAddress)
 {
-    Q_D(ClientHub);
-
     if (d->serverAddress == serverAddress)
         return;
 
@@ -164,8 +154,6 @@ void ClientHub::setServerAddress(QString serverAddress)
 
 void ClientHub::setPort(quint16 port)
 {
-    Q_D(ClientHub);
-
     if (d->port == port)
         return;
 
@@ -175,8 +163,6 @@ void ClientHub::setPort(quint16 port)
 
 void ClientHub::setAutoReconnect(bool isAutoReconnect)
 {
-    Q_D(ClientHub);
-
     if (d->isAutoReconnect == isAutoReconnect)
         return;
 
@@ -186,8 +172,6 @@ void ClientHub::setAutoReconnect(bool isAutoReconnect)
 
 void ClientHub::onStatusChanged(Status status)
 {
-    Q_D(ClientHub);
-
     if(status == Unconnected){
         if(isAutoReconnect()){
             connectToHost();
@@ -199,8 +183,6 @@ void ClientHub::onStatusChanged(Status status)
 
 void ClientHub::hi(qlonglong hubId)
 {
-    Q_D(ClientHub);
-
     setStatus(Connected);
     if(hubId == this->hubId()){
         //reconnected
@@ -216,7 +198,6 @@ void ClientHub::hi(qlonglong hubId)
 
 void ClientHub::beginConnection()
 {
-    Q_D(ClientHub);
     qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", QVariant::fromValue(hubId()));
 
     if(__call_id){

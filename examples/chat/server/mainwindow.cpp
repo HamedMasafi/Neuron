@@ -100,6 +100,7 @@ void MainWindow::on_serverManager_peerConnected(Peer *peer)
 void MainWindow::on_serverManager_peerDisconnected(Peer *peer)
 {
     Q_UNUSED(peer);
+    qDebug() << Q_FUNC_INFO;
     populatePeersList();
 }
 

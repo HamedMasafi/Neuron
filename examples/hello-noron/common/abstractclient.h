@@ -3,7 +3,6 @@
 
 #include <Peer>
 
-
 class AbstractClient : public Neuron::Peer
 {
     Q_OBJECT
@@ -15,8 +14,6 @@ class AbstractClient : public Neuron::Peer
     N_REMOTE_METHOD_DECL(setTime)
     N_REMOTE_METHOD_DECL(int, getRandomNumber)
 
-public:
-    Q_INVOKABLE AbstractClient(QObject *parent = nullptr);
-    Q_INVOKABLE AbstractClient(Neuron::AbstractHub *hub, QObject *parent);
+    N_CLASS_DECL(AbstractClient)
 };
 #endif // CLIENT

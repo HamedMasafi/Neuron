@@ -53,7 +53,7 @@
 NEURON_BEGIN_NAMESPACE
 
 AbstractHubPrivate::AbstractHubPrivate(AbstractHub *parent)
-    : q_ptr(parent), peer(nullptr), serializer(nullptr),
+    : q(parent), peer(nullptr), serializer(nullptr),
       encoder(nullptr), requestId(0), isTransaction(false),
       isMultiThread(false), hubId(0), status(AbstractHub::Unconnected)
 #ifdef QT_QML_LIB
@@ -84,8 +84,6 @@ void AbstractHubPrivate::procMap(QVariantList list)
 
 void AbstractHubPrivate::procMap(QVariantMap map)
 {
-    Q_Q(AbstractHub);
-
     QList<QGenericArgument> args;
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
@@ -279,8 +277,6 @@ bool AbstractHubPrivate::response(const qlonglong &id,
                                   const QString &senderName,
                                   const QVariant &returnValue)
 {
-    Q_Q(AbstractHub);
-
     //    if(socket. != AbstractHub::Connected)
     //        return false;
 
@@ -305,8 +301,6 @@ bool AbstractHubPrivate::response(const qlonglong &id,
 
 void AbstractHubPrivate::sync()
 {
-    Q_Q(AbstractHub);
-
     if (status != AbstractHub::Connected)
         return;
 
@@ -331,7 +325,7 @@ void AbstractHubPrivate::sync()
 }
 
 AbstractHub::AbstractHub(QObject *parent)
-    : QObject(parent), d_ptr(new AbstractHubPrivate(this))
+    : QObject(parent), d(new AbstractHubPrivate(this))
 {
     qRegisterMetaType<Status>("::AbstractHub::Status");
 
@@ -351,7 +345,7 @@ AbstractHub::AbstractHub(QObject *parent)
 
 AbstractHub::AbstractHub(AbstractSerializer *serializer,
                                    QObject *parent)
-    : QObject(parent), d_ptr(new AbstractHubPrivate(this))
+    : QObject(parent), d(new AbstractHubPrivate(this))
 {
     qRegisterMetaType<Status>("::AbstractHub::Status");
 
@@ -370,44 +364,33 @@ AbstractHub::AbstractHub(AbstractSerializer *serializer,
 
 AbstractHub::~AbstractHub()
 {
-    Q_D(AbstractHub);
-
     // TODO: remove hub??
     //    if(peer())
     //        peer()->deleteLater();
-
-    delete d;
 }
 
-QHash<const QString, SharedObject *>
-AbstractHub::sharedObjectHash() const
+QHash<const QString, SharedObject *> AbstractHub::sharedObjectHash() const
 {
-    Q_D(const AbstractHub);
     return d->sharedObjects;
 }
 
 Peer *AbstractHub::peer() const
 {
-    Q_D(const AbstractHub);
     return d->peer;
 }
 
 bool AbstractHub::isConnected() const
 {
-    Q_D(const AbstractHub);
     return d->status == Connected;
 }
 
 AbstractSerializer *AbstractHub::serializer() const
 {
-    Q_D(const AbstractHub);
     return d->serializer;
 }
 
 void AbstractHub::attachSharedObject(SharedObject *o)
 {
-    Q_D(AbstractHub);
-
     if (!d->sharedObjects.contains(o->peerName())) {
         d->sharedObjects.insert(o->peerName(), o);
         o->attachHub(this);
@@ -419,8 +402,6 @@ void AbstractHub::attachSharedObject(SharedObject *o)
 
 void AbstractHub::detachSharedObject(SharedObject *o)
 {
-    Q_D(AbstractHub);
-
     if(qobject_cast<Server*>(this))
         return;
 
@@ -434,26 +415,22 @@ void AbstractHub::detachSharedObject(SharedObject *o)
 
 QList<SharedObject *> AbstractHub::sharedObjects() const
 {
-    Q_D(const AbstractHub);
     return d->sharedObjects.values();
 }
 
 QList<SharedObject *>
 AbstractHub::sharedObjects(QString peerName) const
 {
-    Q_D(const AbstractHub);
     return d->sharedObjects.values(peerName);
 }
 
 bool AbstractHub::isMultiThread() const
 {
-    Q_D(const AbstractHub);
     return d->isMultiThread;
 }
 
 AbstractHub::Status AbstractHub::status() const
 {
-    Q_D(const AbstractHub);
     return d->status;
 }
 
@@ -471,7 +448,6 @@ void AbstractHub::waitForConnected(int timeout)
 // TODO: move this method to D
 void AbstractHub::flushSocket()
 {
-    Q_D(AbstractHub);
     bufferMutex.lock();
     socket->write(serializer()->serialize(d->buffer));
     socket->flush();
@@ -483,27 +459,22 @@ void AbstractHub::flushSocket()
 #ifdef QT_QML_LIB
 QJSEngine *AbstractHub::jsEngine() const
 {
-    Q_D(const AbstractHub);
     return d->jsEngine;
 }
 
 QQmlEngine *AbstractHub::qmlEngine() const
 {
-    Q_D(const AbstractHub);
     return d->qmlEngine;
 }
 #endif
 
 qlonglong AbstractHub::hubId() const
 {
-    Q_D(const AbstractHub);
     return d->hubId;
 }
 
 void AbstractHub::setHubId(qlonglong id)
 {
-    Q_D(AbstractHub);
-
     if (d->hubId == id)
         return;
 
@@ -538,8 +509,7 @@ void AbstractHub::socket_disconnected()
 
 void AbstractHub::socket_onReadyRead()
 {
-    Q_D(AbstractHub);
-qDebug() << Q_FUNC_INFO;
+
     //    d->socketReadMutes.lock();
 
     d->readBuffer.append(socket->readAll());
@@ -602,20 +572,16 @@ void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
 
 void AbstractHub::beginTransaction()
 {
-    Q_D(AbstractHub);
     d->isTransaction = true;
 }
 
 bool AbstractHub::isTransaction() const
 {
-    Q_D(const AbstractHub);
     return d->isTransaction;
 }
 
 void AbstractHub::rollback()
 {
-    Q_D(AbstractHub);
-
     if (!d->isTransaction)
         return;
 
@@ -628,8 +594,6 @@ void AbstractHub::rollback()
 // TODO: make commit thread-safe
 void AbstractHub::commit()
 {
-    Q_D(AbstractHub);
-
     if (!d->isTransaction)
         return;
 
@@ -650,7 +614,6 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
                                          QVariant val6, QVariant val7,
                                          QVariant val8, QVariant val9)
 {
-    Q_D(AbstractHub);
     if (d->locks.contains(sender + "::" + methodName))
         return 0;
 
@@ -695,8 +658,6 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
 
 void AbstractHub::setPeer(Peer *peer)
 {
-    Q_D(AbstractHub);
-
     if (d->peer == peer)
         return;
 
@@ -707,8 +668,6 @@ void AbstractHub::setPeer(Peer *peer)
 
 void AbstractHub::setSerializer(AbstractSerializer *serializer)
 {
-    Q_D(AbstractHub);
-
     if (d->serializer == serializer)
         return;
 
@@ -719,8 +678,6 @@ void AbstractHub::setSerializer(AbstractSerializer *serializer)
 #ifdef QT_QML_LIB
 void AbstractHub::setJsEngine(QJSEngine *engine)
 {
-    Q_D(AbstractHub);
-
     if (d->jsEngine == engine)
         return;
 
@@ -730,8 +687,6 @@ void AbstractHub::setJsEngine(QJSEngine *engine)
 
 void AbstractHub::setQmlEngine(QQmlEngine *qmlEngine)
 {
-    Q_D(AbstractHub);
-
     if (d->qmlEngine == qmlEngine)
         return;
 
@@ -746,14 +701,11 @@ void AbstractHub::beginConnection()
 
 void AbstractHub::setIsMultiThread(bool isMultiThread)
 {
-    Q_D(AbstractHub);
     d->isMultiThread = isMultiThread;
 }
 
 void AbstractHub::setStatus(AbstractHub::Status status)
 {
-    Q_D(AbstractHub);
-
     if (d->status == status)
         return;
 
@@ -778,14 +730,11 @@ void AbstractHub::setStatus(AbstractHub::Status status)
 
 AbstractDataEncoder *AbstractHub::encoder() const
 {
-    Q_D(const AbstractHub);
     return d->encoder;
 }
 
 void AbstractHub::setEncoder(AbstractDataEncoder *encoder)
 {
-    Q_D(AbstractHub);
-
     if (d->encoder == encoder)
         return;
 

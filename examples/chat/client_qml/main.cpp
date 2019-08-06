@@ -24,8 +24,11 @@ int main(int argc, char *argv[])
 //    qmlRegisterType<Neuron::Peer>("Tooj.RPC", 1, 0, "Peer");
 //    qmlRegisterType<User>("Tooj.RPC", 1, 0, "User");
 //    qmlRegisterType<ServerInstance>("Tooj.RPC", 1, 0, "ServerInstance");
+    typedef Neuron::Call<void> CallVoid;
     qmlRegisterUncreatableType<Neuron::AbstractCall>("Tooj.RPC", 1, 0, "Call", "");
+    qmlRegisterUncreatableType<CallVoid>("Tooj.RPC", 1, 0, "CallVoid", "");
     qmlRegisterType<Pixmap>("Tooj.RPC", 1, 0, "Pixmap");
+
 
     auto hub = new Neuron::ClientHub;
     hub->setObjectName("hub");

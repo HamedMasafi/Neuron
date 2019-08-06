@@ -38,10 +38,8 @@ ServerPrivate::ServerPrivate(Server *parent) : q_ptr(parent),
 }
 
 Server::Server(QObject *parent) : AbstractHub(parent),
-    d_ptr(new ServerPrivate(this))
+    d(new ServerPrivate(this))
 {
-    Q_D(Server);
-
     d->serverSocket = new TcpSocketServer;
     d->serverSocket->setObjectName("serverSocket");
 
@@ -53,10 +51,8 @@ Server::Server(QObject *parent) : AbstractHub(parent),
 }
 
 Server::Server(qint16 port, QObject *parent) : AbstractHub(parent),
-     d_ptr(new ServerPrivate(this))
+     d(new ServerPrivate(this))
 {
-    Q_D(Server);
-
     d->serverSocket = new TcpSocketServer;
     d->serverSocket->setObjectName("serverSocket");
 
@@ -71,20 +67,15 @@ Server::Server(qint16 port, QObject *parent) : AbstractHub(parent),
 
 Server::~Server()
 {
-    Q_D(Server);
-    delete d;
 }
 
 QSet<Peer *> Server::peers() const
 {
-    Q_D(const Server);
     return d->peers;
 }
 
 void Server::startServer(qint16 port)
 {
-    Q_D(Server);
-
     bool ok = d->serverSocket->listen(QHostAddress::Any, port);
     if (!ok) {
        qWarning("Unable to start server. Error: %s", d->serverSocket->errorString().toUtf8().data());
@@ -93,31 +84,26 @@ void Server::startServer(qint16 port)
 
 quint32 Server::reconnectTimeout() const
 {
-    Q_D(const Server);
     return d->reconnectTimeout;
 }
 
 bool Server::isListening() const
 {
-    Q_D(const Server);
     return d->serverSocket->isListening();
 }
 
 int Server::typeId() const
 {
-    Q_D(const Server);
     return d->typeId;
 }
 
 Server::ServerType Server::serverType() const
 {
-    Q_D(const Server);
     return d->serverType;
 }
 
 void Server::hub_connected()
 {
-    Q_D(Server);
 qDebug()<<Q_FUNC_INFO;
     K_TRACE_DEBUG;
     ServerHub *hub = qobject_cast<ServerHub*>(sender());
@@ -169,8 +155,6 @@ qDebug()<<Q_FUNC_INFO;
 
 void Server::hub_disconnected()
 {
-    Q_D(Server);
-
     ServerHub *hub = qobject_cast<ServerHub*>(sender());
 
     if(d->reconnectTimeout){
@@ -207,7 +191,6 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
 {
     initalizeMutex.lock();
 
-    Q_D(Server);
     K_TRACE_DEBUG;
     qDebug() << Q_FUNC_INFO;
 
@@ -278,8 +261,6 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
 
 void Server::setTypeId(int typeId)
 {
-    Q_D(Server);
-
     if (d->typeId == typeId)
         return;
 
@@ -289,8 +270,6 @@ void Server::setTypeId(int typeId)
 
 void Server::setServerType(Server::ServerType serverType)
 {
-    Q_D(Server);
-
     if (d->serverType == serverType)
         return;
 
@@ -300,7 +279,6 @@ void Server::setServerType(Server::ServerType serverType)
 
 void Server::setReconnectTimeout(quint32 reconnectTimeout)
 {
-    Q_D(Server);
     if (d->reconnectTimeout == reconnectTimeout)
         return;
 

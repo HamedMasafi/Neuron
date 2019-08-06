@@ -22,6 +22,7 @@
 #define NEURONSERVER_H
 
 #include <QtCore/QObject>
+#include <QtCore/QExplicitlySharedDataPointer>
 #include "abstracthub.h"
 
 NEURON_BEGIN_NAMESPACE
@@ -33,8 +34,7 @@ class NEURON_EXPORT Server : public AbstractHub
 {
     Q_OBJECT
 
-    ServerPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(Server)
+    QExplicitlySharedDataPointer<ServerPrivate> d;
 
     Q_PROPERTY(int typeId READ typeId WRITE setTypeId NOTIFY typeIdChanged)
     Q_PROPERTY(ServerType serverType READ serverType WRITE setServerType NOTIFY serverTypeChanged)

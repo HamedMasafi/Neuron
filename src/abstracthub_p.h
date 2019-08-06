@@ -22,6 +22,7 @@
 #define NEURONABSTRACTHUB_P_H
 
 #include <QtCore/QSet>
+#include <QtCore/QSharedData>
 
 #include <QMutex>
 #include <cstdint>
@@ -44,9 +45,8 @@ class QQmlEngine;
 
 NEURON_BEGIN_NAMESPACE
 
-class AbstractHubPrivate{
-    AbstractHub *q_ptr;
-    Q_DECLARE_PUBLIC(AbstractHub)
+class AbstractHubPrivate : public QSharedData{
+    AbstractHub *q;
 
 public:
     AbstractHubPrivate(AbstractHub *parent);

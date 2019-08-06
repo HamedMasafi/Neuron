@@ -28,6 +28,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
+#include <QtCore/QExplicitlySharedDataPointer>
 #include <QAbstractSocket>
 
 #include <QMutex>
@@ -50,8 +51,7 @@ class NEURON_EXPORT AbstractHub : public QObject
 {
     Q_OBJECT
 
-    AbstractHubPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(AbstractHub)
+    QExplicitlySharedDataPointer<AbstractHubPrivate> d;
 
     Q_PROPERTY(Peer* peer READ peer WRITE setPeer NOTIFY peerChanged)
     Q_PROPERTY(AbstractSerializer* serializer READ serializer WRITE setSerializer NOTIFY serializerChanged)
@@ -165,6 +165,7 @@ protected:
 
     friend class Peer;
     friend class Server;
+    friend class AbstractHubPrivate;
 };
 
 NEURON_END_NAMESPACE

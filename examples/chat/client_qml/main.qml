@@ -237,7 +237,9 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignTop
 
                             onClicked: {
-                                User.sendMessage(userMessage.text)
+                                User.sendMessage(userMessage.text).then(function(){
+
+                                })
                                 userMessage.text = ''
                             }
                         }

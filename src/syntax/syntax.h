@@ -30,18 +30,18 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
  */
 
 #ifdef QT_QML_LIB
-#define CALL(t) NEURON_WRAP_NAMESPACE(AbstractCall)
+#define CALL(t) NEURON_WRAP_NAMESPACE(Call)<t>
 #else
 #define CALL(t) NEURON_WRAP_NAMESPACE(Call)<t>
 #endif
 
 #include "p_share.h"
 #include "method_normal.h"
-#include "method_async.h"
-#include "method_metamethod.h"
-#include "method_jscallback.h"
-#include "method_slotcallback.h"
-#include "method_stdfunc.h"
+//#include "method_async.h"
+//#include "method_metamethod.h"
+//#include "method_jscallback.h"
+//#include "method_slotcallback.h"
+//#include "method_stdfunc.h"
 #ifdef NEURON_SHARED_OBJECT
 //#error "sahred object"
 #endif
@@ -108,13 +108,11 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     }
 
 //Constructors
-#define N_CLASS_DECLARE(class) \
-    Q_INVOKABLE  class(QObject *parent = nullptr); \
-    class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent = 0);
-
 #define N_CLASS_DECL(class) \
+    public: \
     Q_INVOKABLE  class(QObject *parent = nullptr); \
     class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent = nullptr); \
+    private: \
     void initalize();
 
 #define NEURON_SEND_TO_PEER(...) invokeOnPeer(__func__ "Slot", __VA_ARGS__)

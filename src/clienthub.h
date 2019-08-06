@@ -22,6 +22,7 @@
 #define NEURONCLIENTHUB_H
 
 #include <QtCore/qglobal.h>
+#include <QtCore/QExplicitlySharedDataPointer>
 
 #include "abstracthub.h"
 
@@ -37,8 +38,7 @@ class NEURON_EXPORT ClientHub : public AbstractHub
 {
     Q_OBJECT
 
-    ClientHubPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(ClientHub)
+    QExplicitlySharedDataPointer<ClientHubPrivate> d;
 
     Q_PROPERTY(QString serverAddress READ serverAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)

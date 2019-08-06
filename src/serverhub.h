@@ -22,6 +22,7 @@
 #define NEURONSERVERHUB_H
 
 #include <QtCore/qglobal.h>
+#include <QtCore/QExplicitlySharedDataPointer>
 
 #include "abstracthub.h"
 
@@ -33,13 +34,12 @@ class NEURON_EXPORT ServerHub : public AbstractHub
 {
     Q_OBJECT
 
-    ServerHubPrivate *d_ptr;
-    Q_DECLARE_PRIVATE(ServerHub)
+    QExplicitlySharedDataPointer<ServerHubPrivate> d;
 
 public:
-    ServerHub(QObject *parent = 0);
-    ServerHub(AbstractSerializer *serializer, QObject *parent = 0);
-    ServerHub(QTcpSocket *socket, QObject *parent = 0);
+    ServerHub(QObject *parent = nullptr);
+    ServerHub(AbstractSerializer *serializer, QObject *parent = nullptr);
+    ServerHub(QTcpSocket *socket, QObject *parent = nullptr);
 
     virtual ~ServerHub();
 

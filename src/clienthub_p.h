@@ -22,17 +22,15 @@
 #define NEURONCLIENTHUB_P_H
 
 #include "clienthub.h"
+#include <QSharedData>
 
 class QEventLoop;
 
 NEURON_BEGIN_NAMESPACE
 
-class ClientHubPrivate{
-    ClientHub *q_ptr;
-    Q_DECLARE_PUBLIC(ClientHub)
-
+class ClientHubPrivate : public QSharedData {
 public:
-    ClientHubPrivate(ClientHub *parent);
+    ClientHubPrivate();
 
     quint16 port;               // port
     QString serverAddress;     // address of server

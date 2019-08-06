@@ -28,24 +28,24 @@
 
 NEURON_BEGIN_NAMESPACE
 
-ServerHubPrivate::ServerHubPrivate(ServerHub *parent) : q_ptr(parent), serverThread(0), connectionEventLoop(0)
+ServerHubPrivate::ServerHubPrivate() : serverThread(nullptr), connectionEventLoop(nullptr)
 {
 
 }
 
 ServerHub::ServerHub(QObject *parent) : AbstractHub(parent),
-    d_ptr(new ServerHubPrivate(this))
+    d(new ServerHubPrivate)
 {
 
 }
 
 ServerHub::ServerHub(AbstractSerializer *serializer, QObject *parent) : AbstractHub(serializer, parent),
-    d_ptr(new ServerHubPrivate(this))
+    d(new ServerHubPrivate)
 {
 }
 
 ServerHub::ServerHub(QTcpSocket *socket, QObject *parent) : AbstractHub(parent),
-    d_ptr(new ServerHubPrivate(this))
+    d(new ServerHubPrivate)
 {
     this->socket = socket;
 }
@@ -68,21 +68,16 @@ ServerHub::~ServerHub()
 //        cout << i.key() << ": " << i.value() << endl;
         detachSharedObject(i.value());
     }
-
-    delete d_ptr;
 }
 
 ServerThread *ServerHub::serverThread() const
 {
-    Q_D(const ServerHub);
-
     return d->serverThread;
 }
 
 qlonglong ServerHub::hi(qlonglong hubId)
 {
     initalizeMutex.lock();
-    Q_D(ServerHub);
 
     setHubId(hubId);
 //    emit connected();
@@ -111,8 +106,6 @@ bool ServerHub::setSocketDescriptor(qintptr socketDescriptor, bool waitForConnec
 
 void ServerHub::setServerThread(ServerThread *serverThread)
 {
-    Q_D(ServerHub);
-
     if(d->serverThread != serverThread)
         d->serverThread = serverThread;
 }
@@ -120,7 +113,6 @@ void ServerHub::setServerThread(ServerThread *serverThread)
 void ServerHub::beginConnection()
 {
     K_TRACE_DEBUG;
-    Q_D(ServerHub);
     d->connectionEventLoop = new QEventLoop;
     K_REG_OBJECT(d->connectionEventLoop);
     d->connectionEventLoop->exec();

@@ -5,16 +5,9 @@
 
 using namespace Neuron;
 
-AbstractClient::AbstractClient(QObject *parent) : Peer(parent)
+N_CLASS_IMPL(AbstractClient)
 {
-    setPeerName("AbstractClient");
-}
 
-AbstractClient::AbstractClient(AbstractHub *hub, QObject *parent) : Peer(parent)
-{
-    if(hub)
-        setHub(hub);
-    setPeerName("AbstractClient");
 }
 
 N_PROPERTY_IMPL(AbstractClient, int, t, t, setT, tChanged)

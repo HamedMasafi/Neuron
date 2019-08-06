@@ -22,11 +22,12 @@
 #define NEURONSERVER_P_H
 
 #include "server.h"
+#include <QSharedData>
 
 NEURON_BEGIN_NAMESPACE
 
 class TcpSocketServer;
-class ServerPrivate{
+class ServerPrivate : public QSharedData {
     Server *q_ptr;
     Q_DECLARE_PUBLIC(Server)
 

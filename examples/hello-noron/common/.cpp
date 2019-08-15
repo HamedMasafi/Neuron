@@ -5,12 +5,12 @@
 
 NEURON_BEGIN_NAMESPACE
 
-Client::Client(QObject *parent) : NeuronPeer(parent)
+Client::Client(QObject *parent) : Peer(parent)
 {
 
 }
 
-Client::Client(NeuronAbstractHub *hub, QObject *parent) : NeuronPeer(parent)
+Client::Client(AbstractHub *hub, QObject *parent) : Peer(parent)
 {
     if(hub)
         setHub(hub);
@@ -22,7 +22,7 @@ int Client::getRandomNumber(QJSValue callbackFunction)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
+        RemoteCall<int> *call = new RemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -35,7 +35,7 @@ int Client::getRandomNumber(std::function<void(int)> callbackFunction)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(callbackFunction);
+        RemoteCall<int> *call = new RemoteCall<int>(callbackFunction);
         addCall(id, call);
     }
     
@@ -47,7 +47,7 @@ int Client::getRandomNumber(const QObject *obj, char *callbackSlot)
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
+        RemoteCall<int> *call = new RemoteCall<int>(const_cast<QObject *>(obj), callbackSlot);
         addCall(id, call);
     }
     
@@ -58,7 +58,7 @@ int Client::getRandomNumber()
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
         call->eventLoop->exec();
         int ret = call->returnData.value<int>();
@@ -74,7 +74,7 @@ int Client::getRandomNumber(const QObject *obj, const QMetaMethod *callbackMetho
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     
     if(id){
-        NeuronRemoteCall<int> *call = new NeuronRemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
+        RemoteCall<int> *call = new RemoteCall<int>(const_cast<QObject *>(obj), const_cast<QMetaMethod *>(callbackMethod));
         addCall(id, call);
     }
     
@@ -84,7 +84,7 @@ int Client::getRandomNumberAsync()
 {
     qlonglong id = invokeOnPeer("getRandomNumberSlot");
     if(id){
-        NeuronRemoteCallBase *call = new NeuronRemoteCallBase(NeuronRemoteCallBase::EventLoop);
+        RemoteCallBase *call = new RemoteCallBase(RemoteCallBase::EventLoop);
         addCall(id, call);
     }
     

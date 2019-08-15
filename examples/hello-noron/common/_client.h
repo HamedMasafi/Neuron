@@ -12,13 +12,13 @@
 #   include <QJSValue>
 #endif
 
-#include <NeuronAbstractHub>
-#include <NeuronPeer>
+#include <AbstractHub>
+#include <Peer>
 
 
 NEURON_BEGIN_NAMESPACE
 
-class Client : public NeuronPeer
+class Client : public Peer
 {
     Q_OBJECT
     
@@ -26,7 +26,7 @@ class Client : public NeuronPeer
 
 public:
     Q_INVOKABLE Client(QObject *parent = 0);
-    Client(NeuronAbstractHub *hub, QObject *parent = 0);
+    Client(AbstractHub *hub, QObject *parent = 0);
 
 public slots:
     int getRandomNumber(const QObject *obj, const QMetaMethod *callbackMethod);

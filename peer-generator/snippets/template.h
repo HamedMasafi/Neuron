@@ -12,7 +12,7 @@
 #   include <QJSValue>
 #endif
 
-#include <NeuronAbstractHub>
+#include <AbstractHub>
 <includes>
 #include <<IncludeName/>>
 </includes>
@@ -26,7 +26,7 @@ class <ClassName/> : public <BaseType/>
 
 public:
     Q_INVOKABLE <ClassName/>(QObject *parent = 0);
-    <ClassName/>(NeuronAbstractHub *hub, QObject *parent = 0);
+    <ClassName/>(AbstractHub *hub, QObject *parent = 0);
 
 <methods>
 <group/>

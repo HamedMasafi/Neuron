@@ -1,12 +1,13 @@
 #include "clientwindow.h"
 
 #include "user.h"
-#include "server.h"
+#include "serverinstance.h"
 
 #include "defines.h"
 
-#include <NeuronClientHub>
+#include <ClientHub>
 
+#include <SimpleTokenValidator>
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -16,12 +17,12 @@ ClientWindow::ClientWindow(QWidget *parent) :
     QMainWindow(parent), _resourceId(0)
 {
 
-    hub = new NeuronClientHub(this);
+    hub = new Neuron::ClientHub(this);
     hub->setObjectName("hub");
     hub->setAutoReconnect(true);
-    hub->setValidateToken(NEURON_VALIDATE_TOKEN);
+    hub->setEncoder(new Neuron::SimpleTokenValidator(NEURON_VALIDATE_TOKEN, hub));
 
-    server = new Server(hub, this);
+    server = new ServerInstance(hub, this);
     server->setObjectName("server");
 
     user = new User(hub, this);
@@ -59,8 +60,12 @@ void ClientWindow::on_pushButtonLogin_clicked()
 
 void ClientWindow::on_pushButtonSend_clicked()
 {
-    user->sendMessageAsync(textEditMessage->toPlainText());
-    textEditMessage->setPlainText("");
+    textEditMessage->setEnabled(false);
+    user->sendMessage(textEditMessage->toPlainText())
+            ->then([this](){
+        textEditMessage->clear();
+        textEditMessage->setEnabled(true);
+    });
 }
 
 void ClientWindow::on_pushButtonChangeAvator_clicked()
@@ -118,9 +123,9 @@ void ClientWindow::on_server_usersChanged(QVariantList users)
     }
 }
 
-void ClientWindow::on_hub_isConnectedChanged(bool isConnected)
+void ClientWindow::on_hub_statusChanged(Neuron::AbstractHub::Status status)
 {
-    if(isConnected)
+    if(status == Neuron::AbstractHub::Connected)
         statusBar()->showMessage("Connected");
     else
         statusBar()->showMessage("Disonnected");
@@ -134,11 +139,6 @@ void ClientWindow::on_user_messageRecivedSignal(QString username, QString messag
                      .arg(username == user->username() ? "red" : "blue"));
 }
 
-void ClientWindow::imageSent()
-{
-    QMessageBox::information(this, "Send image", "Image was sent");
-}
-
 void ClientWindow::on_pushButtonSendImage_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
@@ -148,7 +148,9 @@ void ClientWindow::on_pushButtonSendImage_clicked()
     if(!fileName.isNull()){
         QPixmap pixmap(fileName);
         if(!pixmap.isNull())
-            user->sendImage(pixmap, this, "imageSent");
+            user->sendImage(pixmap)->then([this](){
+               QMessageBox::information(this, "Send image", "Image was sent");
+            });
 
             /*
              * if c++11 is enabled flowing code will be send image and show a messagebox

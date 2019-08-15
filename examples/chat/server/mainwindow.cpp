@@ -1,36 +1,42 @@
 #include "mainwindow.h"
 
-#include <NeuronPeer>
-#include <NeuronServer>
+#include <Peer>
+#include <Server>
 
 #include "user.h"
-#include "server.h"
+#include "serverinstance.h"
 #include "defines.h"
+#include <SimpleTokenValidator>
+
+using namespace Neuron;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    serverManager = new NeuronServer(PORT, this);
+    serverManager = new Neuron::Server(PORT, this);
     serverManager->setObjectName("serverManager");
     serverManager->registerType<User*>();
-    serverManager->setValidateToken(NEURON_VALIDATE_TOKEN);
-    serverManager->setServerType(NeuronServer::MultiThread);
+    serverManager->setEncoder(new Neuron::SimpleTokenValidator(NEURON_VALIDATE_TOKEN, serverManager));
+    serverManager->setServerType(Neuron::Server::MultiThread);
 
-    server = new Server(serverManager, this);
+    connect(serverManager, &Neuron::Server::peerConnected, this, &MainWindow::on_serverManager_peerConnected);
+    connect(serverManager, &Neuron::Server::peerDisconnected, this, &MainWindow::on_serverManager_peerDisconnected);
+
+    server = new ServerInstance(serverManager, this);
     server->setObjectName("server");
 
     setupUi(this);
 
     /*
      Or, ... with a c++11 simple way
-    connect(serverManager, &ServerPeersManager::peerConnected, this, [this] (NeuronPeer *p) {
+    connect(serverManager, &ServerPeersManager::peerConnected, this, [this] (Peer *p) {
         populatePeersList();
 
         User *peer = qobject_cast<User*>(p);
         connect(peer, &UserBase::usernameChanged, this, [this] () {
             populatePeersList();
 
-            foreach (NeuronPeer *p, serverManager->peers()) {
+            foreach (Peer *p, serverManager->peers()) {
                 User *peer = qobject_cast<User*>(p);
                 if(peer != sender()){
                     User *s = qobject_cast<User*>(sender());
@@ -40,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
         });
         connect(peer, &UserBase::sendMessageSignal, this, [this] (QString message) {
             User  *s = qobject_cast<User*>(sender());
-            foreach (NeuronPeer *p, serverManager->peers()) {
+            foreach (Peer *p, serverManager->peers()) {
                 User *peer = qobject_cast<User*>(p);
                 peer->messageRecivedAsync(s->username(), message);
             }
@@ -80,7 +86,7 @@ void MainWindow::populatePeersList()
     server->setUsers(users);
 }
 
-void MainWindow::on_serverManager_peerConnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerConnected(Peer *peer)
 {
     User *user = qobject_cast<User*>(peer);
     populatePeersList();
@@ -91,9 +97,10 @@ void MainWindow::on_serverManager_peerConnected(NeuronPeer *peer)
     connect(user, &User::sendImageSignal, this, &MainWindow::user_sendImageSignal);
 }
 
-void MainWindow::on_serverManager_peerDisconnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerDisconnected(Peer *peer)
 {
     Q_UNUSED(peer);
+    qDebug() << Q_FUNC_INFO;
     populatePeersList();
 }
 
@@ -106,9 +113,9 @@ void MainWindow::user_sendImageSignal(QPixmap image)
 void MainWindow::user_sendMessageSignal(QString message)
 {
     User *s = qobject_cast<User*>(sender());
-    foreach (NeuronPeer *p, serverManager->peers()) {
+    foreach (Peer *p, serverManager->peers()) {
         User *peer = qobject_cast<User*>(p);
-        peer->messageRecivedAsync(s->username(), message);
+        peer->messageRecived(s->username(), message);
     }
 }
 
@@ -122,5 +129,5 @@ void MainWindow::user_usernameChanged()
 
 void MainWindow::on_pushButtonSendBroadcast_clicked()
 {
-    server->broadcastMessageAsync(lineEditMessage->text());
+    server->broadcastMessage(lineEditMessage->text());
 }

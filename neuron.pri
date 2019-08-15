@@ -3,49 +3,54 @@ QT += network
 INCLUDEPATH += $$PWD/include
 
 HEADERS += \
-    $$PWD/src/neuronglobal.h \
-    $$PWD/src/neuronabstracthub.h \
-    $$PWD/src/neuronabstracthub_p.h \
-    $$PWD/src/neuronabstractserializer.h \
-    $$PWD/src/neuronjsonbinaryserializer.h \
-    $$PWD/src/neuronremotecall_p.h \
-    $$PWD/src/neuronclienthub.h \
-    $$PWD/src/neuronclienthub_p.h \
-    $$PWD/src/neuronserverhub.h \
-    $$PWD/src/neuronserver.h \
-    $$PWD/src/neuronserver_p.h \
-    $$PWD/src/neurontcpsocketserver_p.h \
-    $$PWD/src/neuronsharedobject.h \
-    $$PWD/src/neuronserverhub_p.h \
-    $$PWD/src/neuronpeer.h \
-    $$PWD/src/neuronserverthread.h \
+    $$PWD/src/global.h \
+    $$PWD/src/abstracthub.h \
+    $$PWD/src/abstracthub_p.h \
+    $$PWD/src/abstractserializer.h \
+    $$PWD/src/jsonbinaryserializer.h \
+    $$PWD/src/call.h \
+    $$PWD/src/abstractcall.h \
+    $$PWD/src/clienthub.h \
+    $$PWD/src/clienthub_p.h \
+    $$PWD/src/serverhub.h \
+    $$PWD/src/server.h \
+    $$PWD/src/server_p.h \
+    $$PWD/src/tcpsocketserver_p.h \
+    $$PWD/src/sharedobject.h \
+    $$PWD/src/serverhub_p.h \
+    $$PWD/src/peer.h \
+    $$PWD/src/serverthread.h \
     $$PWD/src/syntax/syntax.h \
-    $$PWD/src/syntax/method_metamethod.h \
-    $$PWD/src/syntax/syntax_sharedobject.h \
     $$PWD/src/syntax/syntax_peer.h \
+    $$PWD/src/syntax/syntax_sharedobject.h \
     $$PWD/src/syntax/p_share.h \
-    $$PWD/src/syntax/method_jscallback.h \
-    $$PWD/src/syntax/method_async.h \
-    $$PWD/src/syntax/method_slotcallback.h \
-    $$PWD/src/syntax/method_stdfunc.h \
     $$PWD/src/syntax/method_slot_sharedobject.h \
     $$PWD/src/syntax/method_slot_peer.h \
     $$PWD/src/syntax/decl_signal_peer.h \
     $$PWD/src/syntax/decl_signal_sharedobject.h \
-    $$PWD/src/neuronabstractdataencoder.h \
-    $$PWD/src/neuronsimpletokenvalidator.h
+    $$PWD/src/abstractdataencoder.h \
+    $$PWD/src/simpletokenvalidator.h
 
 SOURCES += \
-    $$PWD/src/neuronabstracthub.cpp \
-    $$PWD/src/neuronabstractserializer.cpp \
-    $$PWD/src/neuronjsonbinaryserializer.cpp \
-    $$PWD/src/neuronremotecall.cpp \
-    $$PWD/src/neuronclienthub.cpp \
-    $$PWD/src/neuronserverhub.cpp \
-    $$PWD/src/neuronserver.cpp \
-    $$PWD/src/neurontcpsocketserver.cpp \
-    $$PWD/src/neuronsharedobject.cpp \
-    $$PWD/src/neuronpeer.cpp \
-    $$PWD/src/neuronserverthread.cpp \
-    $$PWD/src/neuronabstractdataencoder.cpp \
-    $$PWD/src/neuronsimpletokenvalidator.cpp
+    $$PWD/src/abstracthub.cpp \
+    $$PWD/src/abstractserializer.cpp \
+    $$PWD/src/jsonbinaryserializer.cpp \
+    $$PWD/src/call.cpp \
+    $$PWD/src/abstractcall.cpp \
+    $$PWD/src/clienthub.cpp \
+    $$PWD/src/serverhub.cpp \
+    $$PWD/src/server.cpp \
+    $$PWD/src/tcpsocketserver.cpp \
+    $$PWD/src/sharedobject.cpp \
+    $$PWD/src/peer.cpp \
+    $$PWD/src/serverthread.cpp \
+    $$PWD/src/abstractdataencoder.cpp \
+    $$PWD/src/simpletokenvalidator.cpp
+
+equals(NEURON_TYPE, server) {
+    DEFINES += NEURON_SERVER
+}
+
+equals(NEURON_TYPE, client) {
+    DEFINES += NEURON_CLIENT
+}

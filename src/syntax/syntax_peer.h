@@ -10,16 +10,20 @@
 #undef N_CLASS_IMPL
 #endif
 
-#define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NeuronPeer(parent) \
-        {  \
-            setPeerName(#class); \
-        }    \
-        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronPeer(parent)    \
-        {   \
-            setPeerName(#class); \
-            if(hub)    \
-                setHub(hub);    \
-        }
+#define N_CLASS_IMPL(class)                                                     \
+        class::class(QObject *parent) : NEURON_WRAP_NAMESPACE(Peer)(parent)     \
+        {                                                                       \
+            setPeerName(#class);                                                \
+            initalize();                                                        \
+        }                                                                       \
+        class::class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent)  \
+                : NEURON_WRAP_NAMESPACE(Peer)(parent)                           \
+        {                                                                       \
+            setPeerName(#class);                                                \
+            if(hub)                                                             \
+                setHub(hub);                                                    \
+            initalize();                                                        \
+        }                                                                       \
+        void class::initalize()
 
 #endif // SYNTAX_PEER_H

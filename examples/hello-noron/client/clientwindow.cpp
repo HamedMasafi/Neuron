@@ -1,10 +1,11 @@
 #include "clientwindow.h"
 
-#include "client.h"
+#include "abstractclient.h"
 
 #include "defines.h"
 
-#include <NeuronClientHub>
+#include <ClientHub>
+#include <SimpleTokenValidator>
 
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -15,15 +16,17 @@ ClientWindow::ClientWindow(QWidget *parent) :
     QMainWindow(parent)
 {
 
-    hub = new NeuronClientHub(this);
+    hub = new Neuron::ClientHub(this);
     hub->setObjectName("hub");
 //    hub->setAutoReconnect(true);
-//    hub->setValidateToken(NEURON_VALIDATE_TOKEN);
+    hub->setEncoder(new Neuron::SimpleTokenValidator(NEURON_VALIDATE_TOKEN));
 
-    client = new Client(hub, this);
+    client = new AbstractClient(hub, this);
     client->setObjectName("client");
 
-    hub->connectToHost("127.0.0.1", 8000);
+    hub->connectToHost("localhost", PORT, true);
+
+    qDebug() << hub->status();
 
     setupUi(this);
 }
@@ -64,10 +67,21 @@ void ClientWindow::on_hub_isConnectedChanged(bool isConnected)
 
 void ClientWindow::on_pushButtonGetRandomNumberWithTimeout_clicked()
 {
-    //client->getRandomNumber(spinBox->value());
+    client->getRandomNumber()->then([this](int n){
+        qDebug() << "Data recived: " << n;
+        labelResult->setText(QString::number(n));
+    });
 }
 
 void ClientWindow::on_pushButtonGetRandomNumber_clicked()
 {
-    client->getRandomNumber();
+    client->getRandomNumber()->then([this](int n){
+        qDebug() << "Data recived: " << n;
+        labelResult->setText(QString::number(n));
+    });
+}
+
+void ClientWindow::on_lineEdit_textChanged(const QString &arg1)
+{
+    client->setUsername(arg1);
 }

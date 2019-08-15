@@ -5,7 +5,7 @@ exec 3< <(egrep -o "class\sNEURON_EXPORT\s(\S+)"  ../src -R 2>&1)
 pattern="\.\.\/src\/([a-z]+)\.h\:class\sNEURON_EXPORT\s(\w+)"
 
 echo "" > "Neuron"
-echo "" > "neuron.h"
+echo "" > ".h"
 
 while read line; do
 	if [[ $line =~ $pattern ]]; then

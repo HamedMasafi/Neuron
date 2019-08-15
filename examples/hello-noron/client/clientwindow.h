@@ -3,17 +3,19 @@
 
 #include "ui_clientwindow.h"
 
-class Client;
-class NeuronClientHub;
+namespace Neuron {
+    class ClientHub;
+}
+class AbstractClient;
 class ClientWindow : public QMainWindow, private Ui::ClientWindow
 {
     Q_OBJECT
 
-    Client *client;
-    NeuronClientHub *hub;
+    AbstractClient *client;
+    Neuron::ClientHub *hub;
 
 public:
-    explicit ClientWindow(QWidget *parent = 0);
+    explicit ClientWindow(QWidget *parent = nullptr);
     void changeEvent(QEvent *e);
 
 private slots:
@@ -24,6 +26,7 @@ private slots:
 
     void on_pushButtonGetRandomNumberWithTimeout_clicked();
     void on_pushButtonGetRandomNumber_clicked();
+    void on_lineEdit_textChanged(const QString &arg1);
 };
 
 #endif // CLIENTWINDOW_H

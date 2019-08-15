@@ -3,26 +3,31 @@
 
 #include "ui_mainwindow.h"
 
-class NeuronServer;
-class NeuronPeer;
-class Client;
+namespace Neuron {
+    class Server;
+    class Peer;
+}
+
+class AbstractClient;
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
-    NeuronServer *serverManager;
-    Client *client;
+    Neuron::Server *serverManager;
+    AbstractClient *client;
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
 
 protected:
     void changeEvent(QEvent *e);
 
 public slots:
-    void on_serverManager_peerConnected(NeuronPeer *peer);
-    void on_serverManager_peerDisconnected(NeuronPeer *peer);
+    void on_serverManager_peerConnected(Neuron::Peer *peer);
+    void on_serverManager_peerDisconnected(Neuron::Peer *peer);
 
+private slots:
+    void on_pushButtonSendBroadcast_clicked();
 };
 
 #endif // MAINWINDOW_H

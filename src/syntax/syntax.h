@@ -29,13 +29,19 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
  * NO_SLOT
  */
 
+#ifdef QT_QML_LIB
+#define CALL(t) NEURON_WRAP_NAMESPACE(Call)<t>
+#else
+#define CALL(t) NEURON_WRAP_NAMESPACE(Call)<t>
+#endif
+
 #include "p_share.h"
 #include "method_normal.h"
-#include "method_async.h"
-#include "method_metamethod.h"
-#include "method_jscallback.h"
-#include "method_slotcallback.h"
-#include "method_stdfunc.h"
+//#include "method_async.h"
+//#include "method_metamethod.h"
+//#include "method_jscallback.h"
+//#include "method_slotcallback.h"
+//#include "method_stdfunc.h"
 #ifdef NEURON_SHARED_OBJECT
 //#error "sahred object"
 #endif
@@ -45,31 +51,19 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 //signals:
 //  void callNumberSignal(int number);
 
-
 #define REMOTE_METHOD_DECL_P(ret, name, count, oe, ...) \
     ret name(__NAMEVALUE(count, __VA_ARGS__)); \
     ret name ## Callback(__NAMEVALUE(count, __VA_ARGS__));
 
 #define __REMOTE_METHOD_DECL_P3(ret, name, count, oe, ...) \
-    public: \
-    METHOD_DECL_P_META_METHOD   (ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_DECL_P_QML_CALLBACK  (ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_DECL_P_STD_FUNC      (ret, name, count, __SEP(count), __VA_ARGS__) \
     public Q_SLOTS: \
-    METHOD_DECL_P_NORMAL        (ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_DECL_P_ASYNC         (ret, name, count, __SEP(count), __VA_ARGS__) \
+    CALL(ret) *name(__NAMEVALUE(count, __VA_ARGS__)); \
     METHOD_DECL_P_SLOT          (ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_DECL_P_SLOT_CALLBACK (ret, name, count, __SEP(count), __VA_ARGS__) \
     Q_SIGNALS: \
     METHOD_DECL_P_SIGNAL_##oe   (ret, name, count, __SEP(count), __VA_ARGS__)
 
 #define __REMOTE_METHOD_IMPL_P3(class, ret, name, count, oe, ...) \
-    METHOD_IMPL_P_NORMAL_##oe       (class, ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_IMPL_P_ASYNC             (class, ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_IMPL_P_META_METHOD_##oe  (class, ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_IMPL_P_QML_CALLBACK_##oe (class, ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_IMPL_P_SLOT_CALLBACK_##oe(class, ret, name, count, __SEP(count), __VA_ARGS__) \
-    METHOD_IMPL_P_STD_FUNC_##oe     (class, ret, name, count, __SEP(count), __VA_ARGS__) \
+    METHOD_IMPL_P_NORMAL            (class, ret, name, count, __SEP(count), __VA_ARGS__) \
     METHOD_IMPL_P_SLOT_##oe         (class, ret, name, count, __SEP(count), __VA_ARGS__)
 
 #define __REMOTE_METHOD_DECL_P2(count, oe, ...) \
@@ -114,9 +108,14 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
     }
 
 //Constructors
-#define N_CLASS_DECLARE(class) \
-    Q_INVOKABLE  class(QObject *parent = 0); \
-    class(NeuronAbstractHub *hub, QObject *parent = 0);
+#define N_CLASS_DECL(class) \
+    public: \
+    Q_INVOKABLE  class(QObject *parent = nullptr); \
+    class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent = nullptr); \
+    private: \
+    void initalize();
+
+#define NEURON_SEND_TO_PEER(...) invokeOnPeer(__func__ "Slot", __VA_ARGS__)
 
 QT_WARNING_POP
 

@@ -1,13 +1,13 @@
 #ifndef SYNTAX_SHAREDOBJECT_H
 #define SYNTAX_SHAREDOBJECT_H
 
-#ifdef NEURON_CLIENT
 #   include "method_slot_peer.h"
 #   include "decl_signal_peer.h"
-#else
-#   include "method_slot_sharedobject.h"
-#   include "decl_signal_sharedobject.h"
-#endif
+//#ifdef NEURON_CLIENT
+//#else
+//#   include "method_slot_sharedobject.h"
+//#   include "decl_signal_sharedobject.h"
+//#endif
 
 #include "syntax.h"
 
@@ -15,18 +15,21 @@
 #undef N_CLASS_IMPL
 #endif
 
-#define N_CLASS_IMPL(class) \
-        class::class(QObject *parent) : NeuronSharedObject(parent) \
-        {  \
-            setPeerName(#class); \
-        }    \
-        class::class(NeuronAbstractHub *hub, QObject *parent) : NeuronSharedObject(parent)    \
-        {   \
-            setPeerName(#class); \
-            if(hub){    \
-                setHub(hub);    \
-                hub->attachSharedObject(this); \
-            }   \
-        }
+
+#define N_CLASS_IMPL(class)                                                     \
+        class::class(QObject *parent) : NEURON_WRAP_NAMESPACE(SharedObject)(parent)     \
+        {                                                                       \
+            setPeerName(#class);                                                \
+            initalize();                                                        \
+        }                                                                       \
+        class::class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent)  \
+                : NEURON_WRAP_NAMESPACE(Peer)(parent)                           \
+        {                                                                       \
+            setPeerName(#class);                                                \
+            if(hub)                                                             \
+                setHub(hub);                                                    \
+            initalize();                                                        \
+        }                                                                       \
+        void class::initalize()
 
 #endif // SYNTAX_SHAREDOBJECT_H

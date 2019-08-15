@@ -1,25 +1,24 @@
 QT += network
 
-DEFINES += NORON_CLIENT 
+DEFINES += NEURON_CLIENT
 INCLUDEPATH += $$PWD/include
 
 HEADERS += \
-    $$PWD/src/noronglobal.h \
-    $$PWD/src/noronabstracthub.h \
-    $$PWD/src/noronabstracthub_p.h \
-    $$PWD/src/noronabstractserializer.h \
-    $$PWD/src/noronjsonbinaryserializer.h \
-    $$PWD/src/noronremotecall_p.h \
-    $$PWD/src/noronclienthub.h \
-    $$PWD/src/noronclienthub_p.h \
-    $$PWD/src/noronserverhub.h \
-    $$PWD/src/noronserver.h \
-    $$PWD/src/noronserver_p.h \
-    $$PWD/src/norontcpsocketserver_p.h \
-    $$PWD/src/noronsharedobject.h \
-    $$PWD/src/noronserverhub_p.h \
-    $$PWD/src/noronpeer.h \
-    $$PWD/src/noronserverthread.h \
+    $$PWD/src/global.h \
+    $$PWD/src/abstracthub.h \
+    $$PWD/src/abstracthub_p.h \
+    $$PWD/src/abstractserializer.h \
+    $$PWD/src/jsonbinaryserializer.h \
+    $$PWD/src/clienthub.h \
+    $$PWD/src/clienthub_p.h \
+    $$PWD/src/serverhub.h \
+    $$PWD/src/server.h \
+    $$PWD/src/server_p.h \
+    $$PWD/src/tcpsocketserver_p.h \
+    $$PWD/src/sharedobject.h \
+    $$PWD/src/serverhub_p.h \
+    $$PWD/src/peer.h \
+    $$PWD/src/serverthread.h \
     $$PWD/src/syntax/syntax.h \
     $$PWD/src/syntax/method_metamethod.h \
     $$PWD/src/syntax/syntax_sharedobject.h \
@@ -32,17 +31,25 @@ HEADERS += \
     $$PWD/src/syntax/method_slot_sharedobject.h \
     $$PWD/src/syntax/method_slot_peer.h \
     $$PWD/src/syntax/decl_signal_peer.h \
-    $$PWD/src/syntax/decl_signal_sharedobject.h
+    $$PWD/src/syntax/decl_signal_sharedobject.h \
+    $$PWD/src/abstractdataencoder.h \
+    $$PWD/src/simpletokenvalidator.h \
+    $$PWD/src/abstractcall.h \
+    $$PWD/src/call.h
+
 
 SOURCES += \
-    $$PWD/src/noronabstracthub.cpp \
-    $$PWD/src/noronabstractserializer.cpp \
-    $$PWD/src/noronjsonbinaryserializer.cpp \
-    $$PWD/src/noronremotecall.cpp \
-    $$PWD/src/noronclienthub.cpp \
-    $$PWD/src/noronserverhub.cpp \
-    $$PWD/src/noronserver.cpp \
-    $$PWD/src/norontcpsocketserver.cpp \
-    $$PWD/src/noronsharedobject.cpp \
-    $$PWD/src/noronpeer.cpp \
-    $$PWD/src/noronserverthread.cpp
+    $$PWD/src/abstracthub.cpp \
+    $$PWD/src/abstractserializer.cpp \
+    $$PWD/src/jsonbinaryserializer.cpp \
+    $$PWD/src/clienthub.cpp \
+    $$PWD/src/serverhub.cpp \
+    $$PWD/src/server.cpp \
+    $$PWD/src/tcpsocketserver.cpp \
+    $$PWD/src/sharedobject.cpp \
+    $$PWD/src/peer.cpp \
+    $$PWD/src/serverthread.cpp \
+    $$PWD/src/abstractdataencoder.cpp \
+    $$PWD/src/simpletokenvalidator.cpp \
+    $$PWD/src/abstractcall.cpp \
+    $$PWD/src/call.cpp

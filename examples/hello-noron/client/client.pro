@@ -1,18 +1,21 @@
 TEMPLATE = app
 QT += widgets
 INCLUDEPATH += $$PWD/../common
+INCLUDEPATH += ../../../include
 
-include(../../../noron.pri)
+include(../../../neuron.pri)
+
+DEFINES += NEURON_CLIENT
 
 SOURCES += \
+    ../common/abstractclient.cpp \
     main.cpp \
-    clientwindow.cpp \
-    ../common/client.cpp
+    clientwindow.cpp
 
 FORMS += \
     clientwindow.ui
 
 HEADERS += \
+    ../common/abstractclient.h \
     clientwindow.h \
-    ../common/client.h \
     ../common/defines.h

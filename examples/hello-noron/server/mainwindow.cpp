@@ -1,20 +1,26 @@
 #include "mainwindow.h"
 
-#include <NeuronPeer>
-#include <NeuronServer>
+#include <Peer>
+#include <Server>
+#include <SimpleTokenValidator>
 
-#include "client.h"
+#include "abstractclient.h"
 #include "defines.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    serverManager = new NeuronServer(PORT, this);
-    serverManager->setObjectName("serverManager");
-    serverManager->registerType<Client*>();
-//    serverManager->setValidateToken(NEURON_VALIDATE_TOKEN);
-    serverManager->setServerType(NeuronServer::SingleThread);
+    qRegisterMetaType<AbstractClient*>();
+    serverManager = new Neuron::Server(this);
+    serverManager->setObjectName(QString::fromUtf8("serverManager"));
+    serverManager->registerType<AbstractClient*>();
+    serverManager->setEncoder(new Neuron::SimpleTokenValidator(NEURON_VALIDATE_TOKEN));
+    serverManager->setServerType(Neuron::Server::MultiThread);
 
+    serverManager->startServer(PORT);
+
+    connect(serverManager, &Neuron::Server::peerConnected, this, &MainWindow::on_serverManager_peerConnected);
+    connect(serverManager, &Neuron::Server::peerDisconnected, this, &MainWindow::on_serverManager_peerDisconnected);
     setupUi(this);
 }
 
@@ -30,24 +36,49 @@ void MainWindow::changeEvent(QEvent *e)
     }
 }
 
-void MainWindow::on_serverManager_peerConnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerConnected(Neuron::Peer *peer)
 {
-    Client *client = qobject_cast<Client*>(peer);
+    qDebug() << Q_FUNC_INFO;
+    AbstractClient *client = qobject_cast<AbstractClient*>(peer);
 
-    connect(client, &Client::getRandomNumberSignal, [=] {
+    QListWidgetItem *item = new QListWidgetItem(listWidgetOnlineUsers);
+    item->setData(Qt::EditRole, QVariant::fromValue(client));
+    item->setText(client->username());
 
+    connect(client, &AbstractClient::getRandomNumberSignal, [=] (int &r){
+        r = 4;
+    });
+    connect(client, &AbstractClient::usernameChanged, [item] (QString username){
+        item->setText(username);
     });
 
-    listWidgetOnlineUsers->clear();
-    foreach (NeuronPeer *p, serverManager->peers())
-        listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
+//    listWidgetOnlineUsers->addItem(item);
+//    listWidgetOnlineUsers->clear();
+//    foreach (Neuron::Peer *p, serverManager->peers())
+//        listWidgetOnlineUsers->addItem(qobject_cast<AbstractClient*>(p)->username());
 }
 
-void MainWindow::on_serverManager_peerDisconnected(NeuronPeer *peer)
+void MainWindow::on_serverManager_peerDisconnected(Neuron::Peer *peer)
 {
+    qDebug() << Q_FUNC_INFO;
     Q_UNUSED(peer);
 
-    listWidgetOnlineUsers->clear();
-    foreach (NeuronPeer *p, serverManager->peers())
-        listWidgetOnlineUsers->addItem(qobject_cast<Client*>(p)->username());
+    AbstractClient *client = qobject_cast<AbstractClient*>(peer);
+    QVariant v = QVariant::fromValue(client);
+
+    for (int i = 0; i < listWidgetOnlineUsers->count(); ++i) {
+        if (listWidgetOnlineUsers->item(i)->data(Qt::EditRole) == v) {
+            listWidgetOnlineUsers->takeItem(i);
+            break;
+        }
+    }
+//    listWidgetOnlineUsers->clear();
+//    foreach (Neuron::Peer *p, serverManager->peers())
+//        listWidgetOnlineUsers->addItem(qobject_cast<AbstractClient*>(p)->username());
+}
+
+void MainWindow::on_pushButtonSendBroadcast_clicked()
+{
+//    foreach (Neuron::Peer *p, serverManager->peers())
+//qobject_cast<AbstractClient*>(p)->
 }

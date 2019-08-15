@@ -11,10 +11,10 @@
 #define NEURONPEER_H
 
 #define QObject int
-#define NeuronPeer
+#define Peer
 #include "../src/syntax/syntax.h"
 
-class Test : public NeuronPeer
+class Test : public Peer
 {
     N_CLASS_DECLARE(Test)
 

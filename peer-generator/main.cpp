@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     classParser.parseAll();
 
 //    if(peersCount == 0 && classes.count() != 0){
-//        classes[0]->setBaseType("NeuronPeer");
+//        classes[0]->setBaseType("Peer");
 //        peersCount++;
 //    }
 

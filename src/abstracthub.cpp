@@ -87,7 +87,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     QList<QGenericArgument> args;
     bool ok;
     qlonglong id = map[ID].toLongLong(&ok);
-qDebug() << map;
+
     if (!ok) {
         qWarning("The id '%s' is not numeric",
                  map[ID].toString().toLatin1().data());
@@ -114,7 +114,8 @@ qDebug() << map;
             call->deleteLater();
             q->_calls.remove(id);
         } else {
-            qDebug() << "No call fount";
+            qDebug() << "No call found";
+//            qDebug() << map;
         }
         return;
     }
@@ -122,7 +123,7 @@ qDebug() << map;
     QObject *target = nullptr;
 
     if (map[CLASS_NAME] == "") {
-        qDebug() << map;
+//        qDebug() << map;
 //        qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
@@ -130,7 +131,6 @@ qDebug() << map;
     } else {
         target = sharedObjects.value(map[CLASS_NAME].toString());
 
-        qDebug() << ":::" << peer << target << map[CLASS_NAME] << peer->peerName();
         if (peer && !target && map[CLASS_NAME] == peer->peerName())
             target = peer;
     }
@@ -154,6 +154,7 @@ qDebug() << map;
     // find method
     for (int i = 0; i < target->metaObject()->methodCount(); i++) {
         method = target->metaObject()->method(i);
+
         if (method.name() == methodName) {
             const char *type = QVariant::typeToName(method.returnType());
             QString typeString = QString(type);
@@ -205,10 +206,10 @@ qDebug() << map;
     //    }
 
     SharedObject *so = nullptr;
-    qDebug() << "*******"
-             << q->inherits(NEURON_NAMESPACE_STR "::ServerHub")
-             << target->inherits(NEURON_NAMESPACE_STR "::SharedObject")
-             << q << target;
+//    qDebug() << "*******"
+//             << q->inherits(NEURON_NAMESPACE_STR "::ServerHub")
+//             << target->inherits(NEURON_NAMESPACE_STR "::SharedObject")
+//             << q << target;
 
     if (q->inherits(NEURON_NAMESPACE_STR "::ServerHub") && target->inherits(NEURON_NAMESPACE_STR "::SharedObject")) {
         so = qobject_cast<SharedObject*>(target);
@@ -256,10 +257,11 @@ qDebug() << map;
         so->unregisterSender(target->thread());
 
     if (!ok) {
-        qWarning("Invoke %s on %s faild", qPrintable(method.name()),
-                 qPrintable(map[CLASS_NAME].toString()));
+//        qWarning("Invoke %s on %s faild", qPrintable(method.name()),
+//                 qPrintable(map[CLASS_NAME].toString()));
+        qWarning("Invoke on %s faild", qPrintable(method.name()));
+//        qWarning() << map;
     } else {
-        qDebug() << "returning" << returnData;
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
@@ -494,9 +496,7 @@ void AbstractHub::socket_connected()
 
 void AbstractHub::socket_disconnected()
 {
-    qDebug() << "AbstractHub::socket_disconnected()";
     setStatus(AbstractHub::Unconnected);
-    qDebug() << "AbstractHub::socket_disconnected(2)";
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();
@@ -537,6 +537,7 @@ void AbstractHub::socket_onReadyRead()
             return;
     } else {
         qDebug() << "Invalid data recived";
+//        qDebug() << bufferString;
         return;
     }
 

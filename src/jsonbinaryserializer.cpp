@@ -45,6 +45,8 @@ JsonBinarySerializer::JsonBinarySerializer(QObject *parent) : AbstractSerializer
 
 QByteArray JsonBinarySerializer::serialize(QVariant v, bool *ok)
 {
+    Q_UNUSED(ok);
+
     QJsonValue val = toJson(v);
     QJsonDocument doc;
 
@@ -75,6 +77,8 @@ QByteArray JsonBinarySerializer::serialize(QVariantMap map)
 
 QVariant JsonBinarySerializer::deserialize(QByteArray bytes, bool *ok)
 {
+    Q_UNUSED(ok);
+
     QJsonDocument doc = QJsonDocument::fromJson(bytes);
     if(doc.isArray())
         return fromJson(QJsonDocument::fromJson(bytes).array());

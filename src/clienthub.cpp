@@ -104,7 +104,6 @@ void ClientHub::timerEvent(QTimerEvent *)
     if(socket->state() == QAbstractSocket::UnconnectedState){
         connectToHost();
         setStatus(Reconnecting);
-//        qDebug() << "reconnecting...";
     }else if(socket->state() == QAbstractSocket::ConnectedState){
         killTimer(d->reconnectTimerId);
 //        d->sync();
@@ -114,7 +113,7 @@ void ClientHub::timerEvent(QTimerEvent *)
 
 void ClientHub::connectToHost(bool waitForConnected)
 {
-    connectToHost(QString::null, 0, waitForConnected);
+    connectToHost(QString(), 0, waitForConnected);
 }
 
 void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnected)

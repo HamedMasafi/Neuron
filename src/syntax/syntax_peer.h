@@ -1,8 +1,8 @@
-#ifndef SYNTAX_PEER_H
-#define SYNTAX_PEER_H
+#ifndef SYNTAX_CLASS_DEF_H
+#define SYNTAX_CLASS_DEF_H
 
 #include "method_slot_peer.h"
-#include "decl_signal_peer.h"
+//#include "decl_signal_peer.h"
 
 #include "syntax.h"
 
@@ -26,4 +26,4 @@
         }                                                                       \
         void class::initalize()
 
-#endif // SYNTAX_PEER_H
+#endif // SYNTAX_CLASS_DEF_H

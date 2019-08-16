@@ -18,6 +18,7 @@
 #include <QVariantList>
 #include <QString>
 
+typedef Neuron::Call<void> CallVoid;
 
 class ServerInstance : public Neuron::SharedObject
 {

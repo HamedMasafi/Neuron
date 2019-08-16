@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick widgets
+QT += qml quick widgets quickcontrols2
 INCLUDEPATH += $$PWD/../common
 
 include(../../../neuron.pri)

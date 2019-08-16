@@ -1,8 +1,8 @@
-import QtQuick 2.4
-import QtQuick.Controls 1.3
-import QtQuick.Window 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Window 2.12
 import QtQuick.Dialogs 1.2
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.12
 import Tooj.RPC 1.0
 
 ApplicationWindow {
@@ -122,46 +122,50 @@ ApplicationWindow {
 
         front: Item {
             anchors.fill: parent
-            ColumnLayout{
+            Pane {
                 anchors.centerIn: parent
-                //                margins: 20
+                ColumnLayout{
 
-                Rectangle{
-                    anchors.fill: parent
-                    anchors{
-                        leftMargin: -20
-                        topMargin: -20
-                        bottomMargin: -20
-                        rightMargin: -20
+                    anchors.centerIn: parent
+                    //                margins: 20
+
+//                    Rectangle{
+//                        anchors.fill: parent
+//                        anchors{
+//                            leftMargin: -20
+//                            topMargin: -20
+//                            bottomMargin: -20
+//                            rightMargin: -20
+//                        }
+//                    }
+
+                    Text {
+                        text: "Server address"
+                    }
+                    TextField{
+                        id: serverAddress
+                        text: "127.0.0.1"
+                    }
+
+                    Text {
+                        text: "Username"
+                    }
+                    TextField{
+                        id: username
+                    }
+
+                    Button{
+                        text: "Login"
+                        onClicked: {
+                            Hub.serverAddress = serverAddress.text
+                            //                        hub.port = PORT
+                            Hub.connectToHost(true)
+                            User.username = username.text
+                            flipable.flipped = true
+                        }
                     }
                 }
-
-                Text {
-                    text: "Server address"
-                }
-                TextField{
-                    id: serverAddress
-                    text: "127.0.0.1"
-                }
-
-                Text {
-                    text: "Username"
-                }
-                TextField{
-                    id: username
-                }
-
-                Button{
-                    text: "Login"
-                    onClicked: {
-                        Hub.serverAddress = serverAddress.text
-//                        hub.port = PORT
-                        Hub.connectToHost(true)
-                        User.username = username.text
-                        flipable.flipped = true
-                    }
-                }
-            }
+        }
         }
         back: Item {
             anchors.fill: parent
@@ -169,7 +173,7 @@ ApplicationWindow {
             ColumnLayout{
                 anchors.fill: parent
 
-                Text {
+                Label {
                     text: qsTr("Note: some features like send image or change avator does not work in qml!")
                 }
                 RowLayout{
@@ -179,7 +183,7 @@ ApplicationWindow {
                         width: 50
                     }
                     ColumnLayout{
-                        Text {
+                        Label {
                             text: User.username
                         }
                         Button{
@@ -192,19 +196,21 @@ ApplicationWindow {
                 RowLayout{
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    TextArea{
-                        id: messages
-
-                        textFormat: TextEdit.RichText
-                        readOnly: true
+                    Frame {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        TextArea{
+                            id: messages
+
+                            textFormat: TextEdit.RichText
+                            readOnly: true
+                            anchors.fill: parent
+                        }
                     }
 
-                    Rectangle{
+                    Frame {
                         Layout.fillHeight: true
                         Layout.preferredWidth: 200
-                        clip: true
                         ListView{
                             clip: true
                             model: Server.users
@@ -221,25 +227,25 @@ ApplicationWindow {
                             }
                         }
                     }
+
                 }
                 RowLayout{
                     Layout.fillWidth: true
 
-                    TextArea{
+                    TextField{
                         id: userMessage
                         Layout.fillWidth: true
-                        Layout.maximumHeight: 160
+//                        Layout.fillHeight: true
                     }
                     ColumnLayout{
-                        Layout.maximumHeight: 160
                         Button{
                             text: "Send"
                             Layout.alignment: Qt.AlignTop
 
                             onClicked: {
-                                User.sendMessage(userMessage.text).then(function(){
+                                User.sendMessage(userMessage.text)/*.then(function(){
 
-                                })
+                                })*/
                                 userMessage.text = ''
                             }
                         }
@@ -251,9 +257,9 @@ ApplicationWindow {
                                 imageSelector.open()
                             }
                         }
-                        Item{
-                            Layout.fillHeight: true
-                        }
+//                        Item{
+//                            Layout.fillHeight: true
+//                        }
                     }
                 }
             }
@@ -284,12 +290,9 @@ ApplicationWindow {
         }
     }
 
-    statusBar: StatusBar{
-        RowLayout {
-            anchors.fill: parent
-            Label {
-                text: Hub.isConnected ? "Connected" : "Disconnected"
-            }
+    footer: RowLayout{
+        Label {
+            text: Hub.isConnected ? "Connected" : "Disconnected"
         }
     }
 }

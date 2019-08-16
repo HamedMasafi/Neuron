@@ -104,7 +104,6 @@ Server::ServerType Server::serverType() const
 
 void Server::hub_connected()
 {
-qDebug()<<Q_FUNC_INFO;
     K_TRACE_DEBUG;
     ServerHub *hub = qobject_cast<ServerHub*>(sender());
     K_REG_OBJECT(hub);
@@ -192,7 +191,6 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
     initalizeMutex.lock();
 
     K_TRACE_DEBUG;
-    qDebug() << Q_FUNC_INFO;
 
 //    const QMetaObject *metaObject = QMetaType::metaObjectForType(d->typeId);
 //    QObject *o = metaObject->newInstance();
@@ -285,5 +283,7 @@ void Server::setReconnectTimeout(quint32 reconnectTimeout)
     d->reconnectTimeout = reconnectTimeout;
     emit reconnectTimeoutChanged(reconnectTimeout);
 }
+
+
 
 NEURON_END_NAMESPACE

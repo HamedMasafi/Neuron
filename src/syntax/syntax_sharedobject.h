@@ -1,5 +1,5 @@
-#ifndef SYNTAX_SHAREDOBJECT_H
-#define SYNTAX_SHAREDOBJECT_H
+#ifndef SYNTAX_CLASS_DEF_H
+#define SYNTAX_CLASS_DEF_H
 
 #   include "method_slot_peer.h"
 #   include "decl_signal_peer.h"
@@ -23,7 +23,7 @@
             initalize();                                                        \
         }                                                                       \
         class::class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent)  \
-                : NEURON_WRAP_NAMESPACE(Peer)(parent)                           \
+                : NEURON_WRAP_NAMESPACE(SharedObject)(parent)                           \
         {                                                                       \
             setPeerName(#class);                                                \
             if(hub)                                                             \
@@ -32,4 +32,4 @@
         }                                                                       \
         void class::initalize()
 
-#endif // SYNTAX_SHAREDOBJECT_H
+#endif // SYNTAX_CLASS_DEF_H

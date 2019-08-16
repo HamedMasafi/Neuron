@@ -33,12 +33,12 @@ NEURON_BEGIN_NAMESPACE
  */
 
 Peer::Peer(QObject *parent)
-    : QObject(parent), _peerName(QString::null), m_hub(0)
+    : QObject(parent), m_hub(nullptr)
 {
 }
 
 Peer::Peer(AbstractHub *hub, QObject *parent)
-    : QObject(parent), _peerName(QString::null), m_hub(0)
+    : QObject(parent), m_hub(nullptr)
 {
     setHub(hub);
 }

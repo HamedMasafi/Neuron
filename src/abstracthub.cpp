@@ -115,7 +115,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
             q->_calls.remove(id);
         } else {
             qDebug() << "No call found";
-//            qDebug() << map;
+            qDebug() << map;
         }
         return;
     }
@@ -514,30 +514,15 @@ void AbstractHub::socket_onReadyRead()
 
     d->readBuffer.append(socket->readAll());
 
-    if (!d->readBuffer.size()) {
-        qDebug() << "Invalid buffer size";
+    if (!d->readBuffer.size())
         return;
-    }
 
     QString bufferString = d->readBuffer;
 
     if (bufferString.endsWith("}\n")) {
-        //        int bracketOpen = 0;
-        //        int bracketClose = 0;
-        //        for (int i = 0; i < bufferString.size(); ++i) {
-        //            if(bufferString.at(i) == '{')
-        //                bracketOpen++;
-
-        //            if(bufferString.at(i) == '}')
-        //                bracketClose++;
-        //        }
-        //        if(bracketClose != bracketOpen)
-        //            return;
         if (bufferString.count('{') != bufferString.count('}'))
             return;
     } else {
-        qDebug() << "Invalid data recived";
-//        qDebug() << bufferString;
         return;
     }
 

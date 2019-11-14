@@ -74,12 +74,14 @@ protected:
 
 signals:
     void hubChanged(AbstractHub* hub);
+    void propertyChanged(const QString &name, const QVariant &value);
 
 private slots:
     void hub_disconnected();
 
 public slots:
     void setHub(AbstractHub* hub);
+    void setProperty(QString name, QVariant value);
 };
 
 NEURON_END_NAMESPACE

@@ -18,25 +18,38 @@
 **
 **************************************************************************/
 
-#ifndef NEURONABSTRACTDATAENCODER_H
-#define NEURONABSTRACTDATAENCODER_H
+#ifndef SERVERMODEL_H
+#define SERVERMODEL_H
 
 #include "global.h"
-#include <QObject>
-#include <QVariantMap>
+#include "peer.h"
+
+#include <QAbstractListModel>
 
 NEURON_BEGIN_NAMESPACE
 
-class NEURON_EXPORT AbstractDataEncoder : public QObject
+class Server;
+class NEURON_EXPORT ServerModel : public QAbstractListModel
 {
     Q_OBJECT
-public:
-    AbstractDataEncoder(QObject *parent = Q_NULLPTR);
 
-    virtual void encrypt(QVariantMap &map) = 0;
-    virtual bool decrypt(QVariantMap &map) = 0;
+    QStringList _properties;
+    Neuron::Server *_server;
+    QList<Peer*> _peers;
+public:
+    ServerModel(Neuron::Server *server);
+    int rowCount(const QModelIndex &parent) const;
+    QVariant data(const QModelIndex &index, int role) const;
+    int columnCount(const QModelIndex &parent) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+    Neuron::Peer *peer(const QModelIndex &index) const;
+
+private slots:
+    void server_peerConnected(Peer *peer);
+    void server_peerDisconnected(Peer *peer);
 };
 
 NEURON_END_NAMESPACE
 
-#endif // NEURONABSTRACTDATAENCODER_H
+#endif // SERVERMODEL_H

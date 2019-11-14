@@ -114,8 +114,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
             call->deleteLater();
             q->_calls.remove(id);
         } else {
-            qDebug() << "No call found";
-            qDebug() << map;
+            qWarning() << "No call found!" << map;
         }
         return;
     }
@@ -123,8 +122,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     QObject *target = nullptr;
 
     if (map[CLASS_NAME] == "") {
-//        qDebug() << map;
-//        qFatal("Error in data");
+        qDebug() << map;
+        qFatal("Error in data");
     }
     if (map[CLASS_NAME] == THIS_HUB) {
         target = q;
@@ -171,6 +170,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
                     qWarning("%s is not registered in meta type. Did you "
                              "forget to call qRegisterMetaType?",
                              qPrintable(method.typeName()));
+//                return;
             }
 
             // TODO: why?
@@ -185,8 +185,10 @@ void AbstractHubPrivate::procMap(QVariantMap map)
         }
     }
 
-    if (method.name().isEmpty()) {
-        qWarning("No such method %s", qPrintable(methodName));
+    if (method.name().isEmpty() || method.name() != methodName) {
+        qWarning("No such method %s::%s",
+                 qPrintable(map[CLASS_NAME].toString()),
+                 qPrintable(methodName));
         return;
     }
     for (int i = 0; i < 10; i++) {
@@ -206,10 +208,6 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     //    }
 
     SharedObject *so = nullptr;
-//    qDebug() << "*******"
-//             << q->inherits(NEURON_NAMESPACE_STR "::ServerHub")
-//             << target->inherits(NEURON_NAMESPACE_STR "::SharedObject")
-//             << q << target;
 
     if (q->inherits(NEURON_NAMESPACE_STR "::ServerHub") && target->inherits(NEURON_NAMESPACE_STR "::SharedObject")) {
         so = qobject_cast<SharedObject*>(target);
@@ -221,9 +219,10 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 
     locks.insert(lockName);
 
-    Qt::ConnectionType connectionType = Qt::DirectConnection;
-    if (target->thread() != q->thread())
-        connectionType = Qt::BlockingQueuedConnection;
+    Qt::ConnectionType connectionType =
+            target->thread() != q->thread()
+                ? Qt::BlockingQueuedConnection
+                : Qt::DirectConnection;
 
 
     if (returnData.type() == QVariant::Invalid)
@@ -257,11 +256,11 @@ void AbstractHubPrivate::procMap(QVariantMap map)
         so->unregisterSender(target->thread());
 
     if (!ok) {
-//        qWarning("Invoke %s on %s faild", qPrintable(method.name()),
-//                 qPrintable(map[CLASS_NAME].toString()));
-        qWarning("Invoke on %s faild", qPrintable(method.name()));
-//        qWarning() << map;
+        qWarning("Invoke %s faild", qPrintable(lockName));
     } else {
+        qDebug() << "returning" << returnData << "to"
+                 << map[CLASS_NAME].toString() << "::" << method.name();
+
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
@@ -322,8 +321,8 @@ void AbstractHubPrivate::sync()
 
         q->invokeOnPeer(peer->peerName(), "set" + w, p.read(peer));
     }
-    QMetaObject::invokeMethod(q, "commit", Qt::QueuedConnection);
-    //    q->commit();
+//    QMetaObject::invokeMethod(q, "commit", Qt::QueuedConnection);
+    q->commit();
 }
 
 AbstractHub::AbstractHub(QObject *parent)
@@ -397,8 +396,6 @@ void AbstractHub::attachSharedObject(SharedObject *o)
         d->sharedObjects.insert(o->peerName(), o);
         o->attachHub(this);
         d->sync();
-        //        qDebug() << "SharedObject" << o->objectName() << "attached to"
-        //        << metaObject()->className() << objectName();
     }
 }
 
@@ -409,9 +406,6 @@ void AbstractHub::detachSharedObject(SharedObject *o)
 
     if (d->sharedObjects.remove(o->peerName())) {
         o->detachHub(this);
-        //        qDebug() << "AbstractHub::detachSharedObject" <<
-        //        o->objectName() << "; " << metaObject()->className() <<
-        //        objectName();
     }
 }
 
@@ -451,8 +445,11 @@ void AbstractHub::waitForConnected(int timeout)
 void AbstractHub::flushSocket()
 {
     bufferMutex.lock();
-    socket->write(serializer()->serialize(d->buffer));
-    socket->flush();
+    qint64 n = socket->write(serializer()->serialize(d->buffer));
+    if (!n)
+        qDebug() << "No data to write";
+    if (!socket->flush())
+        qDebug() << "No data to flush";
     d->buffer.clear();
     bufferMutex.unlock();
     d->isTransaction = false;
@@ -520,13 +517,25 @@ void AbstractHub::socket_onReadyRead()
     QString bufferString = d->readBuffer;
 
     if (bufferString.endsWith("}\n")) {
-        if (bufferString.count('{') != bufferString.count('}'))
+        //        int bracketOpen = 0;
+        //        int bracketClose = 0;
+        //        for (int i = 0; i < bufferString.size(); ++i) {
+        //            if(bufferString.at(i) == '{')
+        //                bracketOpen++;
+
+        //            if(bufferString.at(i) == '}')
+        //                bracketClose++;
+        //        }
+        //        if(bracketClose != bracketOpen)
+        //            return;
+        if (bufferString.count('{') != bufferString.count('}')) {
+            qDebug() << "Invalid json";
             return;
+        }
     } else {
+        // qDebug() << "Invalid data recived; ";
         return;
     }
-
-    //    buffer = "[" + buffer.replace("}\n{", "},{") + "]";
 
     QVariant var = serializer()->deserialize(
         "[" + d->readBuffer.replace("}\n{", "},{") + "]");
@@ -638,6 +647,10 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
         return 0;
     } else {
         qint64 res = socket->write(serializer()->serialize(map));
+
+        if (!res)
+            qWarning() << "map is empty";
+
         return res == 0 ? 0 : d->requestId;
     }
 }

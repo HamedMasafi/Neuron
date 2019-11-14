@@ -20,6 +20,8 @@
 
 #include <QtNetwork/QTcpSocket>
 
+#include <QEvent>
+
 #include "abstracthub_p.h"
 #include "clienthub_p.h"
 #include "clienthub.h"
@@ -99,13 +101,13 @@ int ClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versi
 }
 #endif
 
-void ClientHub::timerEvent(QTimerEvent *)
+void ClientHub::timerEvent(QTimerEvent *e)
 {
     if(socket->state() == QAbstractSocket::UnconnectedState){
         connectToHost();
         setStatus(Reconnecting);
     }else if(socket->state() == QAbstractSocket::ConnectedState){
-        killTimer(d->reconnectTimerId);
+        killTimer(e->timerId());// d->reconnectTimerId);
 //        d->sync();
         setStatus(Connected);
     }

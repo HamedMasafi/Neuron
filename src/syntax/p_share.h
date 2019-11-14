@@ -4,7 +4,7 @@
 #include <QtGlobal>
 
 QT_WARNING_PUSH
-QT_WARNING_DISABLE_CLANG("-Wreserved-id-macro");
+QT_WARNING_DISABLE_CLANG("-Wreserved-id-macro")
 
 #define __NAMEVALUE2(...)
 #define __NAMEVALUE4(a, b)                                                    a b

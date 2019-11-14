@@ -14,6 +14,7 @@ HEADERS += \
     $$PWD/src/serverhub.h \
     $$PWD/src/server.h \
     $$PWD/src/server_p.h \
+    $$PWD/src/servermodel.h \
     $$PWD/src/tcpsocketserver_p.h \
     $$PWD/src/sharedobject.h \
     $$PWD/src/serverhub_p.h \
@@ -44,6 +45,7 @@ SOURCES += \
     $$PWD/src/clienthub.cpp \
     $$PWD/src/serverhub.cpp \
     $$PWD/src/server.cpp \
+    $$PWD/src/servermodel.cpp \
     $$PWD/src/tcpsocketserver.cpp \
     $$PWD/src/sharedobject.cpp \
     $$PWD/src/peer.cpp \

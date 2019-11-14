@@ -511,10 +511,8 @@ void AbstractHub::socket_onReadyRead()
 
     d->readBuffer.append(socket->readAll());
 
-    if (!d->readBuffer.size()) {
-        qDebug() << "Invalid buffer size";
+    if (!d->readBuffer.size())
         return;
-    }
 
     QString bufferString = d->readBuffer;
 
@@ -535,7 +533,7 @@ void AbstractHub::socket_onReadyRead()
             return;
         }
     } else {
-        qDebug() << "Invalid data recived; ";
+        // qDebug() << "Invalid data recived; ";
         return;
     }
 

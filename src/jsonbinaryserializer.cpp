@@ -275,7 +275,7 @@ QVariant JsonBinarySerializer::fromJson(QJsonObject object)
 
         if(!obj){
             qWarning("Object type %s can not deserialized", qPrintable(object[VARIANT_TYPE].toString()));
-            return 0;
+            return QVariant();
         }
 
         deserializeQObject(obj, map);

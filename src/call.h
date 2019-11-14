@@ -32,7 +32,6 @@ public:
 protected:
     void returnToCaller() Q_DECL_OVERRIDE
     {
-        qDebug() << "return to caller" << value;
         if (callbackFunction != nullptr)
             callbackFunction(value.value<T>());
 

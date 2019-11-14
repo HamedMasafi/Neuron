@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QString>
 
+typedef Neuron::Call<void> CallVoid;
+
 class User : public Neuron::Peer
 {
     Q_OBJECT

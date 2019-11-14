@@ -5,3 +5,5 @@ Q.qbs.user.*
 
 build-*
 build
+
+lib

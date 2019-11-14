@@ -1,9 +1,11 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml>
+#include <QQuickStyle>
 
 #include <ClientHub>
 #include <Peer>
+
 
 #include <SimpleTokenValidator>
 #include "user.h"
@@ -17,6 +19,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+//    QQuickStyle::setStyle("material");
+
 //    qRegisterMetaType<Neuron::SimpleTokenValidator>();
 //    qRegisterMetaType<Neuron::SimpleTokenValidator*>();
 //    qmlRegisterType<Neuron::SimpleTokenValidator>("Tooj.RPC", 1, 0, "SimpleTokenValidator");
@@ -24,7 +28,6 @@ int main(int argc, char *argv[])
 //    qmlRegisterType<Neuron::Peer>("Tooj.RPC", 1, 0, "Peer");
 //    qmlRegisterType<User>("Tooj.RPC", 1, 0, "User");
 //    qmlRegisterType<ServerInstance>("Tooj.RPC", 1, 0, "ServerInstance");
-    typedef Neuron::Call<void> CallVoid;
     qmlRegisterUncreatableType<Neuron::AbstractCall>("Tooj.RPC", 1, 0, "Call", "");
     qmlRegisterUncreatableType<CallVoid>("Tooj.RPC", 1, 0, "CallVoid", "");
     qmlRegisterType<Pixmap>("Tooj.RPC", 1, 0, "Pixmap");

@@ -33,12 +33,12 @@ NEURON_BEGIN_NAMESPACE
  */
 
 Peer::Peer(QObject *parent)
-    : QObject(parent), _peerName(QString::null), m_hub(0)
+    : QObject(parent), m_hub(nullptr)
 {
 }
 
 Peer::Peer(AbstractHub *hub, QObject *parent)
-    : QObject(parent), _peerName(QString::null), m_hub(0)
+    : QObject(parent), m_hub(nullptr)
 {
     setHub(hub);
 }
@@ -85,7 +85,7 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
                      qPrintable(methodName));
         return 0;
     } else {
-        return hub()->invokeOnPeer(metaObject()->className(), methodName, val0,
+        return hub()->invokeOnPeer(peerName(), methodName, val0,
                                    val1, val2, val3, val4, val5, val6, val7,
                                    val8, val9);
     }
@@ -141,6 +141,12 @@ void Peer::setHub(AbstractHub *hub)
 
         emit hubChanged(hub);
     }
+}
+
+void Peer::setProperty(QString name, QVariant value)
+{
+    QObject::setProperty(name.toLatin1(), value);
+    emit propertyChanged(name, value);
 }
 
 NEURON_END_NAMESPACE

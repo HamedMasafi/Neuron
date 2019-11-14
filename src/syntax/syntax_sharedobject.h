@@ -23,7 +23,7 @@
             initalize();                                                        \
         }                                                                       \
         class::class(NEURON_WRAP_NAMESPACE(AbstractHub) *hub, QObject *parent)  \
-                : NEURON_WRAP_NAMESPACE(Peer)(parent)                           \
+                : NEURON_WRAP_NAMESPACE(SharedObject)(parent)                   \
         {                                                                       \
             setPeerName(#class);                                                \
             if(hub)                                                             \

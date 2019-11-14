@@ -17,9 +17,9 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 #include "p_share.h"
 #include "method_normal.h"
 
-#define REMOTE_METHOD_DECL_P(ret, name, count, oe, ...) \
-    ret name(__NAMEVALUE(count, __VA_ARGS__)); \
-    ret name ## Callback(__NAMEVALUE(count, __VA_ARGS__));
+#define RET_TYPE_VOID(ret) void
+#define RET_TYPE_NONVOID(ret) ret
+#define RET_TYPE(oe, ret) RET_TYPE_##oe(ret)
 
 #define __REMOTE_METHOD_DECL_P3(ret, name, count, oe, ...) \
     public Q_SLOTS: \

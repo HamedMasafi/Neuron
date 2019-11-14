@@ -24,6 +24,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QExplicitlySharedDataPointer>
 #include "abstracthub.h"
+#include <functional>
 
 NEURON_BEGIN_NAMESPACE
 
@@ -62,6 +63,9 @@ public:
     quint32 reconnectTimeout() const;
     bool isListening() const;
 
+    template<typename T>
+    void forEach (const std::function<void(T*)> &callback);
+
 signals:
     void peerConnected(Peer *peer);
     void peerDisconnected(Peer *peer);
@@ -80,6 +84,17 @@ public slots:
     void setServerType(ServerType serverType);
     void setReconnectTimeout(quint32 reconnectTimeout);
 };
+
+template<typename T>
+Q_OUTOFLINE_TEMPLATE void Server::forEach (const std::function<void(T*)> &callback)
+{
+    auto _peers = peers();
+    foreach (Peer *p, _peers) {
+        auto t = qobject_cast<T*>(p);
+        if (t)
+            callback(t);
+    }
+}
 
 NEURON_END_NAMESPACE
 

@@ -1,5 +1,5 @@
-#ifndef SYNTAX_SHAREDOBJECT_H
-#define SYNTAX_SHAREDOBJECT_H
+#ifndef SYNTAX_CLASS_DEF_H
+#define SYNTAX_CLASS_DEF_H
 
 #   include "method_slot_peer.h"
 #   include "decl_signal_peer.h"
@@ -32,4 +32,4 @@
         }                                                                       \
         void class::initalize()
 
-#endif // SYNTAX_SHAREDOBJECT_H
+#endif // SYNTAX_CLASS_DEF_H

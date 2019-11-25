@@ -96,6 +96,8 @@ public:
     Q_INVOKABLE void flushSocket();
     qlonglong hubId() const;
 
+    QHostAddress localAddress() const;
+
 protected:
     QHash<qlonglong, AbstractCall*> _calls;
     QTcpSocket *socket;

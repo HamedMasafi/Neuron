@@ -32,6 +32,8 @@
 #include "global.h"
 #include "call.h"
 
+#include <QPointer>
+
 NEURON_BEGIN_NAMESPACE
 
 class AbstractHub;
@@ -67,7 +69,7 @@ public:
     const QString peerName() const;
 
 protected:
-    AbstractHub* m_hub;
+    QPointer<AbstractHub> m_hub;
     void addCall(qlonglong id, AbstractCall *call);
     void removeCall(qlonglong id);
     void setPeerName(const QString &name);

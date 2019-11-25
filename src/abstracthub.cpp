@@ -21,6 +21,7 @@
 #include <Server>
 #include <QTimer>
 #include <QMetaMethod>
+#include <QHostAddress>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QSet>
@@ -258,8 +259,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     if (!ok) {
         qWarning("Invoke %s faild", qPrintable(lockName));
     } else {
-        qDebug() << "returning" << returnData << "to"
-                 << map[CLASS_NAME].toString() << "::" << method.name();
+//        qDebug() << "returning" << returnData << "to"
+//                 << map[CLASS_NAME].toString() << "::" << method.name();
 
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
@@ -302,7 +303,7 @@ bool AbstractHubPrivate::response(const qlonglong &id,
 
 void AbstractHubPrivate::sync()
 {
-    if (status != AbstractHub::Connected)
+//    if (status != AbstractHub::Connected)
         return;
 
     q->beginTransaction();
@@ -470,6 +471,11 @@ QQmlEngine *AbstractHub::qmlEngine() const
 qlonglong AbstractHub::hubId() const
 {
     return d->hubId;
+}
+
+QHostAddress AbstractHub::localAddress() const
+{
+    return socket->localAddress();
 }
 
 void AbstractHub::setHubId(qlonglong id)
@@ -660,6 +666,7 @@ void AbstractHub::setPeer(Peer *peer)
     if (d->peer == peer)
         return;
 
+    peer->setHub(this);
     d->peer = peer;
     d->sync();
     emit peerChanged(peer);

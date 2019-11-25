@@ -79,5 +79,48 @@
 
 #endif
 
+//#define NEURON_SHARED_POINTER
+#ifdef NEURON_SHARED_POINTER
+template <class T>
+using PointerList = QList<QSharedPointer<T>>;
+
+template <class T>
+using PointerSet = QSet<QSharedPointer<T>>;
+
+template <typename T>
+using Pointer = QSharedPointer<T>;
+
+template<class T>
+inline Pointer<T> createPointer() {
+    return QSharedPointer<T>(new T);
+}
+
+template<class T>
+inline Pointer<T> createPointer(QObject *parent) {
+    return QSharedPointer<T>(new T(parent));
+}
+
+#else
+//template <typename T>
+//using PointerList = QList<T*>;
+
+//template <typename T>
+//using PointerSet = QSet<T*>;
+
+//template <typename T>
+//using Pointer = T*;
+
+//template<class T>
+//inline Pointer<T> createPointer() {
+//    return new T;
+//}
+
+//template<class T>
+//inline Pointer<T> createPointer(QObject *parent) {
+//    return new T(parent);
+//}
+
+#endif
+
 #endif // NEURONGLOBAL_H
 

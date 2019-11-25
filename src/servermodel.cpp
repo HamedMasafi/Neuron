@@ -23,6 +23,7 @@
 
 #include <QMetaProperty>
 #include <QDebug>
+#include <QHostAddress>
 
 NEURON_BEGIN_NAMESPACE
 
@@ -32,16 +33,12 @@ ServerModel::ServerModel(Server *server) :
 
     auto mo = QMetaType::metaObjectForType(server->typeId());
     for (int i = mo->propertyOffset(); i < mo->propertyCount(); ++i) {
-        _properties.append(mo->property(i).name());
+        auto p = mo->property(i);
+        _properties.append(p.name());
+        _props.insert(p.name(), p.name());
     }
-    qDebug() << _properties;
     connect(server, &Server::peerConnected, this, &ServerModel::server_peerConnected);
     connect(server, &Server::peerDisconnected, this, &ServerModel::server_peerDisconnected);
-
-
-    connect(server, &Neuron::Server::peerConnected, [this](Neuron::Peer *peer){
-        qDebug() << ("Peer connected");
-    });
 }
 
 int ServerModel::rowCount(const QModelIndex &parent) const
@@ -51,14 +48,30 @@ int ServerModel::rowCount(const QModelIndex &parent) const
 
 QVariant ServerModel::data(const QModelIndex &index, int role) const
 {
-    if (role != Qt::DisplayRole)
+    if (role != Qt::DisplayRole || !index.isValid())
         return QVariant();
-    return _peers.at(index.row())->property(_properties.at(index.column()).toLatin1());
+
+    auto peer = _peers.at(index.row());
+
+    QString propName;
+    QVariant value;
+    if (m_showAddress && index.column() == 0) {
+        propName = ":address";
+        return peer->hub()->localAddress().toString();
+    } else {
+        propName = _props.keys().at(index.column() - (m_showAddress ? 1 : 0));
+        value = peer->property(propName.toLatin1());
+        if (_translators.contains(propName))
+            return _translators.value(propName)(value);
+    }
+
+    return value;
 }
 
 int ServerModel::columnCount(const QModelIndex &parent) const
 {
-    return _properties.count();
+    Q_UNUSED(parent)
+    return _properties.count() + (m_showAddress ? 1 : 0);
 }
 
 void ServerModel::server_peerConnected(Peer *peer)
@@ -70,6 +83,8 @@ void ServerModel::server_peerConnected(Peer *peer)
     beginInsertRows(QModelIndex(), i, i);
     _peers.append(peer);
     endInsertRows();
+
+    emit peerAdded(peer);
 }
 
 void ServerModel::server_peerDisconnected(Peer *peer)
@@ -87,10 +102,21 @@ QVariant ServerModel::headerData(int section, Qt::Orientation orientation, int r
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    if (orientation == Qt::Horizontal)
-        return _properties.at(section);
-    else
+    if (orientation == Qt::Horizontal) {
+        if (section == 0 && m_showAddress)
+            return _addressText;
+        return _props.values().at(section - (m_showAddress ? 1 : 0));
+    } else {
         return section + 1;
+    }
+}
+
+void ServerModel::setHeaderText(const QString &propertyName, const QString &text)
+{
+    if (propertyName == ":address")
+        _addressText = text;
+    if (_props.contains(propertyName))
+        _props[propertyName] = text;
 }
 
 Peer *ServerModel::peer(const QModelIndex &index) const
@@ -100,6 +126,36 @@ Peer *ServerModel::peer(const QModelIndex &index) const
     if (index.row() < 0 || index.row() > _peers.count() - 1)
         return nullptr;
     return _peers.at(index.row());
+}
+
+void ServerModel::invalidateProperty(Peer *peer, const QString &propertyName)
+{
+    auto peerIndex = _peers.indexOf(peer);
+    auto propIndex = _props.values().indexOf(propertyName);
+
+    if (peerIndex != -1 && propIndex != -1) {
+        auto idx = index(peerIndex, propIndex);
+        emit dataChanged(idx, idx);
+    }
+}
+
+void ServerModel::installTranslator(const QString &propertyName, ServerModel::PropertyTranslator translator)
+{
+    _translators.insert(propertyName, translator);
+}
+
+bool ServerModel::showAddress() const
+{
+    return m_showAddress;
+}
+
+void ServerModel::setShowAddress(bool showAddress)
+{
+    if (m_showAddress == showAddress)
+        return;
+
+    m_showAddress = showAddress;
+    emit showAddressChanged(m_showAddress);
 }
 
 NEURON_END_NAMESPACE

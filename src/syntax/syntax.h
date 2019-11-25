@@ -16,6 +16,7 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
 
 #include "p_share.h"
 #include "method_normal.h"
+#include "decl_signal_peer.h"
 
 #define RET_TYPE_VOID(ret) void
 #define RET_TYPE_NONVOID(ret) ret
@@ -67,7 +68,6 @@ QT_WARNING_DISABLE_GCC("-Wpedantic")
         invokeOnPeer(#write, QVariant::fromValue(name)); \
         emit notify(name);  \
     }
-//invokeOnPeer("setProperty", #name, QVariant::fromValue(name)); \
 
 //Constructors
 #define N_CLASS_DECL(class) \

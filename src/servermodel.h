@@ -25,6 +25,7 @@
 #include "peer.h"
 
 #include <QAbstractListModel>
+#include <functional>
 
 NEURON_BEGIN_NAMESPACE
 
@@ -33,9 +34,21 @@ class NEURON_EXPORT ServerModel : public QAbstractListModel
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool showAddress READ showAddress WRITE setShowAddress NOTIFY showAddressChanged)
+
+    typedef std::function<QVariant(QVariant)> PropertyTranslator;
+
+    QMap<QString, QString> _props;
+    QString _addressText;
+    QMap<QString, PropertyTranslator> _translators;
+
     QStringList _properties;
     Neuron::Server *_server;
     QList<Peer*> _peers;
+
+
+    bool m_showAddress;
+
 public:
     ServerModel(Neuron::Server *server);
     int rowCount(const QModelIndex &parent) const;
@@ -43,11 +56,25 @@ public:
     int columnCount(const QModelIndex &parent) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
+    void setHeaderText(const QString &propertyName, const QString &text);
+
     Neuron::Peer *peer(const QModelIndex &index) const;
+
+    void invalidateProperty(Peer *peer, const QString &propertyName);
+    void installTranslator(const QString &propertyName, PropertyTranslator translator);
+
+    bool showAddress() const;
+
+public slots:
+    void setShowAddress(bool showAddress);
 
 private slots:
     void server_peerConnected(Peer *peer);
     void server_peerDisconnected(Peer *peer);
+
+signals:
+    void peerAdded(Peer *peer);
+    void showAddressChanged(bool showAddress);
 };
 
 NEURON_END_NAMESPACE

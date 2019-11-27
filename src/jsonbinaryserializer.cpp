@@ -225,9 +225,15 @@ QJsonObject JsonBinarySerializer::toJson(QStringList list)
 QJsonObject JsonBinarySerializer::toJson(QVariantMap map)
 {
     QJsonObject mapObject;
-    foreach (QString key, map.keys()) {
-        mapObject.insert(key, toJson(map[key]));
+    for (auto i = map.begin(); i != map.end(); ++i) {
+        mapObject.insert(i.key(), toJson(i.value()));
     }
+//    foreach (QString key, map.keys()) {
+//        if (map[key].isValid())
+//            mapObject.insert(key, toJson(map[key]));
+//        else
+//            mapObject.insert(key, QJsonValue());
+//    }
 
     QJsonObject o;
     o.insert(VARIANT_TYPE, CLASS_NAME(QVariantMap));

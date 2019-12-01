@@ -23,7 +23,7 @@ public:
     }
 
     T wait() {
-        wait();
+        AbstractCall::wait();
         return value.value<T>();
     }
 

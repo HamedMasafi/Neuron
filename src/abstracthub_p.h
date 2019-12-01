@@ -36,6 +36,8 @@
 #define MAP_TYPE            "_t"
 #define MAP_RETURN_VALUE    "_return_value"
 #define MAP_TYPE_REQUEST    "request"
+#define MAP_TYPE_EMIT       "emit"
+#define MAP_TYPE_SET_VALUE  "setvalue"
 #define MAP_TYPE_RESPONSE   "response"
 #define MAP_TOKEN_ITEM      "_token"
 

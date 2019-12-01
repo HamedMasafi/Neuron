@@ -478,6 +478,11 @@ QHostAddress AbstractHub::localAddress() const
     return socket->localAddress();
 }
 
+QHostAddress AbstractHub::peerAddress() const
+{
+    return socket->peerAddress();
+}
+
 void AbstractHub::setHubId(qlonglong id)
 {
     if (d->hubId == id)
@@ -607,8 +612,15 @@ void AbstractHub::commit()
     QMetaObject::invokeMethod(this, "flushSocket");
 }
 
+qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
+{
+    return invokeOnPeer(sender, methodName, Request, val0, val1, val2, val3,
+                        val4, val5, val6, val7, val8, val9);
+}
+
 // TODO: remove val8, val9
 qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
+                                    AbstractHub::CallType type,
                                          QVariant val0, QVariant val1,
                                          QVariant val2, QVariant val3,
                                          QVariant val4, QVariant val5,
@@ -629,7 +641,18 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
     QVariantMap map;
     map[ID] = QVariant(d->requestId);
     map[METHOD_NAME] = methodName;
-    map[MAP_TYPE] = MAP_TYPE_REQUEST;
+
+    switch (type) {
+    case Request:
+        map[MAP_TYPE] = MAP_TYPE_REQUEST;
+        break;
+    case SetProperty:
+        map[MAP_TYPE] = MAP_TYPE_SET_VALUE;
+        break;
+    case Emit:
+        map[MAP_TYPE] = MAP_TYPE_EMIT;
+        break;
+    }
     map[CLASS_NAME] = sender;
 
     d->addToMap(&map, val0, 0);

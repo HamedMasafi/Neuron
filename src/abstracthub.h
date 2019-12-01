@@ -72,6 +72,12 @@ public:
     };
     Q_ENUM(Status)
 
+    enum CallType {
+        Request,
+        SetProperty,
+        Emit
+    };
+
     explicit AbstractHub(QObject *parent = nullptr);
     explicit AbstractHub(AbstractSerializer *serializer, QObject *parent = nullptr);
     virtual ~AbstractHub();
@@ -97,6 +103,7 @@ public:
     qlonglong hubId() const;
 
     QHostAddress localAddress() const;
+    QHostAddress peerAddress() const;
 
 protected:
     QHash<qlonglong, AbstractCall*> _calls;
@@ -134,19 +141,35 @@ public slots:
     bool isTransaction() const;
     void rollback();
     void commit();
+
+    Q_DECL_DEPRECATED
     qlonglong invokeOnPeer(
-            QString sender,
-            QString methodName,
-            QVariant val0 = QVariant(),
-            QVariant val1 = QVariant(),
-            QVariant val2 = QVariant(),
-            QVariant val3 = QVariant(),
-            QVariant val4 = QVariant(),
-            QVariant val5 = QVariant(),
-            QVariant val6 = QVariant(),
-            QVariant val7 = QVariant(),
-            QVariant val8 = QVariant(),
-            QVariant val9 = QVariant());
+        QString sender,
+        QString methodName,
+        QVariant val0 = QVariant(),
+        QVariant val1 = QVariant(),
+        QVariant val2 = QVariant(),
+        QVariant val3 = QVariant(),
+        QVariant val4 = QVariant(),
+        QVariant val5 = QVariant(),
+        QVariant val6 = QVariant(),
+        QVariant val7 = QVariant(),
+        QVariant val8 = QVariant(),
+        QVariant val9 = QVariant());
+    qlonglong invokeOnPeer(
+        QString sender,
+        QString methodName,
+        CallType type,
+        QVariant val0 = QVariant(),
+        QVariant val1 = QVariant(),
+        QVariant val2 = QVariant(),
+        QVariant val3 = QVariant(),
+        QVariant val4 = QVariant(),
+        QVariant val5 = QVariant(),
+        QVariant val6 = QVariant(),
+        QVariant val7 = QVariant(),
+        QVariant val8 = QVariant(),
+        QVariant val9 = QVariant());
 
     void attachSharedObject(SharedObject *o);
     void detachSharedObject(SharedObject *o);

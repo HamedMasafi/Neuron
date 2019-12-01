@@ -21,6 +21,12 @@ public:
         callbackFunction = callback;
         return this;
     }
+
+    T wait() {
+        wait();
+        return value.value<T>();
+    }
+
 #ifdef QT_QML_LIB
     Call<T> *then(QJSValue callback)
     {

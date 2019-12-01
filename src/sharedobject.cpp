@@ -235,7 +235,7 @@ qlonglong SharedObject::invokeOnPeer(QString methodName,
 
 void SharedObject::sync(AbstractHub *hub)
 {
-    if (hub->status() != AbstractHub::Connected)
+//    if (hub->status() != AbstractHub::Connected)
         return;
 
     hub->beginTransaction();

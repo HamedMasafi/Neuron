@@ -24,6 +24,8 @@ public:
 
     void wait();
     void finish();
+    void ignore();
+
 protected:
     QVariant value;
     virtual void returnToCaller()
@@ -45,6 +47,8 @@ public slots:
     }
 #endif
 
+    friend class Peer;
+    friend class SharedObject;
     friend class AbstractHubPrivate;
 };
 

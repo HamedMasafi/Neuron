@@ -24,6 +24,11 @@ void AbstractCall::finish()
     }
 }
 
+void AbstractCall::ignore()
+{
+
+}
+
 #ifdef QT_QML_LIB
 
 QJSValue AbstractCall::toJsValue(QVariant var)

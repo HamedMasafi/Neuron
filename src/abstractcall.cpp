@@ -24,6 +24,15 @@ void AbstractCall::finish()
     }
 }
 
+void AbstractCall::ignore()
+{
+    if (eventLoop != nullptr) {
+        eventLoop->quit();
+        eventLoop->deleteLater();
+    }
+    deleteLater();
+}
+
 #ifdef QT_QML_LIB
 
 QJSValue AbstractCall::toJsValue(QVariant var)

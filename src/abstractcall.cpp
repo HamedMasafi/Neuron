@@ -3,19 +3,23 @@
 NEURON_BEGIN_NAMESPACE
 
 AbstractCall::AbstractCall(QObject *parent) : QObject(parent)
-  , eventLoop(nullptr)
+    , eventLoop(nullptr), isFinished(false)
 {
 
 }
 
 void AbstractCall::wait()
 {
+    if (isFinished)
+        return;
+
     eventLoop = new QEventLoop;
     eventLoop->exec();
 }
 
 void AbstractCall::finish()
 {
+    isFinished = true;
     returnToCaller();
 
     if (eventLoop != nullptr) {

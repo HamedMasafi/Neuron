@@ -18,7 +18,7 @@ class AbstractCall : public QObject
 {
     Q_OBJECT
     QEventLoop *eventLoop;
-
+    bool isFinished;
 public:
     explicit AbstractCall(QObject *parent = nullptr);
 

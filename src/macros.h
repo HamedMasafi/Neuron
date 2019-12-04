@@ -132,13 +132,11 @@
     {   \
         qlonglong __call_id = invokeOnPeer(#name "Slot" sep names);  \
         auto call = new CALL_T(ret)();    \
-        if (__call_id) { \
+        if (__call_id) \
             addCall(__call_id, call);  \
-            return call; \
-        } else { \
+        else \
             call->ignore(); \
-        }   \
-        return nullptr; \
+        return call; \
     } \
     ret class::name##Slot(params)
 

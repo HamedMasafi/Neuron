@@ -20,23 +20,11 @@ HEADERS += \
     $$PWD/src/serverhub_p.h \
     $$PWD/src/peer.h \
     $$PWD/src/serverthread.h \
-    $$PWD/src/syntax/syntax.h \
-    $$PWD/src/syntax/method_metamethod.h \
-    $$PWD/src/syntax/syntax_sharedobject.h \
-    $$PWD/src/syntax/syntax_peer.h \
-    $$PWD/src/syntax/p_share.h \
-    $$PWD/src/syntax/method_jscallback.h \
-    $$PWD/src/syntax/method_async.h \
-    $$PWD/src/syntax/method_slotcallback.h \
-    $$PWD/src/syntax/method_stdfunc.h \
-    $$PWD/src/syntax/method_slot_sharedobject.h \
-    $$PWD/src/syntax/method_slot_peer.h \
-    $$PWD/src/syntax/decl_signal_peer.h \
-    $$PWD/src/syntax/decl_signal_sharedobject.h \
     $$PWD/src/abstractdataencoder.h \
     $$PWD/src/simpletokenvalidator.h \
     $$PWD/src/abstractcall.h \
-    $$PWD/src/call.h
+    $$PWD/src/call.h \
+    $$PWD/src/macros.h
 
 SOURCES += \
     $$PWD/src/abstracthub.cpp \

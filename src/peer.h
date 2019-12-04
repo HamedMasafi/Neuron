@@ -18,9 +18,7 @@
 **
 **************************************************************************/
 
-#ifndef NEURON_SHARED_OBJECT
-#include "syntax/syntax_peer.h"
-#endif
+#include "macros.h"
 
 #ifndef NEURONPEER_H
 #define NEURONPEER_H

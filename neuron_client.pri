@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/src/jsonbinaryserializer.h \
     $$PWD/src/clienthub.h \
     $$PWD/src/clienthub_p.h \
+    $$PWD/src/macros.h \
     $$PWD/src/serverhub.h \
     $$PWD/src/server.h \
     $$PWD/src/server_p.h \
@@ -19,18 +20,11 @@ HEADERS += \
     $$PWD/src/serverhub_p.h \
     $$PWD/src/peer.h \
     $$PWD/src/serverthread.h \
-    $$PWD/src/syntax/syntax.h \
-    $$PWD/src/syntax/syntax_sharedobject.h \
-    $$PWD/src/syntax/syntax_peer.h \
-    $$PWD/src/syntax/p_share.h \
-    $$PWD/src/syntax/method_slot_sharedobject.h \
-    $$PWD/src/syntax/method_slot_peer.h \
-    $$PWD/src/syntax/decl_signal_peer.h \
-    $$PWD/src/syntax/decl_signal_sharedobject.h \
     $$PWD/src/abstractdataencoder.h \
     $$PWD/src/simpletokenvalidator.h \
     $$PWD/src/abstractcall.h \
-    $$PWD/src/call.h
+    $$PWD/src/call.h \
+    $$PWD/src/macros.h
 
 
 SOURCES += \

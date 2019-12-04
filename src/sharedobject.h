@@ -25,7 +25,7 @@
 #include <QtCore/QSet>
 
 #define NEURON_SHARED_OBJECT
-#include "syntax/syntax_sharedobject.h"
+//#include "syntax/syntax_sharedobject.h"
 #include "abstracthub.h"
 #include "peer.h"
 #undef NEURON_SHARED_OBJECT

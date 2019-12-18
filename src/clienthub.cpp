@@ -134,6 +134,7 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
         if (socket->state() != QAbstractSocket::ConnectedState) {
             qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
             setStatus(Unconnected);
+            onStatusChanged(Unconnected);
         }
     }
 }

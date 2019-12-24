@@ -71,6 +71,7 @@ public slots:
     void setServerAddress(QString serverAddress);
     void setPort(quint16 port);
     void setAutoReconnect(bool isAutoReconnect);
+    bool findDataFromBroadcast(const quint16 &broadcastPort, quint16 &port, QString &serverAddress, const int &timeout = 0);
 
 private slots:
     void onStatusChanged(Status status);

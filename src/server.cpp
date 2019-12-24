@@ -20,8 +20,12 @@
 
 #include <QtCore/QThread>
 
+#include <QEvent>
+#include <QNetworkInterface>
+#include <QUdpSocket>
 #include <SharedObject>
 
+#include "abstractdataencoder.h"
 #include "serverhub.h"
 #include "peer.h"
 #include "jsonbinaryserializer.h"
@@ -33,7 +37,8 @@
 NEURON_BEGIN_NAMESPACE
 
 ServerPrivate::ServerPrivate(Server *parent) : q_ptr(parent),
-    serverSocket(nullptr), typeId(0), serverType(Server::SingleThread), hubId(0), reconnectTimeout(0)
+    serverSocket(nullptr), typeId(0), serverType(Server::SingleThread),
+    hubId(0), reconnectTimeout(0), broadcastSocket(nullptr)
 {
 }
 
@@ -50,7 +55,7 @@ Server::Server(QObject *parent) : AbstractHub(parent),
             this, &Server::server_newIncomingConnection);
 }
 
-Server::Server(qint16 port, QObject *parent) : AbstractHub(parent),
+Server::Server(quint16 port, QObject *parent) : AbstractHub(parent),
      d(new ServerPrivate(this))
 {
     d->serverSocket = new TcpSocketServer;
@@ -74,7 +79,7 @@ QSet<Peer *> Server::peers() const
     return d->peers;
 }
 
-void Server::startServer(qint16 port)
+void Server::startServer(quint16 port)
 {
     bool ok = d->serverSocket->listen(QHostAddress::Any, port);
     if (!ok) {
@@ -90,6 +95,36 @@ quint32 Server::reconnectTimeout() const
 bool Server::isListening() const
 {
     return d->serverSocket->isListening();
+}
+
+void Server::startBroadcast(const quint16 &port)
+{
+    if (d->broadcastSocket)
+        return;
+
+    QVariantMap map;
+
+    QString localAddress;
+    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+    for (const QHostAddress &address: QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
+            localAddress = address.toString();
+    }
+
+    map.insert("port", port);
+    map.insert("address", localAddress);
+    if (encoder())
+        encoder()->encrypt(map);
+
+    d->broadcastData = serializer()->serialize(map);
+    d->broadcastSocket = new QUdpSocket(this);
+    d->broadcastPort = port;
+    d->broadcastTimer = startTimer(2000);
+}
+
+void Server::stopBroadcast()
+{
+    killTimer(d->broadcastTimer);
 }
 
 int Server::typeId() const
@@ -282,6 +317,21 @@ void Server::setReconnectTimeout(quint32 reconnectTimeout)
 
     d->reconnectTimeout = reconnectTimeout;
     emit reconnectTimeoutChanged(reconnectTimeout);
+}
+
+void Server::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == d->broadcastTimer) {
+        d->broadcastSocket->writeDatagram(d->broadcastData,
+                                          QHostAddress::Broadcast,
+                                          d->broadcastPort);
+
+#ifdef RAT_TEST_PAD
+        d->broadcastSocket->writeDatagram(d->broadcastData,
+                                          QHostAddress::LocalHost,
+                                          d->broadcastPort);
+#endif
+    }
 }
 
 

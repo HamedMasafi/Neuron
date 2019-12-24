@@ -43,7 +43,7 @@ class NEURON_EXPORT Server : public AbstractHub
 
 public:
     explicit Server(QObject *parent = nullptr);
-    explicit Server(qint16 port, QObject *parent = nullptr);
+    explicit Server(quint16 port, QObject *parent = nullptr);
     virtual ~Server();
 
     enum ServerType{
@@ -59,9 +59,12 @@ public:
     QSet<Peer *> peers() const;
     int typeId() const;
     ServerType serverType() const;
-    void startServer(qint16 port);
+    void startServer(quint16 port);
     quint32 reconnectTimeout() const;
     bool isListening() const;
+
+    void startBroadcast(const quint16 &port);
+    void stopBroadcast();
 
     template<typename T>
     void forEach (const std::function<void(T*)> &callback);
@@ -83,6 +86,10 @@ public slots:
     void setTypeId(int typeId);
     void setServerType(ServerType serverType);
     void setReconnectTimeout(quint32 reconnectTimeout);
+
+    // QObject interface
+protected:
+    void timerEvent(QTimerEvent *event);
 };
 
 template<typename T>

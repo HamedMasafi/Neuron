@@ -24,6 +24,8 @@
 #include "server.h"
 #include <QSharedData>
 
+class QUdpSocket;
+
 NEURON_BEGIN_NAMESPACE
 
 class TcpSocketServer;
@@ -44,6 +46,11 @@ public:
     Server::ServerType serverType;
     qlonglong hubId;
     quint32 reconnectTimeout;
+
+    QUdpSocket *broadcastSocket;
+    quint16 broadcastPort;
+    QByteArray broadcastData;
+    int broadcastTimer;
 };
 
 NEURON_END_NAMESPACE

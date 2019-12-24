@@ -21,6 +21,8 @@
 #include <QtNetwork/QTcpSocket>
 
 #include <QEvent>
+#include <QTimer>
+#include <QUdpSocket>
 
 #include "abstracthub_p.h"
 #include "clienthub_p.h"
@@ -170,6 +172,46 @@ void ClientHub::setAutoReconnect(bool isAutoReconnect)
 
     d->isAutoReconnect = isAutoReconnect;
     emit isAutoReconnectChanged(isAutoReconnect);
+}
+
+bool ClientHub::findDataFromBroadcast(const quint16 &broadcastPort, quint16 &port, QString &serverAddress, const int &timeout)
+{
+    bool ret = false;
+    QEventLoop loop;
+    auto udpSocket = new QUdpSocket(this);
+    connect(udpSocket, &QUdpSocket::readyRead, [this, &loop, &ret, &port, &serverAddress, udpSocket](){
+        while (udpSocket->hasPendingDatagrams()) {
+            QByteArray datagram;
+            datagram.resize(int(udpSocket->pendingDatagramSize()));
+            udpSocket->readDatagram(datagram.data(), datagram.size());
+
+            QVariant var = serializer()->deserialize(datagram);
+            qDebug() << var;
+            if (var.type() != QVariant::Map)
+                return;
+
+            auto map = var.toMap();
+            port = static_cast<quint16>(map.value("port").toInt());
+            serverAddress = map.value("address").toString();
+            ret = true;
+            loop.quit();
+        }
+        if (ret) {
+            udpSocket->close();
+            udpSocket->deleteLater();
+        }
+    });
+    bool ok = udpSocket->bind(broadcastPort, QUdpSocket::ShareAddress);
+
+    if (!ok) {
+        qDebug() << "Unable to bind broadcast";
+        return false;
+    }
+    if (timeout > 0)
+        QTimer::singleShot(timeout, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    return ret;
 }
 
 void ClientHub::onStatusChanged(Status status)

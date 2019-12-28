@@ -97,7 +97,7 @@ bool Server::isListening() const
     return d->serverSocket->isListening();
 }
 
-void Server::startBroadcast(const quint16 &port)
+void Server::startBroadcast(const quint16 &serverPort, const quint16 &broadcastPort)
 {
     if (d->broadcastSocket)
         return;
@@ -111,14 +111,14 @@ void Server::startBroadcast(const quint16 &port)
             localAddress = address.toString();
     }
 
-    map.insert("port", port);
+    map.insert("port", serverPort);
     map.insert("address", localAddress);
     if (encoder())
         encoder()->encrypt(map);
 
     d->broadcastData = serializer()->serialize(map);
     d->broadcastSocket = new QUdpSocket(this);
-    d->broadcastPort = port;
+    d->broadcastPort = broadcastPort;
     d->broadcastTimer = startTimer(2000);
 }
 

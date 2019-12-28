@@ -63,7 +63,7 @@ public:
     quint32 reconnectTimeout() const;
     bool isListening() const;
 
-    void startBroadcast(const quint16 &port);
+    void startBroadcast(const quint16 &serverPort, const quint16 &broadcastPort);
     void stopBroadcast();
 
     template<typename T>

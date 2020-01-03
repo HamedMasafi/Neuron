@@ -329,7 +329,7 @@ void AbstractHubPrivate::sync()
 AbstractHub::AbstractHub(QObject *parent)
     : QObject(parent), d(new AbstractHubPrivate(this))
 {
-    qRegisterMetaType<Status>("::AbstractHub::Status");
+    qRegisterMetaType<Status>();
 
     socket = new QTcpSocket(this);
     K_REG_OBJECT(socket);

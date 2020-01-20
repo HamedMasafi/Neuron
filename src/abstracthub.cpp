@@ -192,6 +192,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
                  qPrintable(methodName));
         return;
     }
+    auto variantTypeId = QMetaType::type("QVariant");
     for (int i = 0; i < 10; i++) {
         QString indexString = QString::number(i);
         if (!map.contains("val" + indexString))
@@ -199,7 +200,10 @@ void AbstractHubPrivate::procMap(QVariantMap map)
 
         const void *data = map["val" + indexString].data();
         const char *name = map["val" + indexString].typeName();
-        args << QGenericArgument(name, data);
+        if (method.parameterType(i) ==variantTypeId && i < method.parameterCount())
+            args << QGenericArgument("QVariant", data);
+        else
+            args << QGenericArgument(name, data);
     }
     // FIXME: remove
     //    if (method.returnType() != QMetaType::Void) {

@@ -176,7 +176,7 @@ void Server::hub_connected()
         hub->attachSharedObject(sharedObj);
     }
 
-    if(d->hubId++ >= LONG_LONG_MAX - 1)
+    if(d->hubId++ >= LONG_MAX - 1)
         d->hubId = 1;
 
     hub->setHubId(d->hubId);

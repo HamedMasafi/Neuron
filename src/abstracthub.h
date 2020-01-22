@@ -73,7 +73,7 @@ public:
     Q_ENUM(Status)
 
     enum CallType {
-        Request,
+        InvokeMethod,
         SetProperty,
         Emit
     };
@@ -156,6 +156,17 @@ public slots:
         QVariant val7 = QVariant(),
         QVariant val8 = QVariant(),
         QVariant val9 = QVariant());
+
+    qlonglong setPropertyOnPeer(
+        QString sender,
+        QString propertyName,
+        QVariant value);
+
+    qlonglong emitOnPeer(
+        QString sender,
+        QString signalName,
+        QVariant value);
+
     qlonglong invokeOnPeer(
         QString sender,
         QString methodName,

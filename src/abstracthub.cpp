@@ -324,6 +324,7 @@ void AbstractHubPrivate::sync()
         QString w = p.name();
         w[0] = w[0].toUpper();
 
+        //TODO change this from 'invoke method' to 'set property'
         q->invokeOnPeer(peer->peerName(), "set" + w, p.read(peer));
     }
 //    QMetaObject::invokeMethod(q, "commit", Qt::QueuedConnection);
@@ -619,8 +620,18 @@ void AbstractHub::commit()
 
 qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
-    return invokeOnPeer(sender, methodName, Request, val0, val1, val2, val3,
+    return invokeOnPeer(sender, methodName, InvokeMethod, val0, val1, val2, val3,
                         val4, val5, val6, val7, val8, val9);
+}
+
+qlonglong AbstractHub::setPropertyOnPeer(QString sender, QString propertyName, QVariant value)
+{
+    return invokeOnPeer(sender, propertyName, SetProperty, value);
+}
+
+qlonglong AbstractHub::emitOnPeer(QString sender, QString signalName, QVariant value)
+{
+    return invokeOnPeer(sender, signalName, Emit);
 }
 
 // TODO: remove val8, val9
@@ -648,11 +659,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
     map[METHOD_NAME] = methodName;
 
     switch (type) {
-    case Request:
-        map[MAP_TYPE] = MAP_TYPE_REQUEST;
+    case InvokeMethod:
+        map[MAP_TYPE] = MAP_TYPE_METHOD_CALL;
         break;
     case SetProperty:
-        map[MAP_TYPE] = MAP_TYPE_SET_VALUE;
+        map[MAP_TYPE] = MAP_TYPE_SET_PROP;
         break;
     case Emit:
         map[MAP_TYPE] = MAP_TYPE_EMIT;

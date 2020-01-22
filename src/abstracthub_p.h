@@ -35,9 +35,9 @@
 #define METHOD_NAME         "_m"
 #define MAP_TYPE            "_t"
 #define MAP_RETURN_VALUE    "_return_value"
-#define MAP_TYPE_REQUEST    "request"
-#define MAP_TYPE_EMIT       "emit"
-#define MAP_TYPE_SET_VALUE  "setvalue"
+#define MAP_TYPE_METHOD_CALL    "method_call"
+#define MAP_TYPE_EMIT           "emit"
+#define MAP_TYPE_SET_PROP       "set_prop"
 #define MAP_TYPE_RESPONSE   "response"
 #define MAP_TOKEN_ITEM      "_token"
 

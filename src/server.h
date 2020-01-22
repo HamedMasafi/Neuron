@@ -59,7 +59,7 @@ public:
     QSet<Peer *> peers() const;
     int typeId() const;
     ServerType serverType() const;
-    void startServer(quint16 port);
+    bool startServer(quint16 port);
     quint32 reconnectTimeout() const;
     bool isListening() const;
 

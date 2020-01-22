@@ -105,13 +105,13 @@ int ClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versi
 
 void ClientHub::timerEvent(QTimerEvent *e)
 {
-    if(socket->state() == QAbstractSocket::UnconnectedState){
+    if(status() == Unconnected){
         connectToHost();
         setStatus(Reconnecting);
-    }else if(socket->state() == QAbstractSocket::ConnectedState){
+    }else if(status() == Connected){
         killTimer(e->timerId());// d->reconnectTimerId);
 //        d->sync();
-        setStatus(Connected);
+//        setStatus(Connected);
     }
 }
 
@@ -122,6 +122,9 @@ void ClientHub::connectToHost(bool waitForConnected)
 
 void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnected)
 {
+    if (status() != Unconnected)
+        return;
+
     if(!address.isNull())
         setServerAddress(address);
 
@@ -133,7 +136,7 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
     if(waitForConnected) {
         this->waitForConnected();
 
-        if (socket->state() != QAbstractSocket::ConnectedState) {
+        if (!isConnected()) {
             qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
             setStatus(Unconnected);
             onStatusChanged(Unconnected);
@@ -227,6 +230,7 @@ void ClientHub::onStatusChanged(Status status)
 
 void ClientHub::hi(qlonglong hubId)
 {
+    qDebug() << "hi recived";
     setStatus(Connected);
     if(hubId == this->hubId()){
         //reconnected
@@ -242,12 +246,14 @@ void ClientHub::hi(qlonglong hubId)
 
 void ClientHub::beginConnection()
 {
-    qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", QVariant::fromValue(hubId()));
+    qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", Request, QVariant::fromValue(hubId()));
 
     if(__call_id){
         Call<qlonglong> *call = new Call<qlonglong>(this);
+        qDebug() << "Sending hi";
         call->then([=](qlonglong hubId){
             setStatus(Connected);
+            qDebug() << "hi recived";
             if (hubId == this->hubId()){
                 //reconnected
                 emit reconnected();
@@ -261,6 +267,8 @@ void ClientHub::beginConnection()
         });
 //        addCall(__call_id, call);
         _calls.insert(__call_id, call);
+    } else {
+        qDebug() << "call id for 'hi' is invalid";
     }
 }
 

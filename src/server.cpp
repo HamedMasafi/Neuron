@@ -79,12 +79,13 @@ QSet<Peer *> Server::peers() const
     return d->peers;
 }
 
-void Server::startServer(quint16 port)
+bool Server::startServer(quint16 port)
 {
     bool ok = d->serverSocket->listen(QHostAddress::Any, port);
     if (!ok) {
        qWarning("Unable to start server. Error: %s", d->serverSocket->errorString().toUtf8().data());
     }
+    return ok;
 }
 
 quint32 Server::reconnectTimeout() const

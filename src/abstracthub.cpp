@@ -494,6 +494,7 @@ void AbstractHub::setHubId(qlonglong id)
 
 void AbstractHub::socket_connected()
 {
+    qDebug() << Q_FUNC_INFO;
     initalizeMutex.lock();
     K_TRACE_DEBUG;
     beginConnection();
@@ -504,6 +505,7 @@ void AbstractHub::socket_connected()
 
 void AbstractHub::socket_disconnected()
 {
+    qDebug() << Q_FUNC_INFO;
     setStatus(AbstractHub::Unconnected);
 
     // TODO:    if(isAutoReconnect()){
@@ -517,7 +519,6 @@ void AbstractHub::socket_disconnected()
 
 void AbstractHub::socket_onReadyRead()
 {
-
     //    d->socketReadMutes.lock();
 
     d->readBuffer.append(socket->readAll());

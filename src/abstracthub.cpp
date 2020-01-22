@@ -102,6 +102,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
         return;
     }
 
+    qDebug() << map;
     if (map[MAP_TYPE] == MAP_TYPE_RESPONSE) {
         if (q->_calls[id]) {
             AbstractCall *call = q->_calls[id];

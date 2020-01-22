@@ -107,7 +107,6 @@ void ClientHub::timerEvent(QTimerEvent *e)
 {
     if(status() == Unconnected){
         connectToHost();
-        setStatus(Reconnecting);
     }else if(status() == Connected){
         killTimer(e->timerId());// d->reconnectTimerId);
 //        d->sync();
@@ -125,6 +124,8 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
     if (status() != Unconnected)
         return;
 
+    setStatus(Reconnecting);
+
     if(!address.isNull())
         setServerAddress(address);
 
@@ -140,7 +141,6 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
             qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
 
             setStatus(Unconnected);
-            onStatusChanged(Unconnected);
         }
     }
 }
@@ -224,7 +224,6 @@ void ClientHub::onStatusChanged(Status status)
         if(isAutoReconnect()){
             connectToHost();
             d->reconnectTimerId = startTimer(500);
-            setStatus(Reconnecting);
         }
     }
 }

@@ -254,7 +254,7 @@ void ClientHub::beginConnection()
         qDebug() << "Sending hi";
         call->then([=](qlonglong hubId){
             setStatus(Connected);
-            qDebug() << "hi recived";
+            qDebug() << "hi recived" <<hubId;
             if (hubId == this->hubId()){
                 //reconnected
                 emit reconnected();

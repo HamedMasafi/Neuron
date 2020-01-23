@@ -270,6 +270,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
     }
+    qDebug() << "returning" << returnData << "to"
+                     << map[CLASS_NAME].toString() << "::" << method.name();
 
     QObject *returnDataPointer = returnData.value<QObject *>();
 
@@ -653,8 +655,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
                                          QVariant val6, QVariant val7,
                                          QVariant val8, QVariant val9)
 {
-    if (d->locks.contains(sender + "::" + methodName))
+    qDebug() << "Sending to -> " + sender + "::" + methodName;
+    if (d->locks.contains(sender + "::" + methodName)) {
+        qDebug() << "Lock -> " + sender + "::" + methodName;
         return 0;
+    }
 
     if (/*d->status != Connected || */ !socket->isOpen()) {
         qWarning("Socket is closed");
@@ -699,9 +704,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
         bufferMutex.lock();
         d->buffer.append(map);
         bufferMutex.unlock();
+        qDebug() << "Is transaction";
         return 0;
     } else {
         qint64 res = socket->write(serializer()->serialize(map));
+        socket->flush();
         if (!res)
             qWarning() << "map is empty";
 

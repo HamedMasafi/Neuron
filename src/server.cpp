@@ -184,7 +184,6 @@ void Server::hub_connected()
     d->hubs.insert(d->hubId, hub);
     d->peers.insert(peer);
 
-    hub->setStatus(AbstractHub::Connected);
     emit peerConnected(peer);
 }
 

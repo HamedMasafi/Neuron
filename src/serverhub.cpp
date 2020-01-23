@@ -20,6 +20,7 @@
 
 #include <QEventLoop>
 #include <QtCore/QDebug>
+#include <QtCore/QScopeGuard>
 #include <QtNetwork/QTcpSocket>
 
 #include "abstracthub_p.h"
@@ -90,7 +91,9 @@ qlonglong ServerHub::hi(qlonglong hubId)
     }
 
     initalizeMutex.unlock();
-    setStatus(Connected);
+    auto cleanup = qScopeGuard([this] {
+        setStatus(Connected);
+    });
     return this->hubId();
 }
 

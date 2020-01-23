@@ -1,5 +1,7 @@
 #include "abstractcall.h"
 
+#include <QDebug>
+
 NEURON_BEGIN_NAMESPACE
 
 AbstractCall::AbstractCall(QObject *parent) : QObject(parent)
@@ -30,6 +32,7 @@ void AbstractCall::finish()
 
 void AbstractCall::ignore()
 {
+    qWarning() << "Invalid call; ignored";
     if (eventLoop != nullptr) {
         eventLoop->quit();
         eventLoop->deleteLater();

@@ -550,7 +550,7 @@ void AbstractHub::socket_onReadyRead()
             return;
         }
     } else {
-        // qDebug() << "Invalid data recived; ";
+        qDebug() << "Invalid data recived; ";
         return;
     }
 
@@ -559,8 +559,18 @@ void AbstractHub::socket_onReadyRead()
     d->readBuffer.clear();
     //    d->socketReadMutes.unlock();
 
-    if (var.type() == QVariant::Map)
+    switch (var.type()) {
+    case QVariant::Map:
         d->procMap(var.toMap());
+        break;
+    case QVariant::List:
+        d->procMap(var.toList());
+        break;
+    default:
+        qWarning() << "Invalid data from serializer" << var;
+        break;
+    }
+    /*if (var.type() == QVariant::Map)
 
     if (var.type() == QVariant::List) {
         d->procMap(var.toList());
@@ -573,7 +583,7 @@ void AbstractHub::socket_onReadyRead()
 
         //        foreach (QVariant map, list)
         //            d->procMap(map.toMap());
-    }
+    }*/
 }
 
 void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
@@ -692,7 +702,6 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
         return 0;
     } else {
         qint64 res = socket->write(serializer()->serialize(map));
-
         if (!res)
             qWarning() << "map is empty";
 

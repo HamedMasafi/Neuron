@@ -221,7 +221,7 @@ qlonglong SharedObject::invokeOnPeer(QString methodName,
         } else {
             qlonglong v = hub->invokeOnPeer(
                         peerName(),
-                        methodName,
+                        methodName, AbstractHub::InvokeMethod,
                         val0, val1, val2, val3, val4,
                         val5, val6, val7, val8, val9);
             if (tmpHubs.count() == 1)
@@ -250,6 +250,7 @@ void SharedObject::sync(AbstractHub *hub)
         QString w = p.name();
         w[0] = w[0].toUpper();
 
+        // TODO: change to set property
         hub->invokeOnPeer(peerName(), "set" + w, p.read(this));
     }
     QMetaObject::invokeMethod(hub, "commit", Qt::QueuedConnection);

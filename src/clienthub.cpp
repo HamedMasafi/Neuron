@@ -255,14 +255,14 @@ void ClientHub::hi(qlonglong hubId)
 
 void ClientHub::beginConnection()
 {
-    qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", Request, QVariant::fromValue(hubId()));
+    qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", InvokeMethod, QVariant::fromValue(hubId()));
 
     if(__call_id){
         Call<qlonglong> *call = new Call<qlonglong>(this);
         qDebug() << "Sending hi";
         call->then([=](qlonglong hubId){
             setStatus(Connected);
-            qDebug() << "hi recived";
+            qDebug() << "hi recived" <<hubId;
             if (hubId == this->hubId()){
                 //reconnected
                 emit reconnected();

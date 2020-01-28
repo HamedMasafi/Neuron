@@ -60,19 +60,22 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
                                   QVariant val7, QVariant val8, QVariant val9)
 {
     // Object is transfered!!!
-    if (!hub())
+    if (!hub()) {
+        qDebug() << "No hub!";
         return 0;
+    }
 
-    if (hub()->status() != AbstractHub::Connected)
+    if (hub()->status() != AbstractHub::Connected) {
+        qDebug() << "IS not connected";
         return 0;
+    }
 
     if (hub()->isMultiThread()) {
-        //        qlonglong ret;
+//        qlonglong ret;
         bool ok = hub()->metaObject()->invokeMethod(
             hub(), QT_STRINGIFY(invokeOnPeer),
             //                                          Qt::DirectConnection,
-            //                                          Q_RETURN_ARG(qlonglong,
-            //                                          ret),
+//            Q_RETURN_ARG(qlonglong, ret),
             Q_ARG(QString, peerName()), Q_ARG(QString, methodName),
             Q_ARG(QVariant, val0), Q_ARG(QVariant, val1), Q_ARG(QVariant, val2),
             Q_ARG(QVariant, val3), Q_ARG(QVariant, val4), Q_ARG(QVariant, val5),
@@ -83,8 +86,11 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
         if (!ok)
             qWarning("Unable to invoke method: %s::%s", qPrintable(peerName()),
                      qPrintable(methodName));
+
+        qDebug() << "IS multi thread;";
         return 0;
     } else {
+        qDebug() << "IS single thread;";
         return hub()->invokeOnPeer(peerName(), methodName, val0,
                                    val1, val2, val3, val4, val5, val6, val7,
                                    val8, val9);

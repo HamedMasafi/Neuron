@@ -271,6 +271,8 @@ void AbstractHubPrivate::procMap(QVariantMap map)
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
     }
+    qDebug() << "returning" << returnData << "to"
+                     << map[CLASS_NAME].toString() << "::" << method.name();
 
     QObject *returnDataPointer = returnData.value<QObject *>();
 
@@ -325,6 +327,7 @@ void AbstractHubPrivate::sync()
         QString w = p.name();
         w[0] = w[0].toUpper();
 
+        //TODO change this from 'invoke method' to 'set property'
         q->invokeOnPeer(peer->peerName(), "set" + w, p.read(peer));
     }
 //    QMetaObject::invokeMethod(q, "commit", Qt::QueuedConnection);
@@ -550,7 +553,7 @@ void AbstractHub::socket_onReadyRead()
             return;
         }
     } else {
-        // qDebug() << "Invalid data recived; ";
+        qDebug() << "Invalid data recived; ";
         return;
     }
 
@@ -559,8 +562,18 @@ void AbstractHub::socket_onReadyRead()
     d->readBuffer.clear();
     //    d->socketReadMutes.unlock();
 
-    if (var.type() == QVariant::Map)
+    switch (var.type()) {
+    case QVariant::Map:
         d->procMap(var.toMap());
+        break;
+    case QVariant::List:
+        d->procMap(var.toList());
+        break;
+    default:
+        qWarning() << "Invalid data from serializer" << var;
+        break;
+    }
+    /*if (var.type() == QVariant::Map)
 
     if (var.type() == QVariant::List) {
         d->procMap(var.toList());
@@ -573,7 +586,7 @@ void AbstractHub::socket_onReadyRead()
 
         //        foreach (QVariant map, list)
         //            d->procMap(map.toMap());
-    }
+    }*/
 }
 
 void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
@@ -620,8 +633,18 @@ void AbstractHub::commit()
 
 qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
 {
-    return invokeOnPeer(sender, methodName, Request, val0, val1, val2, val3,
+    return invokeOnPeer(sender, methodName, InvokeMethod, val0, val1, val2, val3,
                         val4, val5, val6, val7, val8, val9);
+}
+
+qlonglong AbstractHub::setPropertyOnPeer(QString sender, QString propertyName, QVariant value)
+{
+    return invokeOnPeer(sender, propertyName, SetProperty, value);
+}
+
+qlonglong AbstractHub::emitOnPeer(QString sender, QString signalName, QVariant value)
+{
+    return invokeOnPeer(sender, signalName, Emit);
 }
 
 // TODO: remove val8, val9
@@ -633,8 +656,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
                                          QVariant val6, QVariant val7,
                                          QVariant val8, QVariant val9)
 {
-    if (d->locks.contains(sender + "::" + methodName))
+    qDebug() << "Sending to -> " + sender + "::" + methodName;
+    if (d->locks.contains(sender + "::" + methodName)) {
+        qDebug() << "Lock -> " + sender + "::" + methodName;
         return 0;
+    }
 
     if (/*d->status != Connected || */ !socket->isOpen()) {
         qWarning("Socket is closed");
@@ -649,11 +675,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
     map[METHOD_NAME] = methodName;
 
     switch (type) {
-    case Request:
-        map[MAP_TYPE] = MAP_TYPE_REQUEST;
+    case InvokeMethod:
+        map[MAP_TYPE] = MAP_TYPE_METHOD_CALL;
         break;
     case SetProperty:
-        map[MAP_TYPE] = MAP_TYPE_SET_VALUE;
+        map[MAP_TYPE] = MAP_TYPE_SET_PROP;
         break;
     case Emit:
         map[MAP_TYPE] = MAP_TYPE_EMIT;
@@ -679,10 +705,11 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
         bufferMutex.lock();
         d->buffer.append(map);
         bufferMutex.unlock();
+        qDebug() << "Is transaction";
         return 0;
     } else {
         qint64 res = socket->write(serializer()->serialize(map));
-
+        socket->flush();
         if (!res)
             qWarning() << "map is empty";
 

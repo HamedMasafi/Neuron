@@ -65,6 +65,7 @@ protected:
     void timerEvent(QTimerEvent *);
 
 public slots:
+    void reconnect();
     void connectToHost(bool waitForConnected);
     void connectToHost(QString address = QString(), quint16 port = 0, bool waitForConnected = false);
     void disconnectFromHost();

@@ -71,24 +71,27 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
     }
 
     if (hub()->isMultiThread()) {
-//        qlonglong ret;
+        qlonglong ret;
+        auto connectionType = thread() == hub()->thread()
+                        ? Qt::DirectConnection
+                        : Qt::BlockingQueuedConnection;
+
         bool ok = hub()->metaObject()->invokeMethod(
             hub(), QT_STRINGIFY(invokeOnPeer),
-            //                                          Qt::DirectConnection,
-//            Q_RETURN_ARG(qlonglong, ret),
+            connectionType,
+            Q_RETURN_ARG(qlonglong, ret),
             Q_ARG(QString, peerName()), Q_ARG(QString, methodName),
             Q_ARG(QVariant, val0), Q_ARG(QVariant, val1), Q_ARG(QVariant, val2),
             Q_ARG(QVariant, val3), Q_ARG(QVariant, val4), Q_ARG(QVariant, val5),
             Q_ARG(QVariant, val6), Q_ARG(QVariant, val7) /*,
                                                                         QGenericArgument(val8.typeName(), val8.data()),
                                                                         QGenericArgument(val9.typeName(), val9.data())*/);
-        //        return ret;
         if (!ok)
             qWarning("Unable to invoke method: %s::%s", qPrintable(peerName()),
                      qPrintable(methodName));
 
         qDebug() << "IS multi thread;";
-        return 0;
+        return ret;
     } else {
         qDebug() << "IS single thread;";
         return hub()->invokeOnPeer(peerName(), methodName, val0,

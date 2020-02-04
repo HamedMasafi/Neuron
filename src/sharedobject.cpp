@@ -186,8 +186,7 @@ qlonglong SharedObject::invokeOnPeer(QString methodName,
                                           QVariant val0, QVariant val1,
                                           QVariant val2, QVariant val3,
                                           QVariant val4, QVariant val5,
-                                          QVariant val6, QVariant val7,
-                                          QVariant val8, QVariant val9)
+                                          QVariant val6, QVariant val7)
 {
     //hubsLock.lock();
 
@@ -223,7 +222,7 @@ qlonglong SharedObject::invokeOnPeer(QString methodName,
                         peerName(),
                         methodName, AbstractHub::InvokeMethod,
                         val0, val1, val2, val3, val4,
-                        val5, val6, val7, val8, val9);
+                        val5, val6, val7);
             if (tmpHubs.count() == 1)
                 return v;
         }

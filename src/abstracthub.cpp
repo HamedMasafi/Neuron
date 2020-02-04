@@ -659,30 +659,36 @@ void AbstractHub::commit()
     QMetaObject::invokeMethod(this, "flushSocket");
 }
 
-qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName, QVariant val0, QVariant val1, QVariant val2, QVariant val3, QVariant val4, QVariant val5, QVariant val6, QVariant val7, QVariant val8, QVariant val9)
+qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
+                                    QVariant val0, QVariant val1, QVariant val2,
+                                    QVariant val3, QVariant val4, QVariant val5,
+                                    QVariant val6, QVariant val7)
 {
-    return invokeOnPeer(sender, methodName, InvokeMethod, val0, val1, val2, val3,
-                        val4, val5, val6, val7, val8, val9);
+    return invokeOnPeer(sender, methodName, InvokeMethod, val0, val1, val2,
+                        val3, val4, val5, val6, val7);
 }
 
-qlonglong AbstractHub::setPropertyOnPeer(QString sender, QString propertyName, QVariant value)
+qlonglong AbstractHub::setPropertyOnPeer(QString sender, QString propertyName,
+                                         QVariant value)
 {
     return invokeOnPeer(sender, propertyName, SetProperty, value);
 }
 
-qlonglong AbstractHub::emitOnPeer(QString sender, QString signalName, QVariant value)
+qlonglong AbstractHub::emitOnPeer(QString sender, QString signalName,
+                                  QVariant val0, QVariant val1, QVariant val2,
+                                  QVariant val3, QVariant val4, QVariant val5,
+                                  QVariant val6, QVariant val7)
 {
-    return invokeOnPeer(sender, signalName, Emit);
+    return invokeOnPeer(sender, signalName, Emit, val0, val1, val2, val3, val4,
+                        val5, val6, val7);
 }
 
-// TODO: remove val8, val9
 qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
                                     AbstractHub::CallType type,
                                          QVariant val0, QVariant val1,
                                          QVariant val2, QVariant val3,
                                          QVariant val4, QVariant val5,
-                                         QVariant val6, QVariant val7,
-                                         QVariant val8, QVariant val9)
+                                         QVariant val6, QVariant val7)
 {
     qDebug() << "Sending to -> " + sender + "::" + methodName;
     if (d->locks.contains(sender + "::" + methodName)) {
@@ -723,8 +729,8 @@ qlonglong AbstractHub::invokeOnPeer(QString sender, QString methodName,
     d->addToMap(&map, val5, 5);
     d->addToMap(&map, val6, 6);
     d->addToMap(&map, val7, 7);
-    d->addToMap(&map, val8, 8);
-    d->addToMap(&map, val9, 9);
+//    d->addToMap(&map, val8, 8);
+//    d->addToMap(&map, val9, 9);
 
     if (d->encoder)
         d->encoder->encrypt(map);

@@ -60,14 +60,12 @@ public:
             QVariant val4 = QVariant(),
             QVariant val5 = QVariant(),
             QVariant val6 = QVariant(),
-            QVariant val7 = QVariant(),
-            QVariant val8 = QVariant(),
-            QVariant val9 = QVariant());
+            QVariant val7 = QVariant());
 
     const QString peerName() const;
 
 protected:
-    QPointer<AbstractHub> m_hub;
+    AbstractHub *m_hub;
     void addCall(qlonglong id, AbstractCall *call);
     void removeCall(qlonglong id);
     void setPeerName(const QString &name);

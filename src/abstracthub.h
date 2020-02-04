@@ -144,8 +144,7 @@ public slots:
     void commit();
 
     Q_DECL_DEPRECATED
-    qlonglong invokeOnPeer(
-        QString sender,
+    qlonglong invokeOnPeer(QString sender,
         QString methodName,
         QVariant val0 = QVariant(),
         QVariant val1 = QVariant(),
@@ -154,9 +153,7 @@ public slots:
         QVariant val4 = QVariant(),
         QVariant val5 = QVariant(),
         QVariant val6 = QVariant(),
-        QVariant val7 = QVariant(),
-        QVariant val8 = QVariant(),
-        QVariant val9 = QVariant());
+        QVariant val7 = QVariant());
 
     qlonglong setPropertyOnPeer(
         QString sender,
@@ -164,12 +161,13 @@ public slots:
         QVariant value);
 
     qlonglong emitOnPeer(
-        QString sender,
-        QString signalName,
-        QVariant value);
+            QString sender,
+            QString signalName,
+            QVariant val0, QVariant val1, QVariant val2,
+            QVariant val3, QVariant val4, QVariant val5,
+            QVariant val6, QVariant val7);
 
-    qlonglong invokeOnPeer(
-        QString sender,
+    qlonglong invokeOnPeer(QString sender,
         QString methodName,
         CallType type,
         QVariant val0 = QVariant(),
@@ -179,9 +177,7 @@ public slots:
         QVariant val4 = QVariant(),
         QVariant val5 = QVariant(),
         QVariant val6 = QVariant(),
-        QVariant val7 = QVariant(),
-        QVariant val8 = QVariant(),
-        QVariant val9 = QVariant());
+        QVariant val7 = QVariant());
 
     void attachSharedObject(SharedObject *o);
     void detachSharedObject(SharedObject *o);

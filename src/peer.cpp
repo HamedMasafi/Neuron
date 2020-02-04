@@ -57,7 +57,7 @@ AbstractHub *Peer::hub() const
 qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
                                   QVariant val1, QVariant val2, QVariant val3,
                                   QVariant val4, QVariant val5, QVariant val6,
-                                  QVariant val7, QVariant val8, QVariant val9)
+                                  QVariant val7)
 {
     // Object is transfered!!!
     if (!hub()) {
@@ -83,9 +83,7 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
             Q_ARG(QString, peerName()), Q_ARG(QString, methodName),
             Q_ARG(QVariant, val0), Q_ARG(QVariant, val1), Q_ARG(QVariant, val2),
             Q_ARG(QVariant, val3), Q_ARG(QVariant, val4), Q_ARG(QVariant, val5),
-            Q_ARG(QVariant, val6), Q_ARG(QVariant, val7) /*,
-                                                                        QGenericArgument(val8.typeName(), val8.data()),
-                                                                        QGenericArgument(val9.typeName(), val9.data())*/);
+            Q_ARG(QVariant, val6), Q_ARG(QVariant, val7));
         if (!ok)
             qWarning("Unable to invoke method: %s::%s", qPrintable(peerName()),
                      qPrintable(methodName));
@@ -95,8 +93,7 @@ qlonglong Peer::invokeOnPeer(QString methodName, QVariant val0,
     } else {
         qDebug() << "IS single thread;";
         return hub()->invokeOnPeer(peerName(), methodName, val0,
-                                   val1, val2, val3, val4, val5, val6, val7,
-                                   val8, val9);
+                                   val1, val2, val3, val4, val5, val6, val7);
     }
 }
 

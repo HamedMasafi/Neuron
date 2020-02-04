@@ -73,8 +73,7 @@ private slots:
     void hub_statusChanged(AbstractHub::Status status);
 
 protected:
-    qlonglong invokeOnPeer(
-            QString methodName,
+    qlonglong invokeOnPeer(QString methodName,
             QVariant val0 = QVariant(),
             QVariant val1 = QVariant(),
             QVariant val2 = QVariant(),
@@ -82,9 +81,7 @@ protected:
             QVariant val4 = QVariant(),
             QVariant val5 = QVariant(),
             QVariant val6 = QVariant(),
-            QVariant val7 = QVariant(),
-            QVariant val8 = QVariant(),
-            QVariant val9 = QVariant());
+            QVariant val7 = QVariant());
 
     void sync(AbstractHub *hub);
 signals:

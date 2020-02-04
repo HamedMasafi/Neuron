@@ -23,7 +23,6 @@ public:
     explicit AbstractCall(QObject *parent = nullptr);
 
     void wait();
-    void finish();
     void ignore();
 
 protected:
@@ -46,6 +45,9 @@ public slots:
         return this;
     }
 #endif
+
+private:
+    void finish();
 
     friend class Peer;
     friend class SharedObject;

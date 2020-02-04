@@ -78,6 +78,7 @@ ServerThread *ServerHub::serverThread() const
 
 qlonglong ServerHub::hi(qlonglong hubId)
 {
+    qDebug() << Q_FUNC_INFO;
     initalizeMutex.lock();
 
     setHubId(hubId);
@@ -118,7 +119,7 @@ void ServerHub::beginConnection()
     K_TRACE_DEBUG;
     d->connectionEventLoop = new QEventLoop;
     K_REG_OBJECT(d->connectionEventLoop);
-    d->connectionEventLoop->exec();
+//    d->connectionEventLoop->exec();
 }
 
 NEURON_END_NAMESPACE

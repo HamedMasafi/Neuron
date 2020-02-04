@@ -135,6 +135,7 @@ private slots:
     void socket_disconnected();
     void socket_onReadyRead();
     void socket_error(QAbstractSocket::SocketError socketError);
+    void socket_stateChanged(QAbstractSocket::SocketState);
 
 public slots:
     void beginTransaction();

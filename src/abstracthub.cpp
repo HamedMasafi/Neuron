@@ -286,8 +286,10 @@ bool AbstractHubPrivate::response(const qlonglong &id,
                                   const QString &senderName,
                                   const QVariant &returnValue)
 {
-    //    if(socket. != AbstractHub::Connected)
-    //        return false;
+    if(q->socket->state() != QAbstractSocket::ConnectedState) {
+        qWarning() << "Unable to response; socket is closed";
+        return false;
+    }
 
     QVariantMap map;
     map[MAP_TYPE] = MAP_TYPE_RESPONSE;
@@ -345,6 +347,7 @@ AbstractHub::AbstractHub(QObject *parent)
     connect(socket, &QIODevice::readyRead, this, &AbstractHub::socket_onReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &AbstractHub::socket_disconnected);
     connect(socket, &QTcpSocket::connected, this, &AbstractHub::socket_connected);
+    connect(socket, &QTcpSocket::stateChanged, this, &AbstractHub::socket_stateChanged);
 //    connect(socket, &QTcpSocket::error, this, &AbstractHub::socket_error);
 
     AbstractSerializer *serializer = new JsonBinarySerializer(this);
@@ -368,6 +371,7 @@ AbstractHub::AbstractHub(AbstractSerializer *serializer,
             &AbstractHub::socket_disconnected);
     connect(socket, &QTcpSocket::connected, this,
             &AbstractHub::socket_connected);
+    connect(socket, &QTcpSocket::stateChanged, this, &AbstractHub::socket_stateChanged);
 
     setSerializer(serializer);
 }
@@ -502,19 +506,19 @@ void AbstractHub::setHubId(qlonglong id)
 
 void AbstractHub::socket_connected()
 {
-    qDebug() << Q_FUNC_INFO;
-    initalizeMutex.lock();
-    K_TRACE_DEBUG;
-    beginConnection();
+//    qDebug() << Q_FUNC_INFO;
+//    initalizeMutex.lock();
+//    K_TRACE_DEBUG;
+//    beginConnection();
 
-//    setStatus(AbstractHub::Connected);
-    initalizeMutex.unlock();
+////    setStatus(AbstractHub::Connected);
+//    initalizeMutex.unlock();
 }
 
 void AbstractHub::socket_disconnected()
 {
-    qDebug() << Q_FUNC_INFO;
-    setStatus(AbstractHub::Unconnected);
+//    qDebug() << Q_FUNC_INFO;
+//    setStatus(AbstractHub::Unconnected);
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();
@@ -593,6 +597,30 @@ void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
 {
     Q_UNUSED(socketError)
     emit error();
+}
+
+void AbstractHub::socket_stateChanged(QAbstractSocket::SocketState state)
+{
+    qDebug() << "socket state changed to" << state;
+    switch (state) {
+    case QAbstractSocket::ConnectedState:
+        initalizeMutex.lock();
+        K_TRACE_DEBUG;
+        beginConnection();
+        initalizeMutex.unlock();
+        break;
+    case QAbstractSocket::UnconnectedState:
+        setStatus(AbstractHub::Unconnected);
+        break;
+    case QAbstractSocket::ConnectingState:
+        setStatus(AbstractHub::Reconnecting);
+        break;
+    case QAbstractSocket::HostLookupState:
+    case QAbstractSocket::BoundState:
+    case QAbstractSocket::ListeningState:
+    case QAbstractSocket::ClosingState:
+        break;
+    }
 }
 
 void AbstractHub::beginTransaction()

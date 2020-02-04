@@ -21,6 +21,7 @@
 #include <QtNetwork/QTcpSocket>
 
 #include <QEvent>
+#include <QThread>
 #include <QTimer>
 #include <QUdpSocket>
 
@@ -116,7 +117,9 @@ void ClientHub::timerEvent(QTimerEvent *e)
 
 void ClientHub::reconnect()
 {
-    connectToHost();
+    QThread::msleep(500);
+    metaObject()->invokeMethod(this, "connectToHost", Q_ARG(bool, false));
+//    connectToHost();
 }
 
 void ClientHub::connectToHost(bool waitForConnected)
@@ -145,7 +148,7 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
         if (!isConnected()) {
             qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
 
-            setStatus(Unconnected);
+//            setStatus(Unconnected);
 
 //            if (isAutoReconnect())
 //                QTimer::singleShot(500, this, &ClientHub::reconnect);
@@ -231,7 +234,8 @@ void ClientHub::onStatusChanged(Status status)
     if(status == Unconnected){
         if(isAutoReconnect()){
             qDebug() << "reconnecting";
-            connectToHost(true);
+            QTimer::singleShot(500, this, &ClientHub::reconnect);
+//            connectToHost(true);
 //            d->reconnectTimerId = startTimer(500);
         }
     }

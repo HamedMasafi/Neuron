@@ -140,6 +140,7 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
     if(port)
         setPort(port);
 
+    socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
     socket->connectToHost(this->serverAddress(), this->port());
 
     if(waitForConnected) {

@@ -264,15 +264,13 @@ void AbstractHubPrivate::procMap(QVariantMap map)
     if (!ok) {
         qWarning("Invoke %s faild", qPrintable(lockName));
     } else {
-//        qDebug() << "returning" << returnData << "to"
-//                 << map[CLASS_NAME].toString() << "::" << method.name();
+        qDebug() << "returning to"
+                         << map[CLASS_NAME].toString() << "::" << method.name();
 
         response(id, map[CLASS_NAME].toString(),
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
     }
-    qDebug() << "returning to"
-                     << map[CLASS_NAME].toString() << "::" << method.name();
 
     QObject *returnDataPointer = returnData.value<QObject *>();
 
@@ -303,7 +301,8 @@ bool AbstractHubPrivate::response(const qlonglong &id,
         encoder->encrypt(map);
 
     qint64 res = q->socket->write(q->serializer()->serialize(map));
-    q->socket->flush();
+    if (!q->socket->flush())
+        qDebug() << "Nothing to flush";
 
     if (res == 0)
         qDebug() << "unable to response";
@@ -506,10 +505,10 @@ void AbstractHub::setHubId(qlonglong id)
 
 void AbstractHub::socket_connected()
 {
-    qDebug() << Q_FUNC_INFO;
-//    initalizeMutex.lock();
-    K_TRACE_DEBUG;
-    beginConnection();
+//    qDebug() << Q_FUNC_INFO;
+////    initalizeMutex.lock();
+//    K_TRACE_DEBUG;
+//    beginConnection();
 
 ////    setStatus(AbstractHub::Connected);
 //    initalizeMutex.unlock();
@@ -517,8 +516,8 @@ void AbstractHub::socket_connected()
 
 void AbstractHub::socket_disconnected()
 {
-    qDebug() << Q_FUNC_INFO;
-    setStatus(AbstractHub::Unconnected);
+//    qDebug() << Q_FUNC_INFO;
+//    setStatus(AbstractHub::Unconnected);
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();
@@ -531,6 +530,7 @@ void AbstractHub::socket_disconnected()
 
 void AbstractHub::socket_onReadyRead()
 {
+    qDebug() << "data recived";
     //    d->socketReadMutes.lock();
 
     d->readBuffer.append(socket->readAll());
@@ -601,27 +601,27 @@ void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
 
 void AbstractHub::socket_stateChanged(QAbstractSocket::SocketState state)
 {
-//    qDebug() << "socket state changed to" << state;
-//    switch (state) {
-//    case QAbstractSocket::ConnectedState:
-//        initalizeMutex.lock();
-//        K_TRACE_DEBUG;
-//        beginConnection();
-//        initalizeMutex.unlock();
-//        setStatus(AbstractHub::Connected);
-//        break;
-//    case QAbstractSocket::UnconnectedState:
-//        setStatus(AbstractHub::Unconnected);
-//        break;
-//    case QAbstractSocket::ConnectingState:
-//        setStatus(AbstractHub::Reconnecting);
-//        break;
-//    case QAbstractSocket::HostLookupState:
-//    case QAbstractSocket::BoundState:
-//    case QAbstractSocket::ListeningState:
-//    case QAbstractSocket::ClosingState:
-//        break;
-//    }
+    qDebug() << "socket state changed to" << state;
+    switch (state) {
+    case QAbstractSocket::ConnectedState:
+        initalizeMutex.lock();
+        K_TRACE_DEBUG;
+        beginConnection();
+        initalizeMutex.unlock();
+        setStatus(AbstractHub::Connected);
+        break;
+    case QAbstractSocket::UnconnectedState:
+        setStatus(AbstractHub::Unconnected);
+        break;
+    case QAbstractSocket::ConnectingState:
+        setStatus(AbstractHub::Reconnecting);
+        break;
+    case QAbstractSocket::HostLookupState:
+    case QAbstractSocket::BoundState:
+    case QAbstractSocket::ListeningState:
+    case QAbstractSocket::ClosingState:
+        break;
+    }
 }
 
 void AbstractHub::beginTransaction()

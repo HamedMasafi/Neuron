@@ -224,7 +224,7 @@ void Server::hub_disconnected()
 
 void Server::server_newIncomingConnection(qintptr socketDescriptor)
 {
-    initalizeMutex.lock();
+//    initalizeMutex.lock();
 
     K_TRACE_DEBUG;
 
@@ -282,7 +282,7 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
         qWarning("ServerHub creation faild");
         hub->deleteLater();
 //        peer->deleteLater();
-        initalizeMutex.unlock();
+//        initalizeMutex.unlock();
         return;
     }
 
@@ -290,7 +290,7 @@ void Server::server_newIncomingConnection(qintptr socketDescriptor)
     hub->setEncoder(encoder());
     K_TRACE_DEBUG;
 
-    initalizeMutex.unlock();
+//    initalizeMutex.unlock();
 }
 
 void Server::setTypeId(int typeId)

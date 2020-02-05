@@ -76,7 +76,7 @@ public slots:
 
 private slots:
     void onStatusChanged(Status status);
-    void hi(qlonglong hubId);
+//    void hi(qlonglong hubId);
 
 signals:
     void serverAddressChanged(QString serverAddress);

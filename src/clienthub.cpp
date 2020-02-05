@@ -241,43 +241,45 @@ void ClientHub::onStatusChanged(Status status)
     }
 }
 
-void ClientHub::hi(qlonglong hubId)
-{
-    qDebug() << "hi recived";
-    setStatus(Connected);
-    if(hubId == this->hubId()){
-        //reconnected
-        emit reconnected();
-    }else{
-    }
+//void ClientHub::hi(qlonglong hubId)
+//{
+//    qDebug() << "hi recived";
+//    setStatus(Connected);
+//    if(hubId == this->hubId()){
+//        //reconnected
+//        emit reconnected();
+//    }else{
+//    }
 
-    if(d->connectionEventLoop){
-        d->connectionEventLoop->exit();
-        d->connectionEventLoop->deleteLater();
-    }
-}
+//    if(d->connectionEventLoop){
+//        d->connectionEventLoop->exit();
+//        d->connectionEventLoop->deleteLater();
+//    }
+//}
 
 void ClientHub::beginConnection()
 {
+    auto cb = [=](qlonglong hubId){
+        setStatus(Connected);
+        qDebug() << "hi recived" <<hubId;
+        if (hubId == this->hubId()){
+            //reconnected
+            emit reconnected();
+        }else{
+            setHubId(hubId);
+        }
+
+        if(d->connectionEventLoop){
+            d->connectionEventLoop->exit();
+            d->connectionEventLoop->deleteLater();
+        }
+    };
     qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", InvokeMethod, QVariant::fromValue(hubId()));
 
     if(__call_id){
         Call<qlonglong> *call = new Call<qlonglong>(this);
         qDebug() << "Sending hi";
-        call->then([=](qlonglong hubId){
-            setStatus(Connected);
-            qDebug() << "hi recived" <<hubId;
-            if (hubId == this->hubId()){
-                //reconnected
-                emit reconnected();
-            }else{
-            }
-
-            if(d->connectionEventLoop){
-                d->connectionEventLoop->exit();
-                d->connectionEventLoop->deleteLater();
-            }
-        });
+        call->then(cb);
 //        addCall(__call_id, call);
         _calls.insert(__call_id, call);
     } else {

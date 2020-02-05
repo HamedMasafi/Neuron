@@ -604,10 +604,10 @@ void AbstractHub::socket_stateChanged(QAbstractSocket::SocketState state)
     qDebug() << "socket state changed to" << state;
     switch (state) {
     case QAbstractSocket::ConnectedState:
-        initalizeMutex.lock();
+//        initalizeMutex.lock();
         K_TRACE_DEBUG;
         beginConnection();
-        initalizeMutex.unlock();
+//        initalizeMutex.unlock();
         break;
     case QAbstractSocket::UnconnectedState:
         setStatus(AbstractHub::Unconnected);

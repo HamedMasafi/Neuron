@@ -104,17 +104,6 @@ int ClientHub::registerQmlSingleton(const char *uri, int versionMajor, int versi
 }
 #endif
 
-void ClientHub::timerEvent(QTimerEvent *e)
-{
-    if(status() == Unconnected){
-        connectToHost();
-    }else if(status() == Connected){
-        killTimer(e->timerId());// d->reconnectTimerId);
-//        d->sync();
-//        setStatus(Connected);
-    }
-}
-
 void ClientHub::reconnect()
 {
     QThread::msleep(500);
@@ -234,50 +223,36 @@ void ClientHub::onStatusChanged(Status status)
     if(status == Unconnected){
         if(isAutoReconnect()){
             qDebug() << "reconnecting";
-            QTimer::singleShot(500, this, &ClientHub::reconnect);
-//            connectToHost(true);
-//            d->reconnectTimerId = startTimer(500);
+            QTimer::singleShot(500, this, [this](){
+                connectToHost();
+            });
         }
-    }
-}
-
-void ClientHub::hi(qlonglong hubId)
-{
-    qDebug() << "hi recived";
-    setStatus(Connected);
-    if(hubId == this->hubId()){
-        //reconnected
-        emit reconnected();
-    }else{
-    }
-
-    if(d->connectionEventLoop){
-        d->connectionEventLoop->exit();
-        d->connectionEventLoop->deleteLater();
     }
 }
 
 void ClientHub::beginConnection()
 {
+    auto cb = [=](qlonglong hubId){
+        setStatus(Connected);
+        qDebug() << "hi recived" <<hubId;
+        if (hubId == this->hubId()){
+            //reconnected
+            emit reconnected();
+        }else{
+            setHubId(hubId);
+        }
+
+        if(d->connectionEventLoop){
+            d->connectionEventLoop->exit();
+            d->connectionEventLoop->deleteLater();
+        }
+    };
     qlonglong __call_id = invokeOnPeer(THIS_HUB, "hi", InvokeMethod, QVariant::fromValue(hubId()));
 
     if(__call_id){
         Call<qlonglong> *call = new Call<qlonglong>(this);
         qDebug() << "Sending hi";
-        call->then([=](qlonglong hubId){
-            setStatus(Connected);
-            qDebug() << "hi recived" <<hubId;
-            if (hubId == this->hubId()){
-                //reconnected
-                emit reconnected();
-            }else{
-            }
-
-            if(d->connectionEventLoop){
-                d->connectionEventLoop->exit();
-                d->connectionEventLoop->deleteLater();
-            }
-        });
+        call->then(cb);
 //        addCall(__call_id, call);
         _calls.insert(__call_id, call);
     } else {

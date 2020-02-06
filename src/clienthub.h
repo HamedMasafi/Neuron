@@ -61,9 +61,6 @@ public:
     static int registerQmlSingleton(const char *uri, int versionMajor, int versionMinor);
 #endif
 
-protected:
-    void timerEvent(QTimerEvent *);
-
 public slots:
     void reconnect();
     void connectToHost(bool waitForConnected);
@@ -76,7 +73,7 @@ public slots:
 
 private slots:
     void onStatusChanged(Status status);
-    void hi(qlonglong hubId);
+//    void hi(qlonglong hubId);
 
 signals:
     void serverAddressChanged(QString serverAddress);

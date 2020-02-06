@@ -271,7 +271,7 @@ void AbstractHubPrivate::procMap(QVariantMap map)
                  returnData.type() == QVariant::Invalid ? QVariant()
                                                         : returnData);
     }
-    qDebug() << "returning" << returnData << "to"
+    qDebug() << "returning to"
                      << map[CLASS_NAME].toString() << "::" << method.name();
 
     QObject *returnDataPointer = returnData.value<QObject *>();
@@ -506,10 +506,10 @@ void AbstractHub::setHubId(qlonglong id)
 
 void AbstractHub::socket_connected()
 {
-//    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO;
 //    initalizeMutex.lock();
-//    K_TRACE_DEBUG;
-//    beginConnection();
+    K_TRACE_DEBUG;
+    beginConnection();
 
 ////    setStatus(AbstractHub::Connected);
 //    initalizeMutex.unlock();
@@ -517,8 +517,8 @@ void AbstractHub::socket_connected()
 
 void AbstractHub::socket_disconnected()
 {
-//    qDebug() << Q_FUNC_INFO;
-//    setStatus(AbstractHub::Unconnected);
+    qDebug() << Q_FUNC_INFO;
+    setStatus(AbstractHub::Unconnected);
 
     // TODO:    if(isAutoReconnect()){
     //        connectToServer();
@@ -601,26 +601,27 @@ void AbstractHub::socket_error(QAbstractSocket::SocketError socketError)
 
 void AbstractHub::socket_stateChanged(QAbstractSocket::SocketState state)
 {
-    qDebug() << "socket state changed to" << state;
-    switch (state) {
-    case QAbstractSocket::ConnectedState:
-        initalizeMutex.lock();
-        K_TRACE_DEBUG;
-        beginConnection();
-        initalizeMutex.unlock();
-        break;
-    case QAbstractSocket::UnconnectedState:
-        setStatus(AbstractHub::Unconnected);
-        break;
-    case QAbstractSocket::ConnectingState:
-        setStatus(AbstractHub::Reconnecting);
-        break;
-    case QAbstractSocket::HostLookupState:
-    case QAbstractSocket::BoundState:
-    case QAbstractSocket::ListeningState:
-    case QAbstractSocket::ClosingState:
-        break;
-    }
+//    qDebug() << "socket state changed to" << state;
+//    switch (state) {
+//    case QAbstractSocket::ConnectedState:
+//        initalizeMutex.lock();
+//        K_TRACE_DEBUG;
+//        beginConnection();
+//        initalizeMutex.unlock();
+//        setStatus(AbstractHub::Connected);
+//        break;
+//    case QAbstractSocket::UnconnectedState:
+//        setStatus(AbstractHub::Unconnected);
+//        break;
+//    case QAbstractSocket::ConnectingState:
+//        setStatus(AbstractHub::Reconnecting);
+//        break;
+//    case QAbstractSocket::HostLookupState:
+//    case QAbstractSocket::BoundState:
+//    case QAbstractSocket::ListeningState:
+//    case QAbstractSocket::ClosingState:
+//        break;
+//    }
 }
 
 void AbstractHub::beginTransaction()

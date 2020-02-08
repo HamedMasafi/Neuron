@@ -136,7 +136,7 @@ void ClientHub::connectToHost(QString address, quint16 port, bool waitForConnect
 
         if (!isConnected()) {
             qWarning("Unable to start client socket. Error: %s", socket->errorString().toUtf8().data());
-
+            setStatus(Unconnected);
 //            setStatus(Unconnected);
 
 //            if (isAutoReconnect())
@@ -224,7 +224,7 @@ void ClientHub::onStatusChanged(Status status)
         if(isAutoReconnect()){
             qDebug() << "reconnecting";
             QTimer::singleShot(500, this, [this](){
-                connectToHost();
+                connectToHost(true);
             });
         }
     }

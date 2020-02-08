@@ -120,7 +120,7 @@ void Peer::setPeerName(const QString &name)
 
 void Peer::hub_disconnected()
 {
-    m_hub = nullptr;
+//    m_hub = nullptr;
 }
 
 void Peer::setHub(AbstractHub *hub)
